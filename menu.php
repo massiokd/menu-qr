@@ -31,7 +31,8 @@ $categories = $stmtCat->fetchAll();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
-<body>
+<body data-theme="<?= htmlspecialchars($resto['theme'] ?? 'classique') ?>">
+
 
     <!-- Éléments d'arrière-plan -->
     <div class="bg-aurora">
