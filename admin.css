@@ -123,3 +123,39 @@ textarea.form-control { height: 80px; resize: vertical; }
 /* TOAST */
 .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 100; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* En-tête de catégorie avec bouton supprimer */
+.category-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-left: 0.5rem;
+    border-left: 4px solid var(--brand-color);
+}
+
+.category-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    padding-left: 0;
+    border-left: none; /* On enlève l'ancienne bordure car elle est sur le container */
+}
+
+/* Bouton supprimer (croix/poubelle) */
+.icon-btn.delete {
+    color: #9ca3af; /* Gris par défaut */
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.icon-btn.delete:hover {
+    color: var(--danger);
+    background: #fee2e2;
+}
