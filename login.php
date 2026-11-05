@@ -17,22 +17,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    // Vérification du mot de passe (admin123)
+    // --- ZONE DE DEBUG ---
+    echo "<h3>Debug :</h3>";
+    echo "Email envoyé : " . htmlspecialchars($email) . "<br>";
+    echo "Mot de passe envoyé : " . htmlspecialchars($password) . "<br>";
+    echo "Utilisateur trouvé en base ? : "; var_dump($user); echo "<br>";
+    if ($user) {
+        echo "Test password_verify : "; var_dump(password_verify($password, $user['password_hash'])); echo "<br>";
+    }
+    // ---------------------
+
     if ($user && password_verify($password, $user['password_hash'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['restaurant_id'] = $user['restaurant_id'];
-        header('Location: admin.php');
-        exit;
+        echo "<h1>Connexion réussie ! Redirection...</h1>";
+        // header('Location: admin.php'); // On commente temporairement pour voir le message
+        // exit;
     } else {
         $error = "Email ou mot de passe incorrect.";
     }
 }
 ?>
+<!-- Le formulaire HTML reste le même -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion Gérant</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
