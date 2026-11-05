@@ -2,10 +2,7 @@
 session_start();
 require 'config/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') {
-    header('Location: login.php');
-    exit;
-}
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: login.php'); exit; }
 
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
@@ -42,17 +39,18 @@ $categories = $stmtCat->fetchAll();
     </div>
 
     <main class="container">
-        <!-- QR Code -->
-        <div class="qr-card">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?= urlencode($menu_url) ?>" alt="QR Code">
+        
+        <!-- Ajout de catégorie -->
+        <div class="qr-card" style="justify-content: space-between;">
             <div class="qr-info">
-                <h2>Votre QR Code</h2>
-                <p>Imprimez-le et placez-le sur vos tables.</p>
-                <a href="<?= htmlspecialchars($menu_url) ?>" target="_blank">Voir le menu ↗</a>
+                <h2>Ajouter une catégorie</h2>
+                <form action="add_category.php" method="POST" style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                    <input type="text" name="nom" placeholder="Ex: Boissons, Desserts..." required style="padding:0.5rem; border-radius:0.5rem; border:1px solid #ccc;">
+                    <button type="submit" class="btn-primary" style="padding:0.5rem 1rem;">Ajouter</button>
+                </form>
             </div>
         </div>
 
-        <!-- Plats -->
         <?php foreach ($categories as $cat): ?>
             <div class="category-block">
                 <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
@@ -67,7 +65,12 @@ $categories = $stmtCat->fetchAll();
                     <div class="item-row">
                         <div class="item-row-header">
                             <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
+                            <div style="display:flex; gap:0.5rem;">
+                                <a href="item_form.php?id=<?= $item['id'] ?>" style="font-size:0.75rem; font-weight:bold; color:#3b82f6; text-decoration:none;">✏️ Modifier</a>
+                                <a href="delete_item.php?id=<?= $item['id'] ?>" onclick="return confirm('Supprimer ce plat ?')" style="font-size:0.75rem; font-weight:bold; color:#ef4444; text-decoration:none;">🗑️ Suppr</a>
+                            </div>
                         </div>
+                        
                         <div class="item-row-controls">
                             <div class="price-input-group">
                                 <input type="number" id="prix-<?= $item['id'] ?>" value="<?= $item['prix'] ?>" step="50">
@@ -82,59 +85,26 @@ $categories = $stmtCat->fetchAll();
                     </div>
                 <?php endforeach; ?>
 
-                <details class="add-item-details">
-                    <summary>+ Ajouter un plat dans "<?= htmlspecialchars($cat['nom']) ?>"</summary>
-                    <form action="add_item.php" method="POST" class="add-form">
-                        <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
-                        <input type="text" name="nom" placeholder="Nom du plat" required>
-                        <input type="text" name="description" placeholder="Description (optionnel)">
-                        <input type="number" name="prix" placeholder="Prix en DZD" step="50" required>
-                        <button type="submit">Ajouter au menu</button>
-                    </form>
-                </details>
+                <!-- Bouton d'ajout de plat -->
+                <a href="item_form.php?cat_id=<?= $cat['id'] ?>" style="display:block; text-align:center; padding:1rem; border:2px dashed #e5e7eb; border-radius:1rem; color:#6b7280; font-weight:bold; font-size:0.85rem; text-decoration:none; margin-top:1rem;">+ Ajouter un plat dans "<?= htmlspecialchars($cat['nom']) ?>"</a>
             </div>
         <?php endforeach; ?>
     </main>
 
     <div id="toast" class="toast">Prix mis à jour !</div>
 
+    <!-- Le script JS reste identique à celui d'avant pour le prix et la dispo -->
     <script>
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
-        }
+        function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
         async function updatePrix(itemId) {
             const newPrix = document.getElementById('prix-' + itemId).value;
-            const formData = new FormData();
-            formData.append('action', 'update_prix');
-            formData.append('item_id', itemId);
-            formData.append('prix', newPrix);
-            try {
-                const response = await fetch('update_item.php', { method: 'POST', body: formData });
-                const result = await response.json();
-                if(result.success) showToast('Prix mis à jour !');
-            } catch (error) { showToast('Erreur.'); }
+            const formData = new FormData(); formData.append('action', 'update_prix'); formData.append('item_id', itemId); formData.append('prix', newPrix);
+            try { const response = await fetch('update_item.php', { method: 'POST', body: formData }); const result = await response.json(); if(result.success) showToast('Prix mis à jour !'); } catch (error) { showToast('Erreur.'); }
         }
         async function toggleDispo(itemId, btn) {
-            const formData = new FormData();
-            formData.append('action', 'toggle_dispo');
-            formData.append('item_id', itemId);
-            try {
-                const response = await fetch('update_item.php', { method: 'POST', body: formData });
-                const result = await response.json();
-                if(result.success) {
-                    if(result.new_status) {
-                        btn.textContent = 'Disponible';
-                        btn.classList.replace('unavailable', 'available');
-                        showToast('Plat disponible.');
-                    } else {
-                        btn.textContent = 'Épuisé';
-                        btn.classList.replace('available', 'unavailable');
-                        showToast('Plat épuisé.');
-                    }
-                }
+            const formData = new FormData(); formData.append('action', 'toggle_dispo'); formData.append('item_id', itemId);
+            try { const response = await fetch('update_item.php', { method: 'POST', body: formData }); const result = await response.json();
+                if(result.success) { if(result.new_status) { btn.textContent = 'Disponible'; btn.classList.replace('unavailable', 'available'); showToast('Plat disponible.'); } else { btn.textContent = 'Épuisé'; btn.classList.replace('available', 'unavailable'); showToast('Plat épuisé.'); } }
             } catch (error) { showToast('Erreur.'); }
         }
     </script>

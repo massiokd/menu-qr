@@ -44,8 +44,37 @@ body[data-theme="hiver"] { --brand: #3b82f6; --brand-light: #dbeafe; --bg: #eff6
 .category-nav { position: sticky; top: 0; background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 50; border-bottom: 1px solid var(--border); padding: 0.75rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
 .nav-list { display: flex; overflow-x: auto; gap: 0.75rem; padding: 0 1rem; list-style: none; max-width: 32rem; margin: 0 auto; scrollbar-width: none; scroll-behavior: smooth; }
 .nav-list::-webkit-scrollbar { display: none; }
-.category-link { white-space: nowrap; padding: 0.6rem 1.2rem; border-radius: 999px; font-size: 0.85rem; font-weight: 700; text-decoration: none; color: var(--gray); border: 1px solid var(--border); transition: all 0.3s; }
-.category-link.active { background: var(--text); color: var(--bg); border-color: var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+/* Nouveau style de filtre */
+.category-link { 
+    white-space: nowrap; 
+    padding: 0.75rem 0.5rem; 
+    font-size: 0.9rem; 
+    font-weight: 700; 
+    text-decoration: none; 
+    color: var(--gray); 
+    border: none;
+    background: transparent;
+    position: relative;
+    transition: color 0.3s; 
+}
+.category-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 80%;
+    height: 3px;
+    background: var(--brand);
+    border-radius: 2px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.category-link.active { 
+    color: var(--brand); 
+}
+.category-link.active::after {
+    transform: translateX(-50%) scaleX(1);
+}
 
 /* =========================================
    CONTENU & CARTES (Aérées)

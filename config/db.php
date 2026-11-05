@@ -19,4 +19,7 @@ function getDB() {
     } catch (PDOException $e) {
         die("Erreur de connexion : " . $e->getMessage());
     }
+
+define('IMGBB_API_KEY', 'b8778d75e2c085fbf336a8f1e0c4e7cb'); 
+
 }
