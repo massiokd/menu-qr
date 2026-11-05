@@ -3,7 +3,8 @@ session_start();
 require 'config/db.php';
 
 if (isset($_SESSION['user_id'])) {
-    header('Location: admin.php');
+    if ($_SESSION['role'] === 'super_admin') { header('Location: super_admin.php'); }
+    else { header('Location: admin.php'); }
     exit;
 }
 
@@ -17,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-        if ($user && password_verify($password, $user['password_hash'])) {
+    if ($user && password_verify($password, $user['password_hash'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['restaurant_id'] = $user['restaurant_id'];
         $_SESSION['role'] = $user['role'];
@@ -28,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: admin.php');
         }
         exit;
+    } else {
+        $error = "Email ou mot de passe incorrect.";
     }
 }
 ?>
@@ -36,25 +39,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Gérant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Connexion - Fennec Tech</title>
+    <link rel="stylesheet" href="login.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h1 class="text-2xl font-bold mb-6 text-center">Espace Gérant</h1>
+<body>
+    <div class="login-card">
+        <h1>Espace Gérant</h1>
+        
         <?php if($error): ?>
-            <div class="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm"><?= $error ?></div>
+            <div class="error-msg"><?= $error ?></div>
         <?php endif; ?>
+
         <form method="POST">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                <input type="email" name="email" value="gerant@pizzeria.com" class="w-full border rounded px-3 py-2" required>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="votre@email.com" required autocomplete="off">
             </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Mot de passe</label>
-                <input type="password" name="password" class="w-full border rounded px-3 py-2" required>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" name="password" required>
             </div>
-            <button type="submit" class="w-full bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">Se connecter</button>
+            <button type="submit" class="btn-submit">Se connecter</button>
         </form>
     </div>
 </body>

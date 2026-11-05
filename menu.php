@@ -10,7 +10,32 @@ $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE slug = ? AND is_active = 
 $stmt->execute([$slug]);
 $resto = $stmt->fetch();
 
-if (!$resto) { die("Ce restaurant n'existe pas ou son abonnement a expiré."); }
+if (!$resto) { 
+    // Affichage d'une belle page d'erreur
+    echo '
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Menu indisponible</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body { background: #fffaf5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
+            .error-box { background: white; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 350px; width: 90%; }
+        </style>
+    </head>
+    <body>
+        <div class="error-box">
+            <div class="text-5xl mb-4">🦊</div>
+            <h1 class="text-xl font-bold text-gray-800 mb-2">Menu indisponible</h1>
+            <p class="text-sm text-gray-500">Ce menu est temporairement suspendu ou n\'existe pas. Veuillez vous adresser au personnel du restaurant.</p>
+        </div>
+    </body>
+    </html>
+    ';
+    exit;
+}
 
 $stmtCat = $pdo->prepare("SELECT * FROM categories WHERE restaurant_id = ? AND is_active = true ORDER BY ordre ASC");
 $stmtCat->execute([$resto['id']]);
