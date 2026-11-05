@@ -41,12 +41,12 @@ $categories = $stmtCat->fetchAll();
     <main class="container">
         
         <!-- Ajout de catégorie -->
-        <div class="qr-card" style="justify-content: space-between;">
+        <div class="admin-card">
             <div class="qr-info">
                 <h2>Ajouter une catégorie</h2>
-                <form action="add_category.php" method="POST" style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                    <input type="text" name="nom" placeholder="Ex: Boissons, Desserts..." required style="padding:0.5rem; border-radius:0.5rem; border:1px solid #ccc;">
-                    <button type="submit" class="btn-primary" style="padding:0.5rem 1rem;">Ajouter</button>
+                <form action="add_category.php" method="POST" class="add-category-form">
+                    <input type="text" name="nom" placeholder="Ex: Boissons, Desserts..." required>
+                    <button type="submit" class="btn-primary">Ajouter</button>
                 </form>
             </div>
         </div>
@@ -65,9 +65,15 @@ $categories = $stmtCat->fetchAll();
                     <div class="item-row">
                         <div class="item-row-header">
                             <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
-                            <div style="display:flex; gap:0.5rem;">
-                                <a href="item_form.php?id=<?= $item['id'] ?>" style="font-size:0.75rem; font-weight:bold; color:#3b82f6; text-decoration:none;">✏️ Modifier</a>
-                                <a href="delete_item.php?id=<?= $item['id'] ?>" onclick="return confirm('Supprimer ce plat ?')" style="font-size:0.75rem; font-weight:bold; color:#ef4444; text-decoration:none;">🗑️ Suppr</a>
+                            <div class="item-actions">
+                                <!-- Icône Modifier -->
+                                <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                </a>
+                                <!-- Icône Supprimer -->
+                                <a href="delete_item.php?id=<?= $item['id'] ?>" onclick="return confirm('Supprimer ce plat ?')" class="icon-btn delete">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </a>
                             </div>
                         </div>
                         
@@ -85,15 +91,16 @@ $categories = $stmtCat->fetchAll();
                     </div>
                 <?php endforeach; ?>
 
-                <!-- Bouton d'ajout de plat -->
-                <a href="item_form.php?cat_id=<?= $cat['id'] ?>" style="display:block; text-align:center; padding:1rem; border:2px dashed #e5e7eb; border-radius:1rem; color:#6b7280; font-weight:bold; font-size:0.85rem; text-decoration:none; margin-top:1rem;">+ Ajouter un plat dans "<?= htmlspecialchars($cat['nom']) ?>"</a>
+                <a href="item_form.php?cat_id=<?= $cat['id'] ?>" class="btn-add-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Ajouter un plat
+                </a>
             </div>
         <?php endforeach; ?>
     </main>
 
     <div id="toast" class="toast">Prix mis à jour !</div>
 
-    <!-- Le script JS reste identique à celui d'avant pour le prix et la dispo -->
     <script>
         function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
         async function updatePrix(itemId) {
