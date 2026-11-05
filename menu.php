@@ -26,6 +26,8 @@ $categories = $stmtCat->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu - <?= htmlspecialchars($resto['nom']) ?></title>
     <link rel="stylesheet" href="style.css">
+    <!-- Icônes FontAwesome pour le téléphone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body data-theme="<?= htmlspecialchars($resto['theme'] ?? 'classique') ?>">
 
@@ -34,7 +36,6 @@ $categories = $stmtCat->fetchAll();
         <div class="blob blob-2"></div>
     </div>
     <div class="noise-overlay"></div>
-    
     <div class="scroll-progress" id="progressBar"></div>
 
     <header class="header">
@@ -72,7 +73,8 @@ $categories = $stmtCat->fetchAll();
 
                 <div class="items-list">
                     <?php foreach ($items as $item): ?>
-                        <div class="menu-card <?= !$item['disponible'] ? 'unavailable' : '' ?>">
+                        <!-- La classe .reveal sert pour l'animation au scroll -->
+                        <div class="menu-card reveal <?= !$item['disponible'] ? 'unavailable' : '' ?>">
                             
                             <div class="item-details">
                                 <h3 class="item-name"><?= htmlspecialchars($item['nom']) ?></h3>
@@ -99,13 +101,24 @@ $categories = $stmtCat->fetchAll();
         <?php endforeach; ?>
     </main>
 
+    <!-- Nouveau Footer Propre et Discret -->
     <footer class="footer">
-        <p>Besoin d'aide ? Appelez-nous au <a href="tel:+213559322518" class="phone-link">+213 559 32 25 18</a></p>
-        <p style="margin-top: 1rem; opacity: 0.6; font-size: 0.65rem;">Propulsé par Fennec Tech 🦊</p>
+        <div class="footer-contact">
+            <a href="tel:+213559322518" class="contact-item">
+                <i class="fa-solid fa-phone"></i> +213 559 32 25 18
+            </a>
+        </div>
+        
+        <div class="footer-brand">
+            <p>Propulsé par</p>
+            <a href="https://fennec.tech" target="_blank" class="brand-link">
+                🦊 Fennec Tech
+            </a>
+        </div>
     </footer>
 
     <script>
-        // Barre de progression au scroll (optimisé mobile)
+        // 1. Barre de progression
         window.addEventListener('scroll', () => {
             const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -113,11 +126,11 @@ $categories = $stmtCat->fetchAll();
             document.getElementById("progressBar").style.width = scrolled + "%";
         });
 
-        // Surbrillance du menu (Scrollspy)
+        // 2. Menu Actif au scroll (Scrollspy)
         const links = document.querySelectorAll('.category-link');
         const sections = document.querySelectorAll('.category-section');
 
-        const observer = new IntersectionObserver((entries) => {
+        const observerNav = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const id = entry.target.getAttribute('id');
@@ -125,15 +138,32 @@ $categories = $stmtCat->fetchAll();
                         link.classList.remove('active');
                         if (link.dataset.target === id) {
                             link.classList.add('active');
-                            // Centre le lien actif dans la barre de nav
                             link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                         }
                     });
                 }
             });
         }, { rootMargin: "-150px 0px -50% 0px" });
+        sections.forEach(section => observerNav.observe(section));
 
-        sections.forEach(section => observer.observe(section));
+        // 3. ANIMATION MAGIQUE AU SCROLL (IntersectionObserver = ultra fluide sur mobile)
+        const revealElements = document.querySelectorAll('.reveal');
+        
+        const observerReveal = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // On ajoute la classe 'active' pour déclencher l'animation CSS
+                    entry.target.classList.add('active');
+                    // On arrête d'observer une fois que l'élément est apparu
+                    observerReveal.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+        revealElements.forEach(el => observerReveal.observe(el));
     </script>
 </body>
 </html>

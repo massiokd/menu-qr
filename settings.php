@@ -48,7 +48,7 @@ $themes = [
     <div class="admin-tabs">
         <a href="admin.php">Gérer le Menu</a>
         <a href="settings.php" class="active">Paramètres</a>
-        <a href="menu.php?slug=<?= $resto['slug'] ?>" target="_blank">Voir mon menu ↗</a>
+       
     </div>
 
     <main class="container">

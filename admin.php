@@ -39,7 +39,6 @@ $categories = $stmtCat->fetchAll();
     <div class="admin-tabs">
         <a href="admin.php" class="active">Gérer le Menu</a>
         <a href="settings.php">Paramètres</a>
-        <a href="menu.php?slug=<?= $resto['slug'] ?>" target="_blank">Voir mon menu ↗</a>
     </div>
 
     <main class="container">
