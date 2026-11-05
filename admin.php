@@ -39,7 +39,14 @@ $categories = $stmtCat->fetchAll();
     </div>
 
     <main class="container">
-        
+                <!-- Barre de recherche -->
+        <div class="search-bar-container">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="searchInput" placeholder="Rechercher un plat..." onkeyup="filterItems()">
+        </div>
+
+        <!-- Message si aucun résultat -->
+        <div id="noResultsMsg" class="no-results">Aucun plat ne correspond à votre recherche.</div>
         <!-- Ajout de catégorie -->
         <div class="admin-card">
             <div class="qr-info">
@@ -152,6 +159,48 @@ $categories = $stmtCat->fetchAll();
                 if(result.success) { if(result.new_status) { btn.textContent = 'Disponible'; btn.classList.replace('unavailable', 'available'); showToast('Plat disponible.'); } else { btn.textContent = 'Épuisé'; btn.classList.replace('available', 'unavailable'); showToast('Plat épuisé.'); } }
             } catch (error) { showToast('Erreur.'); }
         }
+
+        // --- FILTRE DE RECHERCHE ---
+        function filterItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const categories = document.querySelectorAll('.category-block');
+            let hasGlobalResults = false;
+
+            categories.forEach(category => {
+                const items = category.querySelectorAll('.item-row');
+                let hasCategoryResults = false;
+
+                items.forEach(item => {
+                    const itemName = item.querySelector('.item-row-name').textContent.toLowerCase();
+                    // On vérifie si le nom du plat contient la recherche
+                    if (itemName.includes(query)) {
+                        item.style.display = 'block';
+                        hasCategoryResults = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // On cache la catégorie entière si elle ne contient aucun plat correspondant
+                if (hasCategoryResults && query !== '') {
+                    category.style.display = 'block';
+                    hasGlobalResults = true;
+                } else if (query === '') {
+                    category.style.display = 'block'; // On affiche tout si la recherche est vide
+                } else {
+                    category.style.display = 'none';
+                }
+            });
+
+            // Gestion du message "Aucun résultat"
+            const noResultsMsg = document.getElementById('noResultsMsg');
+            if (!hasGlobalResults && query !== '') {
+                noResultsMsg.style.display = 'block';
+            } else {
+                noResultsMsg.style.display = 'none';
+            }
+        }
+
     </script>
 </body>
 </html>

@@ -380,3 +380,52 @@ textarea.form-control { height: 80px; resize: vertical; }
    ========================================= */
 .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-dark); color: white; padding: 0.85rem 1.5rem; border-radius: 9999px; font-size: 0.9rem; font-weight: 600; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 100; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* =========================================
+   BARRE DE RECHERCHE
+   ========================================= */
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05);
+    transition: border-color 0.2s;
+}
+
+.search-bar-container:focus-within {
+    border-color: var(--brand-color);
+}
+
+.search-bar-container svg {
+    color: var(--text-gray);
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.search-bar-container input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text-dark);
+    outline: none;
+}
+
+.search-bar-container input::placeholder {
+    color: var(--text-gray);
+    font-weight: 500;
+}
+
+.no-results {
+    text-align: center;
+    color: var(--text-gray);
+    font-weight: 500;
+    padding: 2rem 0;
+    display: none;
+}
