@@ -17,13 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    if ($user && password_verify($password, $user['password_hash'])) {
+        if ($user && password_verify($password, $user['password_hash'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['restaurant_id'] = $user['restaurant_id'];
-        header('Location: admin.php');
+        $_SESSION['role'] = $user['role'];
+        
+        if ($user['role'] === 'super_admin') {
+            header('Location: super_admin.php');
+        } else {
+            header('Location: admin.php');
+        }
         exit;
-    } else {
-        $error = "Email ou mot de passe incorrect.";
     }
 }
 ?>
