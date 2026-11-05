@@ -12,7 +12,7 @@ $action = $_POST['action'] ?? '';
 if ($action === 'add_resto') {
     $nom = $_POST['nom'];
     $slug = strtolower(trim($_POST['slug']));
-    $email = $_POST['email'];
+    $email = strtolower(trim($_POST['email']));
     
     // Générer un mot de passe par défaut pour le gérant
     $default_password = 'resto123';
