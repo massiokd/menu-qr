@@ -26,35 +26,25 @@ $categories = $stmtCat->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu - <?= htmlspecialchars($resto['nom']) ?></title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- GSAP pour les animations Ultra Pro -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
 <body data-theme="<?= htmlspecialchars($resto['theme'] ?? 'classique') ?>">
 
-
-    <!-- Éléments d'arrière-plan -->
     <div class="bg-aurora">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
     </div>
     <div class="noise-overlay"></div>
     
-    <!-- Barre de progression -->
     <div class="scroll-progress" id="progressBar"></div>
 
-    <!-- En-tête -->
     <header class="header">
         <?php if($resto['logo_url']): ?>
-            <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo" id="mainLogo">
+            <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo">
         <?php endif; ?>
-        <h1 class="restaurant-name" id="mainTitle"><?= htmlspecialchars($resto['nom']) ?></h1>
-        <p class="restaurant-subtitle" id="mainSubtitle">Découvrez notre carte</p>
+        <h1 class="restaurant-name"><?= htmlspecialchars($resto['nom']) ?></h1>
+        <p class="restaurant-subtitle">Découvrez notre carte</p>
     </header>
 
-    <!-- Navigation -->
     <nav class="category-nav">
         <ul class="nav-list">
             <?php foreach ($categories as $index => $cat): ?>
@@ -69,7 +59,6 @@ $categories = $stmtCat->fetchAll();
         </ul>
     </nav>
 
-    <!-- Contenu -->
     <main class="main-content">
         <?php foreach ($categories as $cat): ?>
             <div id="cat-<?= $cat['id'] ?>" class="category-section">
@@ -111,37 +100,12 @@ $categories = $stmtCat->fetchAll();
     </main>
 
     <footer class="footer">
-        <p>Propulsé par Fennec Tech 🦊</p>
+        <p>Besoin d'aide ? Appelez-nous au <a href="tel:+213559322518" class="phone-link">+213 559 32 25 18</a></p>
+        <p style="margin-top: 1rem; opacity: 0.6; font-size: 0.65rem;">Propulsé par Fennec Tech 🦊</p>
     </footer>
 
-    <!-- SCRIPT ANIMATIONS & NAVIGATION -->
     <script>
-        // 1. Initialisation de GSAP
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Animation de l'en-tête au chargement
-        gsap.from("#mainLogo", { duration: 1, y: 30, opacity: 0, ease: "power3.out", delay: 0.2 });
-        gsap.from("#mainTitle", { duration: 1, y: 20, opacity: 0, ease: "power3.out", delay: 0.3 });
-        gsap.from("#mainSubtitle", { duration: 1, y: 20, opacity: 0, ease: "power3.out", delay: 0.4 });
-
-        // Animation en cascade des plats au scroll
-        const cards = document.querySelectorAll('.menu-card');
-        cards.forEach((card, index) => {
-            gsap.from(card, {
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 90%",
-                    toggleActions: "play none none none"
-                },
-                duration: 0.8,
-                y: 40,
-                opacity: 0,
-                ease: "power2.out",
-                delay: index % 3 * 0.1 // Crée un effet de cascade
-            });
-        });
-
-        // 2. Barre de progression au scroll
+        // Barre de progression au scroll (optimisé mobile)
         window.addEventListener('scroll', () => {
             const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -149,46 +113,27 @@ $categories = $stmtCat->fetchAll();
             document.getElementById("progressBar").style.width = scrolled + "%";
         });
 
-        // 3. Surbrillance du menu (Scrollspy)
+        // Surbrillance du menu (Scrollspy)
         const links = document.querySelectorAll('.category-link');
         const sections = document.querySelectorAll('.category-section');
 
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (scrollY >= (sectionTop - 150)) current = section.getAttribute('id');
-            });
-
-            links.forEach(link => {
-                link.classList.remove('active');
-                if (link.dataset.target === current) {
-                    link.classList.add('active');
-                    link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    links.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.dataset.target === id) {
+                            link.classList.add('active');
+                            // Centre le lien actif dans la barre de nav
+                            link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
+                    });
                 }
             });
-        });
+        }, { rootMargin: "-150px 0px -50% 0px" });
 
-        // 4. Effet de TILT 3D (Vanilla JS)
-        cards.forEach(card => {
-            card.addEventListener('mousemove', e => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                // Calcul de l'inclinaison
-                const rotateX = ((y - centerY) / centerY) * -5;
-                const rotateY = ((x - centerX) / centerX) * 5;
-                
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-            });
-        });
+        sections.forEach(section => observer.observe(section));
     </script>
 </body>
 </html>
