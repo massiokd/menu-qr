@@ -54,15 +54,13 @@ $categories = $stmtCat->fetchAll();
         <?php foreach ($categories as $cat): ?>
             <div class="category-block">
                 <div class="category-header-container">
-    <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
-    
-    <!-- Bouton Supprimer Catégorie (SVG) -->
-    <a href="delete_category.php?id=<?= $cat['id'] ?>" 
-       onclick="return confirm('⚠️ ATTENTION : Supprimer cette catégorie effacera DÉFINITIVEMENT tous les plats qu\'elle contient.\n\nVoulez-vous vraiment continuer ?')" 
-       class="icon-btn delete" title="Supprimer la catégorie">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-    </a>
-</div>
+                    <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
+                    
+                    <!-- Bouton Supprimer Catégorie -->
+                    <a href="#" onclick="openDeleteModal('delete_category.php?id=<?= $cat['id'] ?>', 'Voulez-vous vraiment supprimer la catégorie <?= htmlspecialchars(addslashes($cat['nom'])) ?> ? Tous les plats qu\'elle contient seront définitivement effacés.'); return false;" class="icon-btn delete" title="Supprimer la catégorie">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </a>
+                </div>
                 
                 <?php
                 $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
@@ -75,12 +73,11 @@ $categories = $stmtCat->fetchAll();
                         <div class="item-row-header">
                             <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
                             <div class="item-actions">
-                                <!-- Icône Modifier -->
                                 <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 </a>
-                                <!-- Icône Supprimer -->
-                                <a href="delete_item.php?id=<?= $item['id'] ?>" onclick="return confirm('Supprimer ce plat ?')" class="icon-btn delete">
+                                <!-- Bouton Supprimer Plat -->
+                                <a href="#" onclick="openDeleteModal('delete_item.php?id=<?= $item['id'] ?>', 'Voulez-vous vraiment supprimer le plat <?= htmlspecialchars(addslashes($item['nom'])) ?> ?'); return false;" class="icon-btn delete">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                 </a>
                             </div>
@@ -108,9 +105,41 @@ $categories = $stmtCat->fetchAll();
         <?php endforeach; ?>
     </main>
 
+    <!-- LA MODALE DE SUPPRESSION -->
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <h2 class="modal-title">Confirmer la suppression</h2>
+            <p class="modal-message" id="modal-message">Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+                <a href="#" id="modal-confirm-btn" class="btn-confirm">Supprimer</a>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast">Prix mis à jour !</div>
 
     <script>
+        // --- GESTION DE LA MODALE ---
+        function openDeleteModal(url, message) {
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('modal-confirm-btn').href = url;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('delete-modal').classList.remove('active');
+        }
+
+        // Fermer la modale si on clique en dehors
+        document.getElementById('delete-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // --- AJAX PRIX & DISPO ---
         function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
         async function updatePrix(itemId) {
             const newPrix = document.getElementById('prix-' + itemId).value;
