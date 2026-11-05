@@ -6,11 +6,14 @@ RUN apt-get update \
     && docker-php-ext-install pdo_pgsql curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Script de démarrage pour adapter le port
+# 2. Augmenter les limites d'upload PHP (20 Mo)
+RUN echo "upload_max_filesize = 20M\npost_max_size = 20M\nmemory_limit = 256M" > /usr/local/etc/php/conf.d/uploads.ini
+
+# 3. Script de démarrage pour adapter le port
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# 3. Activer mod_rewrite
+# 4. Activer mod_rewrite
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html

@@ -99,16 +99,63 @@ $categories = $stmtCat->fetchAll();
     </main>
 
     <script>
+        // Fonction pour compresser et prévisualiser l'image
         function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
             const reader = new FileReader();
-            reader.onload = function(){
-                const output = document.getElementById('image-preview');
-                const noImageText = document.getElementById('no-image-text');
-                output.src = reader.result;
-                output.style.display = 'block';
-                if (noImageText) noImageText.style.display = 'none';
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // 1. Création d'un canvas pour redimensionner
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1000; // Largeur max
+                    const MAX_HEIGHT = 1000; // Hauteur max
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 2. On compresse en JPEG à 80% de qualité
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                    // 3. On affiche l'aperçu
+                    const output = document.getElementById('image-preview');
+                    const noImageText = document.getElementById('no-image-text');
+                    output.src = compressedBase64;
+                    output.style.display = 'block';
+                    if (noImageText) noImageText.style.display = 'none';
+
+                    // 4. On transforme le Base64 en Blob (fichier) pour l'envoi
+                    fetch(compressedBase64)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            // On remplace le fichier original par le fichier compressé dans l'input
+                            const compressedFile = new File([blob], "image.jpg", { type: "image/jpeg" });
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(compressedFile);
+                            event.target.files = dataTransfer.files;
+                        });
+                };
+                img.src = e.target.result;
             };
-            reader.readAsDataURL(event.target.files[0]);
+            reader.readAsDataURL(file);
         }
     </script>
 </body>
