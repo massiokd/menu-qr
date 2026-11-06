@@ -29,7 +29,7 @@ $categories = $stmtCat->fetchAll();
     <!-- Icônes FontAwesome pour le téléphone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body data-theme="<?= htmlspecialchars($resto['theme'] ?? 'classique') ?>">
+<body data-theme="<?= htmlspecialchars($resto['theme'] ?? 'classique') ?>" data-font="<?= htmlspecialchars($resto['font_family'] ?? 'Plus Jakarta Sans') ?>">
 
     <div class="bg-aurora">
         <div class="blob blob-1"></div>
