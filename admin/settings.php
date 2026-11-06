@@ -159,13 +159,48 @@ $themes = [
         <?php endif; ?>
 
         <!-- ONGLET SÉCURITÉ -->
+        <!-- ONGLET SÉCURITÉ -->
         <?php if($tab === 'securite'): ?>
+            
+            <!-- Messages d'erreur -->
+            <?php if(isset($_GET['error'])): ?>
+                <div style="background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; margin-bottom:1.5rem; font-size:0.9rem; text-align:center; font-weight:bold;">
+                    <?php 
+                        if($_GET['error'] == 'wrong_password') echo "Le mot de passe actuel est incorrect.";
+                        if($_GET['error'] == 'email_taken') echo "Cet email est déjà utilisé par un autre compte.";
+                        if($_GET['error'] == 'mismatch') echo "Les nouveaux mots de passe ne correspondent pas.";
+                        if($_GET['error'] == 'short') echo "Le mot de passe doit contenir au moins 6 caractères.";
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if(isset($_GET['success'])): ?>
+                <div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; margin-bottom:1.5rem; font-size:0.9rem; text-align:center; font-weight:bold;">
+                    <?php 
+                        if($_GET['success'] == 'email') echo "Adresse email mise à jour avec succès !";
+                        if($_GET['success'] == 'password') echo "Mot de passe mis à jour avec succès !";
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Formulaire Email -->
             <div class="theme-selector-card">
-                <h2>Sécurité</h2>
-                <p>Modifiez votre mot de passe.</p>
+                <h2>Changer d'adresse email</h2>
+                <form action="../actions/update_email.php" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
+                    <input type="email" name="new_email" placeholder="Nouvel email" required class="form-control" value="<?= htmlspecialchars($user_email ?? '') ?>">
+                    <input type="password" name="current_password" placeholder="Mot de passe actuel (pour confirmer)" required class="form-control">
+                    <button type="submit" class="btn-primary" style="align-self:flex-start;">Mettre à jour l'email</button>
+                </form>
+            </div>
+
+            <!-- Formulaire Mot de passe -->
+            <div class="theme-selector-card">
+                <h2>Changer de mot de passe</h2>
                 <form action="../actions/update_password.php" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
-                    <input type="password" name="new_password" placeholder="Nouveau mot de passe (min. 6 car.)" required class="form-control">
-                    <button type="submit" class="btn-primary" style="align-self:flex-start;">Mettre à jour</button>
+                    <input type="password" name="current_password" placeholder="Mot de passe actuel" required class="form-control">
+                    <input type="password" name="new_password" placeholder="Nouveau mot de passe" required class="form-control">
+                    <input type="password" name="confirm_password" placeholder="Confirmer le nouveau mot de passe" required class="form-control">
+                    <button type="submit" class="btn-primary" style="align-self:flex-start;">Mettre à jour le mot de passe</button>
                 </form>
             </div>
         <?php endif; ?>
