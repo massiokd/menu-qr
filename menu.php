@@ -43,7 +43,7 @@ $categories = $stmtCat->fetchAll();
             <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo">
         <?php endif; ?>
         <h1 class="restaurant-name"><?= htmlspecialchars($resto['nom']) ?></h1>
-        <p class="restaurant-subtitle">Découvrez notre carte</p>
+        <p class="restaurant-subtitle"><?= htmlspecialchars($resto['slogan'] ?? 'Découvrez notre carte') ?></p>
     </header>
 
     <nav class="category-nav">
@@ -102,12 +102,29 @@ $categories = $stmtCat->fetchAll();
     </main>
 
     <!-- Footer Propre et Discret -->
-    <footer class="footer">
+       <footer class="footer">
+        <!-- Réseaux sociaux si remplis -->
+        <?php if(!empty($resto['instagram_url']) || !empty($resto['facebook_url'])): ?>
+            <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
+                <?php if(!empty($resto['instagram_url'])): ?>
+                    <a href="<?= htmlspecialchars($resto['instagram_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--gray)'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                <?php endif; ?>
+                
+                <?php if(!empty($resto['facebook_url'])): ?>
+                    <a href="<?= htmlspecialchars($resto['facebook_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--gray)'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Ton numéro à toi (Fennec Tech) -->
         <div class="footer-contact">
-            <a href="tel:+213559322518" class="contact-item">
-                <!-- Icône Téléphone SVG -->
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                +213 559 32 25 18
+            <a href="https://wa.me/213559322518" target="_blank" class="contact-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                Support Fennec Tech
             </a>
         </div>
         
