@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 // Sécurité : vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {

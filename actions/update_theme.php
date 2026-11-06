@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') {
     http_response_code(403);

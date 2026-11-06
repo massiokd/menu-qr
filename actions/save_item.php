@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') {
     header('Location: login.php'); exit;
@@ -47,5 +47,5 @@ if ($item_id) {
     $stmt->execute([$category_id, $nom, $description, $prix, $image_url]);
 }
 
-header('Location: admin.php');
+header('Location: ../admin/admin.php');
 exit;

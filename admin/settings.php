@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') {
     header('Location: login.php');
@@ -35,14 +35,14 @@ $themes = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paramètres - <?= htmlspecialchars($resto['nom']) ?></title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
 
     <!-- Navigation Admin -->
     <header class="admin-header">
         <h1>Paramètres</h1>
-        <a href="logout.php" class="btn-logout">Déconnexion</a>
+        <a href="../logout.php" class="btn-logout">Déconnexion</a>
     </header>
 
     <div class="admin-tabs">
@@ -87,7 +87,7 @@ $themes = [
             formData.append('theme', theme);
 
             try {
-                await fetch('update_theme.php', { method: 'POST', body: formData });
+                await fetch('../actions/update_theme.php', { method: 'POST', body: formData });
                 showToast('Thème mis à jour avec succès !');
             } catch (e) {
                 showToast('Erreur lors de la sauvegarde.');

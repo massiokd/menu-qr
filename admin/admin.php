@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: login.php'); exit; }
 
@@ -24,13 +24,13 @@ $categories = $stmtCat->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - <?= htmlspecialchars($resto['nom']) ?></title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
 
     <header class="admin-header">
         <h1>Gérer le Menu</h1>
-        <a href="logout.php" class="btn-logout">Déconnexion</a>
+        <a href="../logout.php" class="btn-logout">Déconnexion</a>
     </header>
 
     <div class="admin-tabs">
@@ -51,7 +51,7 @@ $categories = $stmtCat->fetchAll();
         <div class="admin-card">
             <div class="qr-info">
                 <h2>Ajouter une catégorie</h2>
-                <form action="add_category.php" method="POST" class="add-category-form">
+                <form action="../actions/add_category.php" method="POST" class="add-category-form">
                     <input type="text" name="nom" placeholder="Ex: Boissons, Desserts..." required>
                     <button type="submit" class="btn-primary">Ajouter</button>
                 </form>
@@ -64,7 +64,7 @@ $categories = $stmtCat->fetchAll();
                     <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
                     
                     <!-- Bouton Supprimer Catégorie -->
-                    <a href="#" onclick="openDeleteModal('delete_category.php?id=<?= $cat['id'] ?>', 'Voulez-vous vraiment supprimer la catégorie <?= htmlspecialchars(addslashes($cat['nom'])) ?> ? Tous les plats qu\'elle contient seront définitivement effacés.'); return false;" class="icon-btn delete" title="Supprimer la catégorie">
+                    <a href="#" onclick="openDeleteModal('../actions/delete_category.php?id=<?= $cat['id'] ?>', 'Voulez-vous vraiment supprimer la catégorie <?= htmlspecialchars(addslashes($cat['nom'])) ?> ? Tous les plats qu\'elle contient seront définitivement effacés.'); return false;" class="icon-btn delete" title="Supprimer la catégorie">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </a>
                 </div>
@@ -84,7 +84,7 @@ $categories = $stmtCat->fetchAll();
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 </a>
                                 <!-- Bouton Supprimer Plat -->
-                                <a href="#" onclick="openDeleteModal('delete_item.php?id=<?= $item['id'] ?>', 'Voulez-vous vraiment supprimer le plat <?= htmlspecialchars(addslashes($item['nom'])) ?> ?'); return false;" class="icon-btn delete">
+                                <a href="#" onclick="openDeleteModal('../actions/delete_item.php?id=<?= $item['id'] ?>', 'Voulez-vous vraiment supprimer le plat <?= htmlspecialchars(addslashes($item['nom'])) ?> ?'); return false;" class="icon-btn delete">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                 </a>
                             </div>
@@ -151,11 +151,11 @@ $categories = $stmtCat->fetchAll();
         async function updatePrix(itemId) {
             const newPrix = document.getElementById('prix-' + itemId).value;
             const formData = new FormData(); formData.append('action', 'update_prix'); formData.append('item_id', itemId); formData.append('prix', newPrix);
-            try { const response = await fetch('update_item.php', { method: 'POST', body: formData }); const result = await response.json(); if(result.success) showToast('Prix mis à jour !'); } catch (error) { showToast('Erreur.'); }
+            try { const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); const result = await response.json(); if(result.success) showToast('Prix mis à jour !'); } catch (error) { showToast('Erreur.'); }
         }
         async function toggleDispo(itemId, btn) {
             const formData = new FormData(); formData.append('action', 'toggle_dispo'); formData.append('item_id', itemId);
-            try { const response = await fetch('update_item.php', { method: 'POST', body: formData }); const result = await response.json();
+            try { const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); const result = await response.json();
                 if(result.success) { if(result.new_status) { btn.textContent = 'Disponible'; btn.classList.replace('unavailable', 'available'); showToast('Plat disponible.'); } else { btn.textContent = 'Épuisé'; btn.classList.replace('available', 'unavailable'); showToast('Plat épuisé.'); } }
             } catch (error) { showToast('Erreur.'); }
         }

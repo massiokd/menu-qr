@@ -17,6 +17,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
+
+# 5. Copier TOUS les dossiers (admin, actions, assets, config...) dans le serveur
 COPY . /var/www/html/
 
 EXPOSE 10000

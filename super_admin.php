@@ -29,7 +29,7 @@ foreach ($restos as $r) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fennec Tech - Super Admin</title>
-    <link rel="stylesheet" href="super_admin.css">
+    <link rel="stylesheet" href="assets/css/super_admin.css">
 </head>
 <body>
 
@@ -59,7 +59,7 @@ foreach ($restos as $r) {
         <!-- Formulaire d'ajout de restaurant -->
         <div class="card">
             <h2 class="card-title">➕ Ajouter un nouveau restaurant</h2>
-            <form action="super_admin_actions.php" method="POST" class="form-row">
+            <form action="actions/super_admin_actions.php" method="POST" class="form-row">
                 <input type="hidden" name="action" value="add_resto">
                 <input type="text" name="nom" placeholder="Nom du restaurant" required>
                 <input type="text" name="slug" placeholder="Lien (ex: chez-paul)" required>

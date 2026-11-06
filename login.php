@@ -4,7 +4,7 @@ require 'config/db.php';
 
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['role'] === 'super_admin') { header('Location: super_admin.php'); }
-    else { header('Location: admin.php'); }
+    else { header('Location: admin/admin.php'); } // MODIFIÉ ICI
     exit;
 }
 
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user['role'] === 'super_admin') {
             header('Location: super_admin.php');
         } else {
-            header('Location: admin.php');
+            header('Location: admin/admin.php'); // MODIFIÉ ICI
         }
         exit;
     } else {
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - Fennec Tech</title>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="assets/css/login.css">
 </head>
 <body>
     <div class="login-card">

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'super_admin') {
     die("Non autorisé.");
@@ -38,7 +38,7 @@ if ($action === 'add_resto') {
         $stmtCat->execute([$resto_id]);
 
         $pdo->commit();
-        header('Location: super_admin.php?success=1');
+        header('Location: ../super_admin.php?success=1');
     } catch (Exception $e) {
         $pdo->rollBack();
         die("Erreur lors de la création : " . $e->getMessage());
@@ -69,5 +69,5 @@ if ($action === 'update_resto') {
         $stmtToggle->execute([$resto_id]);
     }
 
-    header('Location: super_admin.php');
+   header('Location: ../super_admin.php');
 }

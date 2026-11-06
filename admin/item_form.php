@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: login.php'); exit; }
 
@@ -28,7 +28,7 @@ $categories = $stmtCat->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $item_id ? 'Modifier' : 'Ajouter' ?> un plat</title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
     <header class="admin-header">
@@ -37,7 +37,7 @@ $categories = $stmtCat->fetchAll();
     </header>
 
     <main class="container">
-        <form action="save_item.php" method="POST" enctype="multipart/form-data" class="admin-card">
+        <form action="../actions/save_item.php" method="POST" enctype="multipart/form-data" class="admin-card">
             
             <?php if($item_id): ?>
                 <input type="hidden" name="item_id" value="<?= $item_id ?>">

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/db.php';
+require '../config/db.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -24,5 +24,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-header('Location: admin.php');
+header('Location: ../admin/admin.php');
 exit;
