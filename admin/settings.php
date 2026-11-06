@@ -6,9 +6,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Lo
 
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ?");
-$stmt->execute([$resto_id]);
-$resto = $stmt->fetch();
+
+$stmtResto = $pdo->prepare("SELECT * FROM restaurants WHERE id = ?");
+$stmtResto->execute([$resto_id]);
+$resto = $stmtResto->fetch();
+
+// URL du menu pour le QR Code
+$base_url = "https://menu-qr-ebke.onrender.com"; 
+$menu_url = $base_url . "/menu.php?slug=" . $resto['slug'];
 
 // Gestion des sous-onglets
 $tab = $_GET['tab'] ?? 'profil';
@@ -26,13 +31,6 @@ $themes = [
     'royal' => ['nom' => 'Royal', 'couleur' => '#7e22ce'],
     'toscane' => ['nom' => 'Toscane', 'couleur' => '#b45309'],
     'hiver' => ['nom' => 'Hiver', 'couleur' => '#3b82f6']
-];
-
-$fonts = [
-    'Plus Jakarta Sans' => 'Moderne (Par défaut)',
-    'Poppins' => 'Arrondi & Amical',
-    'Montserrat' => 'Élégant & Classique',
-    'Lora' => 'Traditionnel & Serif'
 ];
 ?>
 <!DOCTYPE html>
@@ -62,6 +60,7 @@ $fonts = [
         <div style="display:flex; gap:1rem; margin-bottom:2rem; border-bottom:1px solid #e5e7eb; padding-bottom:0.5rem; overflow-x:auto;">
             <a href="?tab=profil" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'profil' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'profil' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">Profil</a>
             <a href="?tab=branding" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'branding' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'branding' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">Apparence</a>
+            <a href="?tab=qrcode" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'qrcode' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'qrcode' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">QR Code</a>
             <a href="?tab=securite" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'securite' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'securite' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">Sécurité</a>
         </div>
 
@@ -71,6 +70,7 @@ $fonts = [
 
         <!-- CONTENU DES SOUS-ONGLETS -->
         
+        <!-- ONGLET PROFIL -->
         <?php if($tab === 'profil'): ?>
             <div class="theme-selector-card">
                 <h2>Profil du Restaurant</h2>
@@ -101,11 +101,13 @@ $fonts = [
             </div>
         <?php endif; ?>
 
+        <!-- ONGLET APPARENCE (Branding) -->
         <?php if($tab === 'branding'): ?>
             <!-- Logo -->
             <div class="theme-selector-card" style="display:flex; gap:1.5rem; align-items:center;">
                 <div style="flex:1;">
                     <h2>Logo</h2>
+                    <p>Ce logo apparaîtra en haut de votre menu.</p>
                     <form action="../actions/update_logo.php" method="POST" enctype="multipart/form-data">
                         <label class="btn-upload" style="display:inline-flex; width:auto;">Changer le logo
                             <input type="file" name="logo" accept="image/*" style="display:none;" onchange="this.form.submit()">
@@ -113,13 +115,14 @@ $fonts = [
                     </form>
                 </div>
                 <?php if($resto['logo_url']): ?>
-                    <img src="<?= htmlspecialchars($resto['logo_url']) ?>" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+                    <img src="<?= htmlspecialchars($resto['logo_url']) ?>" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
                 <?php endif; ?>
             </div>
 
             <!-- Thèmes de couleurs -->
             <div class="theme-selector-card">
                 <h2>Thème de couleurs</h2>
+                <p>Choisissez l'ambiance visuelle de votre carte.</p>
                 <div class="theme-grid">
                     <?php foreach ($themes as $key => $t): $isActive = ($resto['theme'] ?? 'classique') === $key; ?>
                         <div class="theme-option <?= $isActive ? 'active' : '' ?>" onclick="selectTheme('<?= $key ?>', this)">
@@ -129,27 +132,39 @@ $fonts = [
                     <?php endforeach; ?>
                 </div>
             </div>
+        <?php endif; ?>
 
-            <!-- Police d'écriture -->
-            <div class="theme-selector-card">
-                <h2>Style d'écriture</h2>
-                <div class="theme-grid">
-                    <?php foreach ($fonts as $key => $nom): $isActive = ($resto['font_family'] ?? 'Plus Jakarta Sans') === $key; ?>
-                        <div class="theme-option <?= $isActive ? 'active' : '' ?>" onclick="selectFont('<?= $key ?>', this)" style="font-family: '<?= $key ?>', sans-serif;">
-                            <span style="font-size:1rem;">Aa</span>
-                            <span><?= $nom ?></span>
-                        </div>
-                    <?php endforeach; ?>
+        <!-- ONGLET QR CODE -->
+        <?php if($tab === 'qrcode'): ?>
+            <div class="theme-selector-card" style="text-align:center;">
+                <h2>Votre QR Code</h2>
+                <p>Imprimez ce code et collez-le sur vos tables. Vos clients le scanneront pour voir votre menu.</p>
+                
+                <div style="margin: 2rem 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=<?= urlencode($menu_url) ?>" alt="QR Code" style="border-radius:1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin:0 auto;">
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+                    <a href="<?= htmlspecialchars($menu_url) ?>" target="_blank" class="btn-primary" style="text-decoration:none; background:#f3f4f6; color:var(--text-dark);">
+                        Voir le menu
+                    </a>
+                    
+                    <!-- Bouton de téléchargement HD -->
+                    <a href="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&download=1&data=<?= urlencode($menu_url) ?>" target="_blank" class="btn-primary" style="text-decoration:none; display:flex; align-items:center; gap:0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Télécharger en HD
+                    </a>
                 </div>
             </div>
         <?php endif; ?>
 
+        <!-- ONGLET SÉCURITÉ -->
         <?php if($tab === 'securite'): ?>
             <div class="theme-selector-card">
                 <h2>Sécurité</h2>
                 <p>Modifiez votre mot de passe.</p>
                 <form action="../actions/update_password.php" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
-                    <input type="password" name="new_password" placeholder="Nouveau mot de passe" required class="form-control">
+                    <input type="password" name="new_password" placeholder="Nouveau mot de passe (min. 6 car.)" required class="form-control">
                     <button type="submit" class="btn-primary" style="align-self:flex-start;">Mettre à jour</button>
                 </form>
             </div>
@@ -168,15 +183,6 @@ $fonts = [
             const formData = new FormData(); formData.append('theme', theme);
             await fetch('../actions/update_theme.php', { method: 'POST', body: formData });
             showToast('Thème mis à jour !');
-        }
-
-        async function selectFont(font, element) {
-            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            const formData = new FormData(); formData.append('font_family', font);
-            // On réutilise update_theme.php ou on crée un update_font.php
-            await fetch('../actions/update_font.php', { method: 'POST', body: formData });
-            showToast('Police mise à jour !');
         }
     </script>
 </body>
