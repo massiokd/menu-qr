@@ -4,7 +4,7 @@ require 'config/db.php';
 
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['role'] === 'super_admin') { header('Location: super_admin.php'); }
-    else { header('Location: admin/admin.php'); } // MODIFIÉ ICI
+    else { header('Location: admin/admin.php'); }
     exit;
 }
 
@@ -18,17 +18,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    if ($user && password_verify($password, $user['password_hash'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['restaurant_id'] = $user['restaurant_id'];
-        $_SESSION['role'] = $user['role'];
-        
-        if ($user['role'] === 'super_admin') {
-            header('Location: super_admin.php');
-        } else {
-            header('Location: admin/admin.php'); // MODIFIÉ ICI
+    if ($user) {
+        // 1. Vérifier si le compte est bloqué
+        if ($user['lockout_until'] && strtotime($user['lockout_until']) > time()) {
+            $error = "Compte temporairement bloqué suite à plusieurs échecs. Réessayez plus tard.";
+        } 
+        // 2. Vérifier le mot de passe
+        elseif (password_verify($password, $user['password_hash'])) {
+            // Succès : on remet les compteurs à zéro
+            $stmtReset = $pdo->prepare("UPDATE users SET failed_attempts = 0, lockout_until = NULL WHERE id = ?");
+            $stmtReset->execute([$user['id']]);
+
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['restaurant_id'] = $user['restaurant_id'];
+            $_SESSION['role'] = $user['role'];
+            
+            if ($user['role'] === 'super_admin') { header('Location: super_admin.php'); }
+            else { header('Location: admin/admin.php'); }
+            exit;
+        } 
+        // 3. Échec : on incrémente le compteur
+        else {
+            $attempts = $user['failed_attempts'] + 1;
+            if ($attempts >= 5) {
+                // Blocage de 15 minutes
+                $lockout = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+                $stmtLock = $pdo->prepare("UPDATE users SET failed_attempts = ?, lockout_until = ? WHERE id = ?");
+                $stmtLock->execute([$attempts, $lockout, $user['id']]);
+                $error = "Trop de tentatives échouées. Compte bloqué pendant 15 minutes.";
+            } else {
+                $stmtFail = $pdo->prepare("UPDATE users SET failed_attempts = ? WHERE id = ?");
+                $stmtFail->execute([$attempts, $user['id']]);
+                $error = "Email ou mot de passe incorrect. (Tentative $attempts/5)";
+            }
         }
-        exit;
     } else {
         $error = "Email ou mot de passe incorrect.";
     }
@@ -55,12 +78,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Email</label>
                 <input type="email" name="email" placeholder="votre@email.com" required autocomplete="off">
             </div>
-            <div class="form-group">
+                       <div class="form-group">
                 <label>Mot de passe</label>
-                <input type="password" name="password" required>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="login-pass" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('login-pass', this)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
             </div>
+            <div style="text-align: center; margin-top: 1rem;">
+    <a href="forgot_password.php" style="color: var(--text-gray); font-size: 0.85rem; text-decoration: none;">Mot de passe oublié ?</a>
+</div>
             <button type="submit" class="btn-submit">Se connecter</button>
         </form>
     </div>
+
+    <script>
+        function togglePassword(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            } else {
+                input.type = "password";
+                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            }
+        }
+    </script>
+
 </body>
 </html>

@@ -429,3 +429,32 @@ textarea.form-control { height: 80px; resize: vertical; }
     padding: 2rem 0;
     display: none;
 }
+
+/* --- CORRECTION OEIL ADMIN --- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.password-wrapper input {
+    padding-right: 45px !important;
+}
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%); /* Centre parfaitement l'icône */
+    cursor: pointer;
+    color: #9ca3af;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    transition: color 0.2s ease;
+}
+.toggle-password:hover {
+    color: var(--brand-color);
+}

@@ -90,3 +90,32 @@ body {
     margin-top: 0.5rem;
 }
 .btn-submit:hover { background: #9a3412; }
+
+/* --- CORRECTION OEIL LOGIN --- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.password-wrapper input {
+    padding-right: 45px !important;
+}
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%); /* Centre parfaitement l'icône */
+    cursor: pointer;
+    color: #9ca3af; /* Gris fixe */
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    transition: color 0.2s ease;
+}
+.toggle-password:hover {
+    color: var(--brand); /* Utilise la bonne variable */
+}
