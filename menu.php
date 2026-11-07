@@ -191,10 +191,10 @@ foreach ($categories as $cat) {
         let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
 
         // --- GESTION DES ONGLETS ---
+  
         function switchTab(catId) {
             currentCategoryId = catId;
             
-            // Si on était en train de chercher, on vide la recherche
             const searchInput = document.getElementById('clientSearch');
             if (searchInput.value.trim() !== '') {
                 searchInput.value = '';
@@ -203,19 +203,18 @@ foreach ($categories as $cat) {
                 document.getElementById('noResultMsg').style.display = 'none';
             }
 
-            // 1. Cacher toutes les sections et réinitialiser l'affichage des plats
             document.querySelectorAll('.category-section').forEach(sec => {
                 sec.classList.remove('active');
                 sec.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
             });
 
-            // 2. Afficher la section demandée
             const target = document.getElementById('cat-' + catId);
             if(target) {
                 target.classList.add('active');
+                // 👇 LA CORRECTION EST ICI : On force l'apparition des plats de cet onglet
+                target.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
             }
 
-            // 3. Mettre à jour l'onglet actif
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active');
                 if (b.getAttribute('data-id') == catId) {
@@ -224,7 +223,6 @@ foreach ($categories as $cat) {
                 }
             });
             
-            // Remonter en haut
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -238,7 +236,6 @@ foreach ($categories as $cat) {
             
             clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
 
-            // SI LA RECHERCHE EST VIDE : On remet l'onglet actif normalement
             if (query === '') {
                 tabsWrapper.style.display = 'block';
                 noResultMsg.style.display = 'none';
@@ -246,7 +243,6 @@ foreach ($categories as $cat) {
                 return;
             }
 
-            // SI ON CHERCHE : On cache les onglets et on affiche les résultats
             tabsWrapper.style.display = 'none';
             let hasResults = false;
 
@@ -260,6 +256,8 @@ foreach ($categories as $cat) {
                     
                     if (name.includes(query) || desc.includes(query)) {
                         item.style.display = 'flex';
+                        // 👇 LA CORRECTION EST ICI AUSSI : On force l'apparition des résultats trouvés
+                        item.classList.add('active');
                         sectionHasVisibleItem = true;
                         hasResults = true;
                     } else {
@@ -267,7 +265,6 @@ foreach ($categories as $cat) {
                     }
                 });
 
-                // On affiche la section seulement si elle contient des résultats
                 sec.style.display = sectionHasVisibleItem ? 'block' : 'none';
                 if (sectionHasVisibleItem) sec.classList.add('active');
             });
