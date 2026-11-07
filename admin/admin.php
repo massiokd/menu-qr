@@ -5,8 +5,6 @@ require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: ../login.php'); exit; }
 
-
-
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
 
@@ -34,7 +32,6 @@ $categories = $stmtCat->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - <?= htmlspecialchars($resto['nom']) ?></title>
     <link rel="stylesheet" href="../assets/css/admin.css">
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -50,28 +47,25 @@ $categories = $stmtCat->fetchAll();
         <a href="subscription.php" class="<?= basename($_SERVER['PHP_SELF']) == 'subscription.php' ? 'active' : '' ?>">Abonnement</a>
     </div>
 
-
     <main class="container">
+        
+        <!-- ALERTES -->
         <?php if($resto['subscription_status'] === 'pending_verification'): ?>
-    <div style="background:#fef3c7; color:#92400e; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fcd34d;">
-        <strong>⏳ Votre paiement est en cours de vérification.</strong><br>
-        Votre menu est actif pour vous permettre de continuer à travailler. Nous validons votre abonnement sous 24h.
-    </div>
-<?php endif; ?>
+            <div style="background:#fef3c7; color:#92400e; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fcd34d;">
+                <strong>⏳ Votre paiement est en cours de vérification.</strong><br>
+                Votre menu est actif pour vous permettre de continuer à travailler. Nous validons votre abonnement sous 24h.
+            </div>
+        <?php endif; ?>
 
-        <!-- ALERTE D'EXPIRATION D'ABONNEMENT -->
         <?php if ($days_left !== null && $days_left > 0 && $days_left <= 7): ?>
-            <!-- Alerte Jaune : Expire bientôt -->
             <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <p style="font-weight: 700; color: #92400e; margin-bottom: 0.25rem; margin-top:0;">⚠️ Votre abonnement expire bientôt !</p>
-                    <p style="font-size: 0.85rem; color: #78350f; margin:0;">Il vous reste <strong><?= $days_left ?> jour(s)</strong> avant l'expiration (le <?= date('d/m/Y', strtotime($resto['expires_at'])) ?>).</p>
+                    <p style="font-size: 0.85rem; color: #78350f; margin:0;">Il vous reste <strong><?= $days_left ?> jour(s)</strong> avant l'expiration.</p>
                 </div>
                 <a href="subscription.php" style="background: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem; white-space: nowrap;">Renouveler</a>
             </div>
-            
         <?php elseif ($days_left !== null && $days_left <= 0): ?>
-            <!-- Alerte Rouge : Déjà expiré -->
             <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <p style="font-weight: 700; color: #991b1b; margin-bottom: 0.25rem; margin-top:0;">🚨 Votre abonnement a expiré !</p>
@@ -80,15 +74,21 @@ $categories = $stmtCat->fetchAll();
                 <a href="subscription.php" style="background: #ef4444; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem; white-space: nowrap;">Réactiver</a>
             </div>
         <?php endif; ?>
-        
-                <!-- Barre de recherche -->
+
+        <!-- BOUTON VERS LA PAGE DE RÉORGANISATION -->
+        <a href="reorder.php" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:var(--text-dark); color:white; padding:1rem; border-radius:1rem; text-decoration:none; font-weight:bold; margin-bottom:1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Réorganiser le menu (Glisser ou flèches)
+        </a>
+
+        <!-- Barre de recherche -->
         <div class="search-bar-container">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="searchInput" placeholder="Rechercher un plat..." onkeyup="filterItems()">
         </div>
 
-        <!-- Message si aucun résultat -->
         <div id="noResultsMsg" class="no-results">Aucun plat ne correspond à votre recherche.</div>
+        
         <!-- Ajout de catégorie -->
         <div class="admin-card">
             <div class="qr-info">
@@ -100,31 +100,26 @@ $categories = $stmtCat->fetchAll();
             </div>
         </div>
 
-                <?php foreach ($categories as $cat): ?>
+        <?php foreach ($categories as $cat): ?>
             <div class="category-block" data-id="<?= $cat['id'] ?>">
                 
-                <!-- En-tête de la catégorie -->
+                <!-- En-tête de la catégorie (SANS LA POIGNÉE) -->
                 <div class="category-header-container">
                     <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
                     
                     <div class="category-actions">
-                        <!-- POIGNÉE DE GLISSEMENT CATÉGORIE -->
-                        <div class="drag-handle category-drag" title="Glisser pour réorganiser">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-                        </div>
-
                         <!-- Bouton Modifier -->
                         <a href="#" data-id="<?= $cat['id'] ?>" data-nom="<?= htmlspecialchars($cat['nom']) ?>" onclick="openEditCategory(this); return false;" class="icon-btn edit" title="Modifier la catégorie">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                         </a>
-
                         <!-- Bouton Supprimer -->
-                        <a href="#" onclick="openDeleteModal('../actions/delete_category.php?id=<?= $cat['id'] ?>', 'Voulez-vous vraiment supprimer la catégorie <?= htmlspecialchars(addslashes($cat['nom'])) ?> ? Tous les plats qu\'elle contient seront définitivement effacés.'); return false;" class="icon-btn delete" title="Supprimer la catégorie">
+                        <a href="#" onclick="openDeleteModal('../actions/delete_category.php?id=<?= $cat['id'] ?>', 'Voulez-vous vraiment supprimer la catégorie <?= htmlspecialchars(addslashes($cat['nom'])) ?> ?'); return false;" class="icon-btn delete" title="Supprimer la catégorie">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </a>
                     </div>
+                </div>
                 
-                <!-- Liste des plats -->
+                <!-- Liste des plats (SANS LA POIGNÉE) -->
                 <div class="items-list-container">
                     <?php
                     $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
@@ -137,12 +132,7 @@ $categories = $stmtCat->fetchAll();
                             <div class="item-row-header">
                                 <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
                                 
-                            <div class="item-actions">
-                                <!-- POIGNÉE DE GLISSEMENT PLAT -->
-                                <div class="drag-handle item-drag" title="Glisser pour réorganiser">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-                                </div>
-
+                                <div class="item-actions">
                                     <!-- Modifier Plat -->
                                     <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -168,7 +158,6 @@ $categories = $stmtCat->fetchAll();
                     <?php endforeach; ?>
                 </div>
 
-                <!-- Bouton Ajouter un plat -->
                 <a href="item_form.php?cat_id=<?= $cat['id'] ?>" class="btn-add-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Ajouter un plat
@@ -195,14 +184,24 @@ $categories = $stmtCat->fetchAll();
     <div id="toast" class="toast">Prix mis à jour !</div>
 
     <script>
+        function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
+        
+        // --- GESTION DE LA MODALE ---
+        function openDeleteModal(url, message) {
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('modal-confirm-btn').href = url;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+        function closeModal() { document.getElementById('delete-modal').classList.remove('active'); }
+        document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
-        // Fonction pour ajouter un spinner dans un bouton
+        // --- FONCTION POUR LE SPINNER ---
         function setLoading(element, isLoading, originalText = '') {
             if (isLoading) {
                 element.classList.add('btn-loading');
                 if (element.tagName === 'BUTTON' || element.tagName === 'A') {
                     element.dataset.originalHtml = element.innerHTML;
-                    element.innerHTML = '<span class="spinner"></span>'; // Pour les boutons noirs/verts
+                    element.innerHTML = '<span class="spinner"></span>';
                 }
             } else {
                 element.classList.remove('btn-loading');
@@ -212,39 +211,21 @@ $categories = $stmtCat->fetchAll();
             }
         }
 
-        // --- GESTION DE LA MODALE ---
-        function openDeleteModal(url, message) {
-            document.getElementById('modal-message').innerText = message;
-            document.getElementById('modal-confirm-btn').href = url;
-            document.getElementById('delete-modal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('delete-modal').classList.remove('active');
-        }
-
-        // Fermer la modale si on clique en dehors
-        document.getElementById('delete-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-
         // --- AJAX PRIX & DISPO ---
-        function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
-                async function updatePrix(itemId, btnElement) {
+        async function updatePrix(itemId, btnElement) {
             const newPrix = document.getElementById('prix-' + itemId).value;
             const formData = new FormData(); formData.append('action', 'update_prix'); formData.append('item_id', itemId); formData.append('prix', newPrix);
             
-            setLoading(btnElement, true); // Active le spinner
+            setLoading(btnElement, true);
             try { 
                 const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); 
                 const result = await response.json(); 
                 if(result.success) showToast('Prix mis à jour !'); 
             } catch (error) { 
                 showToast('Erreur.'); 
-            } finally {
-                setLoading(btnElement, false); // Retire le spinner
-            }
+            } finally { setLoading(btnElement, false); }
         }
+
         async function toggleDispo(itemId, btnElement) {
             const formData = new FormData(); formData.append('action', 'toggle_dispo'); formData.append('item_id', itemId);
             
@@ -265,9 +246,7 @@ $categories = $stmtCat->fetchAll();
                 }
             } catch (error) { 
                 showToast('Erreur.'); 
-            } finally {
-                setLoading(btnElement, false);
-            }
+            } finally { setLoading(btnElement, false); }
         }
 
         // --- FILTRE DE RECHERCHE ---
@@ -282,7 +261,6 @@ $categories = $stmtCat->fetchAll();
 
                 items.forEach(item => {
                     const itemName = item.querySelector('.item-row-name').textContent.toLowerCase();
-                    // On vérifie si le nom du plat contient la recherche
                     if (itemName.includes(query)) {
                         item.style.display = 'block';
                         hasCategoryResults = true;
@@ -291,18 +269,16 @@ $categories = $stmtCat->fetchAll();
                     }
                 });
 
-                // On cache la catégorie entière si elle ne contient aucun plat correspondant
                 if (hasCategoryResults && query !== '') {
                     category.style.display = 'block';
                     hasGlobalResults = true;
                 } else if (query === '') {
-                    category.style.display = 'block'; // On affiche tout si la recherche est vide
+                    category.style.display = 'block';
                 } else {
                     category.style.display = 'none';
                 }
             });
 
-            // Gestion du message "Aucun résultat"
             const noResultsMsg = document.getElementById('noResultsMsg');
             if (!hasGlobalResults && query !== '') {
                 noResultsMsg.style.display = 'block';
@@ -311,90 +287,15 @@ $categories = $stmtCat->fetchAll();
             }
         }
 
-               function openEditCategory(element) {
+        // --- MODIFIER CATÉGORIE ---
+        function openEditCategory(element) {
             const id = element.getAttribute('data-id');
             const nom = element.getAttribute('data-nom');
-            
             document.getElementById('edit-cat-id').value = id;
             document.getElementById('edit-cat-name').value = nom;
             document.getElementById('edit-category-modal').classList.add('active');
         }
-
-        function closeEditModal() {
-            document.getElementById('edit-category-modal').classList.remove('active');
-        }
-
-                // --- RÉORGANISATION (TRI) ---
-        async function moveItem(id, type, direction) {
-            const formData = new FormData();
-            formData.append('id', id);
-            formData.append('type', type);
-            formData.append('direction', direction);
-
-            try {
-                const response = await fetch('../actions/update_order.php', { method: 'POST', body: formData });
-                const result = await response.json();
-                if(result.success) {
-                    // On recharge la page pour voir le nouvel ordre instantanément
-                    window.location.reload();
-                }
-            } catch (error) {
-                showToast('Erreur lors du tri.');
-            }
-        }
-
-                // --- DRAG & DROP (SORTABLEJS) ---
-        
-        // 1. Tri des catégories
-        const categoriesContainer = document.querySelector('main.container');
-        new Sortable(categoriesContainer, {
-            animation: 250,
-            handle: '.category-drag',
-            draggable: '.category-block',
-            onEnd: function (evt) {
-                // On récupère le nouvel ordre des IDs
-                const newOrder = Array.from(categoriesContainer.children)
-                                    .filter(el => el.classList.contains('category-block'))
-                                    .map(el => el.getAttribute('data-id'));
-                
-                // On envoie au serveur
-                saveOrder(newOrder, 'category');
-            }
-        });
-
-        // 2. Tri des plats DANS chaque catégorie
-        const itemLists = document.querySelectorAll('.items-list-container');
-        itemLists.forEach(list => {
-            new Sortable(list, {
-                animation: 250,
-                handle: '.item-drag',
-                draggable: '.item-row',
-                onEnd: function (evt) {
-                    const newOrder = Array.from(list.children)
-                                        .filter(el => el.classList.contains('item-row'))
-                                        .map(el => el.getAttribute('data-id'));
-                    saveOrder(newOrder, 'item');
-                }
-            });
-        });
-
-        // 3. Fonction d'envoi au serveur
-        async function saveOrder(ids, type) {
-            const formData = new FormData();
-            formData.append('type', type);
-            ids.forEach((id, index) => formData.append('ids[]', id));
-
-            try {
-                const response = await fetch('../actions/update_order.php', { method: 'POST', body: formData });
-                const result = await response.json();
-                if(result.success) {
-                    showToast('Ordre mis à jour !');
-                }
-            } catch (error) {
-                showToast('Erreur lors du tri.');
-            }
-        }
-
+        function closeEditModal() { document.getElementById('edit-category-modal').classList.remove('active'); }
     </script>
 
     <!-- MODALE POUR MODIFIER UNE CATÉGORIE -->
@@ -411,6 +312,5 @@ $categories = $stmtCat->fetchAll();
             </form>
         </div>
     </div>
-
 </body>
 </html>
