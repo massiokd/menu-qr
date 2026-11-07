@@ -59,6 +59,7 @@ foreach ($restos as $r) {
         <!-- Formulaire d'ajout de restaurant -->
         <div class="card">
             <h2 class="card-title">➕ Ajouter un nouveau restaurant</h2>
+            <!-- CORRECTION DU CHEMIN ICI -->
             <form action="actions/super_admin_actions.php" method="POST" class="form-row">
                 <input type="hidden" name="action" value="add_resto">
                 <input type="text" name="nom" placeholder="Nom du restaurant" required>
@@ -71,29 +72,28 @@ foreach ($restos as $r) {
         <!-- Liste des restaurants -->
         <h2 style="margin-top: 2rem; margin-bottom: 1rem;">Liste des Restaurants</h2>
         
+        <!-- UNE SEULE BOUCLE ICI -->
         <?php foreach ($restos as $r): 
+            // Calcul du statut
             $is_expired = $r['plan'] !== 'lifetime' && strtotime($r['expires_at'] ?? 'now') < time();
             $is_online = $r['is_active'] && !$is_expired;
-        ?>
 
-        <?php foreach ($restos as $r): 
-            // On vérifie s'il y a un paiement en attente pour ce restaurant
+            // Vérification du paiement en attente
             $stmtP = $pdo->prepare("SELECT * FROM payments WHERE restaurant_id = ? AND statut = 'en_attente' ORDER BY created_at DESC LIMIT 1");
             $stmtP->execute([$r['id']]);
             $pending = $stmtP->fetch();
         ?>
             <div class="card">
                 
-          
+                <!-- ALERTE DE PAIEMENT -->
                 <?php if($pending): ?>
                     <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
                         <p style="font-weight: bold; color: #92400e; margin-bottom: 0.5rem;">⚠️ Demande de paiement en attente</p>
-                        <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= $pending['plan'] ?></strong> (<?= $pending['montant'] ?> DZD)</p>
+                        <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= htmlspecialchars($pending['plan']) ?></strong> (<?= $pending['montant'] ?> DZD)</p>
                         <p style="font-size: 0.85rem; color: #78350f;">Réf : <strong><?= htmlspecialchars($pending['reference']) ?></strong></p>
                         <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="display: inline-block; margin-top: 0.5rem; background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement et activer l\'abonnement ?')">✅ Valider le paiement</a>
                     </div>
                 <?php endif; ?>
-         
 
                 <div class="card-header">
                     <div>
@@ -115,7 +115,8 @@ foreach ($restos as $r) {
                 </div>
 
                 <!-- Actions -->
-                <form action="super_admin_actions.php" method="POST" class="form-row">
+                <!-- CORRECTION DU CHEMIN ICI AUSSI -->
+                <form action="actions/super_admin_actions.php" method="POST" class="form-row">
                     <input type="hidden" name="action" value="update_resto">
                     <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
                     
