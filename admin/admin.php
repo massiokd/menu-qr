@@ -40,7 +40,6 @@ $categories = $stmtCat->fetchAll();
         <a href="subscription.php" class="<?= basename($_SERVER['PHP_SELF']) == 'subscription.php' ? 'active' : '' ?>">Abonnement</a>
     </div>
 
-          
 
     <main class="container">
                 <!-- Barre de recherche -->
