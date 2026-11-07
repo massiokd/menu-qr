@@ -75,15 +75,28 @@ foreach ($restos as $r) {
             $is_expired = $r['plan'] !== 'lifetime' && strtotime($r['expires_at'] ?? 'now') < time();
             $is_online = $r['is_active'] && !$is_expired;
         ?>
+
+        <?php foreach ($restos as $r): 
+            // On vérifie s'il y a un paiement en attente pour ce restaurant
+            $stmtP = $pdo->prepare("SELECT * FROM payments WHERE restaurant_id = ? AND statut = 'en_attente' ORDER BY created_at DESC LIMIT 1");
+            $stmtP->execute([$r['id']]);
+            $pending = $stmtP->fetch();
+            
+            .
+        ?>
             <div class="card">
-                 <?php if($pending_payment): ?>
+                
+          
+                <?php if($pending): ?>
                     <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
                         <p style="font-weight: bold; color: #92400e; margin-bottom: 0.5rem;">⚠️ Demande de paiement en attente</p>
-                        <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= $pending_payment['plan'] ?></strong> (<?= $pending_payment['montant'] ?> DZD)</p>
-                        <p style="font-size: 0.85rem; color: #78350f;">Réf : <strong><?= htmlspecialchars($pending_payment['reference']) ?></strong></p>
-                        <a href="actions/validate_payment.php?id=<?= $pending_payment['id'] ?>" style="display: inline-block; margin-top: 0.5rem; background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement et activer l\'abonnement ?')">✅ Valider le paiement</a>
+                        <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= $pending['plan'] ?></strong> (<?= $pending['montant'] ?> DZD)</p>
+                        <p style="font-size: 0.85rem; color: #78350f;">Réf : <strong><?= htmlspecialchars($pending['reference']) ?></strong></p>
+                        <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="display: inline-block; margin-top: 0.5rem; background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement et activer l\'abonnement ?')">✅ Valider le paiement</a>
                     </div>
                 <?php endif; ?>
+         
+
                 <div class="card-header">
                     <div>
                         <div class="card-title"><?= htmlspecialchars($r['nom']) ?></div>

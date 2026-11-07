@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { die("Non a
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = getDB();
     $plan = $_POST['plan'];
-    $reference = $_POST['reference'];
+    $reference = trim($_POST['reference']);
     
     $prix = ['monthly' => 800, 'yearly' => 6900, 'lifetime' => 14900];
     $montant = $prix[$plan] ?? 0;
