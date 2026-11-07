@@ -34,6 +34,7 @@ $categories = $stmtCat->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - <?= htmlspecialchars($resto['nom']) ?></title>
     <link rel="stylesheet" href="../assets/css/admin.css">
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -100,21 +101,16 @@ $categories = $stmtCat->fetchAll();
         </div>
 
                 <?php foreach ($categories as $cat): ?>
-            <div class="category-block">
+            <div class="category-block" data-id="<?= $cat['id'] ?>">
                 
                 <!-- En-tête de la catégorie -->
                 <div class="category-header-container">
                     <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
                     
                     <div class="category-actions">
-                        <!-- Boutons de tri (Flèches) -->
-                                              <div class="sort-buttons">
-                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'up')" title="Monter">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                            </button>
-                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'down')" title="Descendre">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </button>
+                        <!-- POIGNÉE DE GLISSEMENT CATÉGORIE -->
+                        <div class="drag-handle category-drag" title="Glisser pour réorganiser">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
                         </div>
 
                         <!-- Bouton Modifier -->
@@ -127,7 +123,6 @@ $categories = $stmtCat->fetchAll();
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </a>
                     </div>
-                </div>
                 
                 <!-- Liste des plats -->
                 <div class="items-list-container">
@@ -138,19 +133,14 @@ $categories = $stmtCat->fetchAll();
                     ?>
 
                     <?php foreach ($items as $item): ?>
-                        <div class="item-row">
+                        <div class="item-row" data-id="<?= $item['id'] ?>">
                             <div class="item-row-header">
                                 <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
                                 
-                                <div class="item-actions">
-                                    <!-- Boutons de tri du plat -->
-                                <div class="sort-buttons">
-                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'up')" title="Monter">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                                    </button>
-                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'down')" title="Descendre">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                    </button>
+                            <div class="item-actions">
+                                <!-- POIGNÉE DE GLISSEMENT PLAT -->
+                                <div class="drag-handle item-drag" title="Glisser pour réorganiser">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
                                 </div>
 
                                     <!-- Modifier Plat -->
@@ -347,6 +337,58 @@ $categories = $stmtCat->fetchAll();
                 if(result.success) {
                     // On recharge la page pour voir le nouvel ordre instantanément
                     window.location.reload();
+                }
+            } catch (error) {
+                showToast('Erreur lors du tri.');
+            }
+        }
+
+                // --- DRAG & DROP (SORTABLEJS) ---
+        
+        // 1. Tri des catégories
+        const categoriesContainer = document.querySelector('main.container');
+        new Sortable(categoriesContainer, {
+            animation: 250,
+            handle: '.category-drag',
+            draggable: '.category-block',
+            onEnd: function (evt) {
+                // On récupère le nouvel ordre des IDs
+                const newOrder = Array.from(categoriesContainer.children)
+                                    .filter(el => el.classList.contains('category-block'))
+                                    .map(el => el.getAttribute('data-id'));
+                
+                // On envoie au serveur
+                saveOrder(newOrder, 'category');
+            }
+        });
+
+        // 2. Tri des plats DANS chaque catégorie
+        const itemLists = document.querySelectorAll('.items-list-container');
+        itemLists.forEach(list => {
+            new Sortable(list, {
+                animation: 250,
+                handle: '.item-drag',
+                draggable: '.item-row',
+                onEnd: function (evt) {
+                    const newOrder = Array.from(list.children)
+                                        .filter(el => el.classList.contains('item-row'))
+                                        .map(el => el.getAttribute('data-id'));
+                    saveOrder(newOrder, 'item');
+                }
+            });
+        });
+
+        // 3. Fonction d'envoi au serveur
+        async function saveOrder(ids, type) {
+            const formData = new FormData();
+            formData.append('type', type);
+            ids.forEach((id, index) => formData.append('ids[]', id));
+
+            try {
+                const response = await fetch('../actions/update_order.php', { method: 'POST', body: formData });
+                const result = await response.json();
+                if(result.success) {
+                    showToast('Ordre mis à jour !');
                 }
             } catch (error) {
                 showToast('Erreur lors du tri.');

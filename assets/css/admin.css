@@ -597,3 +597,41 @@ textarea.form-control { height: 80px; resize: vertical; }
     pointer-events: none;
     cursor: not-allowed;
 }
+
+/* =========================================
+   DRAG & DROP (Glisser-Déposer)
+   ========================================= */
+.drag-handle {
+    cursor: grab;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    transition: all 0.2s;
+}
+.drag-handle:hover {
+    background: #f3f4f6;
+    color: var(--brand-color);
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Effet visuel quand on soulève une carte */
+.sortable-ghost {
+    opacity: 0.4;
+    background-color: #ffedd5 !important;
+    border: 2px dashed var(--brand-color) !important;
+}
+
+/* Animation fluide */
+.sortable-drag {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    transform: scale(1.02);
+    opacity: 1 !important;
+}
+
+/* On enlève le style des anciennes flèches */
+.sort-buttons { display: none !important; }
