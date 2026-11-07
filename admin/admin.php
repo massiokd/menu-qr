@@ -65,7 +65,16 @@ $categories = $stmtCat->fetchAll();
             <div class="category-block">
                 <div class="category-header-container">
                     <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
-                    
+                                       <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <!-- BOUTONS DE TRI CATÉGORIE -->
+                        <div style="display:flex; gap:0.25rem; background:rgba(0,0,0,0.03); padding:0.2rem; border-radius:0.5rem;">
+                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'up')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                            </button>
+                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'down')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                        </div>
                     <div style="display:flex; align-items:center; gap:0.5rem;">
                         <!-- Bouton Modifier (On utilise des data-attributes, c'est 100% fiable) -->
                         <a href="#" 
@@ -95,6 +104,15 @@ $categories = $stmtCat->fetchAll();
                         <div class="item-row-header">
                             <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
                             <div class="item-actions">
+                                <!-- BOUTONS DE TRI PLAT -->
+                                <div style="display:flex; gap:0.25rem; margin-right:0.5rem;">
+                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'up')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                    </button>
+                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'down')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                </div>
                                 <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 </a>
@@ -227,6 +245,25 @@ $categories = $stmtCat->fetchAll();
 
         function closeEditModal() {
             document.getElementById('edit-category-modal').classList.remove('active');
+        }
+
+                // --- RÉORGANISATION (TRI) ---
+        async function moveItem(id, type, direction) {
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('type', type);
+            formData.append('direction', direction);
+
+            try {
+                const response = await fetch('../actions/update_order.php', { method: 'POST', body: formData });
+                const result = await response.json();
+                if(result.success) {
+                    // On recharge la page pour voir le nouvel ordre instantanément
+                    window.location.reload();
+                }
+            } catch (error) {
+                showToast('Erreur lors du tri.');
+            }
         }
 
     </script>
