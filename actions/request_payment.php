@@ -23,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, ['image' => $imageData]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout de 10 secondes max
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Timeout de connexion
         $response = curl_exec($ch);
         curl_close($ch);
         $result = json_decode($response, true);

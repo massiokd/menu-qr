@@ -12,12 +12,18 @@ function getDB() {
     
     try {
         $pdo = new PDO($dsn, $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            
+            // 👇 LES OPTIMISATIONS AJOUTÉES ICI 👇
+            PDO::ATTR_PERSISTENT         => false, // Évite de saturer les connexions de Supabase
+            PDO::ATTR_EMULATE_PREPARES   => false, // Meilleure performance et sécurité pour PostgreSQL
+            PDO::ATTR_TIMEOUT            => 5      // Si la base met plus de 5s à répondre, on annule (évite le crash infini)
         ]);
         return $pdo;
     } catch (PDOException $e) {
-        die("Erreur de connexion : " . $e->getMessage());
+        // On affiche une erreur plus propre au lieu d'un écran blanc
+        die("Une erreur est survenue lors de la connexion au serveur. Veuillez rafraîchir la page.");
     }
 }
 

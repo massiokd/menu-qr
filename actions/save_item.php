@@ -29,6 +29,8 @@ if ($file) {
         'image' => $imageData,
     ]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout de 10 secondes max
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Timeout de connexion
     $response = curl_exec($ch);
     curl_close($ch);
 

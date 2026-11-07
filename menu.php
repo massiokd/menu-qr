@@ -27,6 +27,22 @@ $resto['scan_count']++; // On met à jour la variable locale
 $stmtCat = $pdo->prepare("SELECT * FROM categories WHERE restaurant_id = ? AND is_active = true ORDER BY ordre ASC");
 $stmtCat->execute([$resto['id']]);
 $categories = $stmtCat->fetchAll();
+// On récupère TOUS les plats du restaurant en UNE SEULE requête
+$stmtAllItems = $pdo->prepare("
+    SELECT items.*, categories.id as cat_id 
+    FROM items 
+    JOIN categories ON items.category_id = categories.id 
+    WHERE categories.restaurant_id = ? AND categories.is_active = true
+    ORDER BY items.ordre ASC
+");
+$stmtAllItems->execute([$resto['id']]);
+$all_items = $stmtAllItems->fetchAll();
+
+// On regroupe les plats par catégorie dans un tableau PHP
+$items_by_category = [];
+foreach ($all_items as $item) {
+    $items_by_category[$item['cat_id']][] = $item;
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -70,7 +86,10 @@ $categories = $stmtCat->fetchAll();
     </nav>
 
     <main class="main-content">
-        <?php foreach ($categories as $cat): ?>
+                        <?php
+                // On récupère les plats déjà chargés depuis notre tableau magique
+                $items = $items_by_category[$cat['id']] ?? [];
+                ?>
             <div id="cat-<?= $cat['id'] ?>" class="category-section">
                 <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
 
