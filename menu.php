@@ -44,6 +44,15 @@ $items_by_category = [];
 foreach ($all_items as $item) {
     $items_by_category[$item['cat_id']][] = $item;
 }
+
+// 5. Préparer la première catégorie active (celle qui a des plats)
+$first_category_id = null;
+foreach ($categories as $cat) {
+    if (!empty($items_by_category[$cat['id']])) {
+        $first_category_id = $cat['id'];
+        break;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -82,15 +91,16 @@ foreach ($all_items as $item) {
             </button>
         </div>
 
-        <!-- Onglets des catégories -->
+        <!-- Onglets des catégories (On saute les vides) -->
         <div class="category-tabs-wrapper" id="tabsWrapper">
             <div class="category-tabs">
-                <?php foreach ($categories as $index => $cat): 
+                <?php foreach ($categories as $cat): 
                     $count = count($items_by_category[$cat['id']] ?? []);
+                    if ($count === 0) continue; // On ne crée pas d'onglet si c'est vide
                 ?>
-                    <button class="tab-btn <?= $index === 0 ? 'active' : '' ?>" 
+                    <button class="tab-btn <?= $first_category_id == $cat['id'] ? 'active' : '' ?>" 
                             data-id="<?= $cat['id'] ?>"
-                            onclick="switchTab(<?= $cat['id'] ?>, this)">
+                            onclick="switchTab(<?= $cat['id'] ?>)">
                         <?= htmlspecialchars($cat['nom']) ?> 
                         <span class="tab-count"><?= $count ?></span>
                     </button>
@@ -108,11 +118,11 @@ foreach ($all_items as $item) {
             <button onclick="clearSearch()" style="margin-top:1rem; background:var(--brand); color:white; border:none; padding:0.6rem 1.2rem; border-radius:0.5rem; font-weight:bold; cursor:pointer;">Voir tout le menu</button>
         </div>
 
-        <?php foreach ($categories as $index => $cat): 
+        <?php foreach ($categories as $cat): 
             $items = $items_by_category[$cat['id']] ?? [];
-            if (empty($items)) continue; // On saute les catégories vides
+            if (empty($items)) continue; // On saute les sections vides
         ?>
-                        <div id="cat-<?= $cat['id'] ?>" class="category-section <?= $index === 0 ? 'active' : '' ?>" style="<?= $index === 0 ? 'display: block;' : 'display: none;' ?>">
+            <div id="cat-<?= $cat['id'] ?>" class="category-section <?= $first_category_id == $cat['id'] ? 'active' : '' ?>">
                 <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
 
                 <div class="items-list">
@@ -156,10 +166,10 @@ foreach ($all_items as $item) {
         <?php if(!empty($resto['instagram_url']) || !empty($resto['facebook_url'])): ?>
             <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
                 <?php if(!empty($resto['instagram_url'])): ?>
-                    <a href="<?= htmlspecialchars($resto['instagram_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+                    <a href="<?= htmlspecialchars($resto['instagram_url']) ?>" target="_blank" style="color:var(--gray);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
                 <?php endif; ?>
                 <?php if(!empty($resto['facebook_url'])): ?>
-                    <a href="<?= htmlspecialchars($resto['facebook_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                    <a href="<?= htmlspecialchars($resto['facebook_url']) ?>" target="_blank" style="color:var(--gray);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -177,14 +187,14 @@ foreach ($all_items as $item) {
     </button>
 
     <script>
-        // --- VARIABLE GLOBALE POUR SE SOUVENIR DE L'ONGLET ACTIF ---
-        let currentCategoryId = <?= $categories[0]['id'] ?? 'null' ?>;
+        // ID de la catégorie active au départ
+        let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
 
         // --- GESTION DES ONGLETS ---
-        function switchTab(catId, btn) {
+        function switchTab(catId) {
             currentCategoryId = catId;
             
-            // Si une recherche était en cours, on la vide
+            // Si on était en train de chercher, on vide la recherche
             const searchInput = document.getElementById('clientSearch');
             if (searchInput.value.trim() !== '') {
                 searchInput.value = '';
@@ -193,28 +203,28 @@ foreach ($all_items as $item) {
                 document.getElementById('noResultMsg').style.display = 'none';
             }
 
-            // On cache toutes les sections et on réinitialise les plats
+            // 1. Cacher toutes les sections et réinitialiser l'affichage des plats
             document.querySelectorAll('.category-section').forEach(sec => {
                 sec.classList.remove('active');
-                sec.style.display = 'none';
                 sec.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
             });
 
-            // On affiche la section demandée
+            // 2. Afficher la section demandée
             const target = document.getElementById('cat-' + catId);
             if(target) {
                 target.classList.add('active');
-                target.style.display = 'block';
             }
 
-            // On met à jour le bouton actif
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            // 3. Mettre à jour l'onglet actif
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                if (b.getAttribute('data-id') == catId) {
+                    b.classList.add('active');
+                    b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
             
-            // On centre le bouton actif dans la barre
-            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            
-            // On remonte en haut de page
+            // Remonter en haut
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -228,36 +238,15 @@ foreach ($all_items as $item) {
             
             clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
 
-            // 1. SI LA RECHERCHE EST VIDE, ON REVIENT AUX ONGLETS
+            // SI LA RECHERCHE EST VIDE : On remet l'onglet actif normalement
             if (query === '') {
                 tabsWrapper.style.display = 'block';
                 noResultMsg.style.display = 'none';
-                
-                sections.forEach(sec => {
-                    sec.classList.remove('active');
-                    sec.style.display = 'none';
-                    sec.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
-                });
-
-                // On réaffiche l'onglet qui était actif avant la recherche
-                const target = document.getElementById('cat-' + currentCategoryId);
-                if(target) {
-                    target.classList.add('active');
-                    target.style.display = 'block';
-                }
-
-                // On remet la couleur sur le bon bouton d'onglet
-                document.querySelectorAll('.tab-btn').forEach(b => {
-                    b.classList.remove('active');
-                    if(b.getAttribute('data-id') == currentCategoryId) {
-                        b.classList.add('active');
-                        b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    }
-                });
+                switchTab(currentCategoryId);
                 return;
             }
 
-            // 2. SI ON TAPE QUELQUE CHOSE, ON CACHE LES ONGLETS ET ON CHERCHE PARTOUT
+            // SI ON CHERCHE : On cache les onglets et on affiche les résultats
             tabsWrapper.style.display = 'none';
             let hasResults = false;
 
@@ -278,15 +267,11 @@ foreach ($all_items as $item) {
                     }
                 });
 
-                // On affiche la section uniquement si elle contient des résultats
-                if (sectionHasVisibleItem) {
-                    sec.style.display = 'block'; 
-                } else {
-                    sec.style.display = 'none';
-                }
+                // On affiche la section seulement si elle contient des résultats
+                sec.style.display = sectionHasVisibleItem ? 'block' : 'none';
+                if (sectionHasVisibleItem) sec.classList.add('active');
             });
 
-            // Message si aucun résultat
             noResultMsg.style.display = hasResults ? 'none' : 'block';
         }
 
@@ -295,10 +280,11 @@ foreach ($all_items as $item) {
             filterMenu();
         }
 
-        // --- ANIMATIONS ET BOUTON RETOUR EN HAUT ---
-        const revealElements = document.querySelectorAll('.category-section.active .reveal');
-        revealElements.forEach(el => el.classList.add('active'));
+        // --- ANIMATIONS ---
+        // On active les animations des éléments visibles au chargement
+        document.querySelectorAll('.category-section.active .reveal').forEach(el => el.classList.add('active'));
 
+        // --- BOUTON RETOUR EN HAUT ---
         const backToTopBtn = document.getElementById("backToTop");
         window.addEventListener("scroll", () => {
             if (window.scrollY > 300) { backToTopBtn.classList.add("show"); } 
