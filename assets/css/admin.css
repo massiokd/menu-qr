@@ -110,6 +110,8 @@ body {
 }
 
 .item-row { 
+    display: flex;            /* AJOUTÉ : Active le mode flexible */
+    flex-direction: column;   /* AJOUTÉ : Force l'empilement vertical */
     background: var(--card-bg); 
     backdrop-filter: blur(10px); 
     border: 1px solid var(--glass-border); 
@@ -122,7 +124,7 @@ body {
 .item-row-header { 
     display: flex; 
     justify-content: space-between; 
-    align-items: center; /* Centre verticalement l'icône et le texte */
+    align-items: center; 
     margin-bottom: 1rem; 
     gap: 1rem;
     width: 100%;
@@ -132,10 +134,10 @@ body {
     font-weight: 700; 
     font-size: 1.1rem; 
     flex: 1;
-    min-width: 0; /* Force le texte à ne pas s'écraser */
-    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+    min-width: 0; 
+    white-space: nowrap; 
     overflow: hidden;
-    text-overflow: ellipsis; /* Ajoute "..." si le nom est trop long */
+    text-overflow: ellipsis; 
     color: var(--text-dark);
 }
 

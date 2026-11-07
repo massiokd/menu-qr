@@ -152,10 +152,13 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
                         <div class="item-row searchable-item">
                             <div class="item-row-header">
                                 <span class="item-row-name item-search-name"><?= htmlspecialchars($item['nom']) ?></span>
+                                
                                 <div class="item-actions">
+                                    <!-- Icône Modifier -->
                                     <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                     </a>
+                                    <!-- Icône Supprimer -->
                                     <a href="#" onclick="openDeleteModal('../actions/delete_item.php?id=<?= $item['id'] ?>', 'Voulez-vous vraiment supprimer le plat <?= htmlspecialchars(addslashes($item['nom'])) ?> ?'); return false;" class="icon-btn delete">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                     </a>
@@ -163,11 +166,13 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
                             </div>
                             
                             <div class="item-row-controls">
+                                <!-- Le champ de prix -->
                                 <div class="price-input-group">
                                     <input type="number" id="prix-<?= $item['id'] ?>" value="<?= $item['prix'] ?>" step="50">
                                     <span>DZD</span>
                                     <button onclick="updatePrix(<?= $item['id'] ?>, this)" class="btn-save-price">OK</button>
                                 </div>
+                                <!-- Le bouton Disponible -->
                                 <button onclick="toggleDispo(<?= $item['id'] ?>, this)" class="btn-status <?= $item['disponible'] ? 'available' : 'unavailable' ?>">
                                     <?= $item['disponible'] ? 'Disponible' : 'Épuisé' ?>
                                 </button>
