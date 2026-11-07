@@ -91,6 +91,8 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             <input type="text" id="searchInput" placeholder="Rechercher un plat..." onkeyup="filterItems()">
         </div>
 
+        
+
         <!-- Onglets des catégories -->
         <div class="admin-tabs-wrapper" id="adminTabsWrapper">
             <div class="admin-category-tabs">
@@ -102,9 +104,16 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
                     </button>
                 <?php endforeach; ?>
                 
+                <!-- Bouton pour aller à la page de Réorganisation -->
+                <a href="reorder.php" class="admin-tab-btn" style="background: var(--text-dark); color: white; border: none; display:flex; align-items:center; gap:0.4rem; padding: 0.6rem 1rem; text-decoration: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    Trier
+                </a>
+
                 <!-- Bouton Ajouter Catégorie -->
-                <button class="admin-tab-btn add-btn" onclick="openAddCategoryModal()" title="Ajouter une catégorie">
+                <button class="admin-tab-btn add-btn" onclick="openAddCategoryModal()" style="background: var(--brand-color); color: white; border: none; display:flex; align-items:center; gap:0.25rem; padding: 0.6rem 1rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Nouvelle
                 </button>
             </div>
         </div>
