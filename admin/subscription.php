@@ -12,10 +12,13 @@ $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ?");
 $stmt->execute([$resto_id]);
 $resto = $stmt->fetch();
 
-// Récupérer le dernier paiement en attente
-$stmtP = $pdo->prepare("SELECT * FROM payments WHERE restaurant_id = ? AND statut = 'en_attente' ORDER BY created_at DESC LIMIT 1");
+// Récupérer le dernier paiement (peu importe le statut)
+$stmtP = $pdo->prepare("SELECT * FROM payments WHERE restaurant_id = ? ORDER BY created_at DESC LIMIT 1");
 $stmtP->execute([$resto_id]);
-$pending_payment = $stmtP->fetch();
+$last_payment = $stmtP->fetch();
+
+// Vérifier s'il y a un paiement spécifiquement "en attente"
+$pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ? $last_payment : null;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -58,6 +61,21 @@ $pending_payment = $stmtP->fetch();
         <div class="theme-selector-card">
             <h2>Renouveler ou Changer de formule</h2>
             <p>Choisissez la formule qui vous convient. Le paiement se fait par virement <strong>Baridimob</strong> ou <strong>CCP</strong>.</p>
+
+            <!-- AFFICHAGE DU DERNIER PAIEMENT (VALIDÉ OU REFUSÉ) -->
+            <?php if($last_payment && $last_payment['statut'] === 'valide' && !$pending_payment): ?>
+                <div style="background:#dcfce7; color:#166534; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #bbf7d0;">
+                    <strong>✅ Paiement validé</strong><br>
+                    <p style="font-size:0.85rem; margin-top:0.25rem;"><?= htmlspecialchars($last_payment['admin_note'] ?? 'Votre abonnement est actif.') ?></p>
+                    <p style="font-size:0.75rem; margin-top:0.5rem; opacity:0.8;">Effectué le <?= date('d/m/Y', strtotime($last_payment['created_at'])) ?></p>
+                </div>
+            <?php elseif($last_payment && $last_payment['statut'] === 'refuse' && !$pending_payment): ?>
+                <div style="background:#fee2e2; color:#991b1b; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fecaca;">
+                    <strong>❌ Paiement refusé</strong><br>
+                    <p style="font-size:0.85rem; margin-top:0.25rem;"><strong>Raison :</strong> <?= htmlspecialchars($last_payment['admin_note'] ?? 'Aucune raison fournie.') ?></p>
+                    <p style="font-size:0.75rem; margin-top:0.5rem; opacity:0.8;">Vous pouvez soumettre un nouveau paiement ci-dessous.</p>
+                </div>
+            <?php endif; ?>
 
             <?php if($pending_payment): ?>
                 <div style="background:#fef3c7; color:#92400e; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fcd34d;">
@@ -118,9 +136,7 @@ $pending_payment = $stmtP->fetch();
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                             Ouvrir l'application Baridimob
                         </a>
-                        <p style="font-size:0.75rem; color:var(--text-gray); text-align:center; margin-top:0.5rem;">
-                            Si l'application n'est pas installée, vous serez redirigé vers le Play Store.
-                        </p>
+
                     </div>
                     <div>
                         <label style="font-weight:700; margin-bottom:0.5rem; display:block;">3. Joignez la preuve de paiement (Capture d'écran)</label>
@@ -133,7 +149,7 @@ $pending_payment = $stmtP->fetch();
                             
                             <input type="file" id="receipt-upload" name="receipt" accept="image/*" required style="display: none;" onchange="document.getElementById('file-name-display').innerText = this.files[0].name;">
                         </div>
-                        <p style="font-size:0.75rem; color:var(--text-gray); margin-top:0.25rem;">Uploadez une capture d'écran de la transaction Baridimob.</p>
+                        <p style="font-size:0.75rem; color:var(--text-gray); margin-top:0.25rem;">Uploadez une capture d'écran de la transaction.</p>
                     </div>
 
                     <div>

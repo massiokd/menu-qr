@@ -124,7 +124,7 @@ $active_clients = $stmtCount->fetch()['total'] ?? 0;
 
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
                             <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement ?')">✅ Valider</a>
-                            <a href="actions/reject_payment.php?id=<?= $pending['id'] ?>" style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Refuser ce paiement ?')">❌ Refuser</a>
+                          <button type="button" onclick="openRejectModal(<?= $pending['id'] ?>)" style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; text-decoration: none; font-weight: bold; font-size: 0.85rem; cursor: pointer;">❌ Refuser</button>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -186,5 +186,31 @@ $active_clients = $stmtCount->fetch()['total'] ?? 0;
         <?php endforeach; ?>
 
     </main>
+
+    <!-- MODALE POUR REFUSER UN PAIEMENT -->
+    <div id="reject-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center;">
+            <h2 style="font-size: 1.2rem; margin-bottom: 1rem; color: #991b1b;">Refuser le paiement</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Expliquez au gérant pourquoi le paiement est refusé.</p>
+            
+            <form action="actions/reject_payment.php" method="POST">
+                <input type="hidden" name="payment_id" id="reject-payment-id">
+                <textarea name="reason" required placeholder="Ex: La référence est introuvable sur mon compte Baridimob." style="width: 100%; height: 80px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem; margin-bottom: 1rem; font-family: inherit;"></textarea>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" onclick="document.getElementById('reject-modal').style.display='none'" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; background: white; border-radius: 0.5rem; cursor: pointer; font-weight: bold;">Annuler</button>
+                    <button type="submit" style="flex: 1; padding: 0.75rem; border: none; background: var(--danger); color: white; border-radius: 0.5rem; cursor: pointer; font-weight: bold;">Confirmer le refus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openRejectModal(paymentId) {
+            document.getElementById('reject-payment-id').value = paymentId;
+            document.getElementById('reject-modal').style.display = 'flex';
+        }
+    </script>
+
 </body>
 </html>

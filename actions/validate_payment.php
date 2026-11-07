@@ -26,9 +26,10 @@ if ($payment) {
     $stmtUpdate = $pdo->prepare("UPDATE restaurants SET plan = ?, expires_at = ?, is_active = true WHERE id = ?");
     $stmtUpdate->execute([$plan, $expires_at, $resto_id]);
 
-    // Mise à jour du paiement
-    $stmtPay = $pdo->prepare("UPDATE payments SET statut = 'valide' WHERE id = ?");
-    $stmtPay->execute([$payment_id]);
+    // Mise à jour du paiement (avec le commentaire de succès)
+    $note_admin = "Votre paiement a été vérifié et validé avec succès. Merci !";
+    $stmtPay = $pdo->prepare("UPDATE payments SET statut = 'valide', admin_note = ? WHERE id = ?");
+    $stmtPay->execute([$note_admin, $payment_id]);
 }
 
 header('Location: ../super_admin.php');
