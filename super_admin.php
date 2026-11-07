@@ -81,8 +81,6 @@ foreach ($restos as $r) {
             $stmtP = $pdo->prepare("SELECT * FROM payments WHERE restaurant_id = ? AND statut = 'en_attente' ORDER BY created_at DESC LIMIT 1");
             $stmtP->execute([$r['id']]);
             $pending = $stmtP->fetch();
-            
-            .
         ?>
             <div class="card">
                 
