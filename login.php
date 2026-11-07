@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(); // Session temporaire
 require 'config/db.php';
 
+// Si déjà connecté, on redirige
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['role'] === 'super_admin') { header('Location: super_admin.php'); }
     else { header('Location: admin/admin.php'); }
@@ -19,15 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user) {
-        // 1. Vérifier si le compte est bloqué
         if ($user['lockout_until'] && strtotime($user['lockout_until']) > time()) {
             $error = "Compte temporairement bloqué suite à plusieurs échecs. Réessayez plus tard.";
         } 
-        // 2. Vérifier le mot de passe
         elseif (password_verify($password, $user['password_hash'])) {
-            // Succès : on remet les compteurs à zéro
             $stmtReset = $pdo->prepare("UPDATE users SET failed_attempts = 0, lockout_until = NULL WHERE id = ?");
             $stmtReset->execute([$user['id']]);
+
+            // --- SÉPARATION DES SESSIONS ---
+            session_destroy(); // On ferme la session temporaire
+            
+            if ($user['role'] === 'super_admin') {
+                session_name('FENNEC_ADMIN');
+            } else {
+                session_name('FENNEC_GERANT');
+            }
+            session_start(); // On ouvre la bonne session
 
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['restaurant_id'] = $user['restaurant_id'];
@@ -37,11 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else { header('Location: admin/admin.php'); }
             exit;
         } 
-        // 3. Échec : on incrémente le compteur
         else {
             $attempts = $user['failed_attempts'] + 1;
             if ($attempts >= 5) {
-                // Blocage de 15 minutes
                 $lockout = date('Y-m-d H:i:s', strtotime('+15 minutes'));
                 $stmtLock = $pdo->prepare("UPDATE users SET failed_attempts = ?, lockout_until = ? WHERE id = ?");
                 $stmtLock->execute([$attempts, $lockout, $user['id']]);

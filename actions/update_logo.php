@@ -1,4 +1,5 @@
 <?php
+session_name('FENNEC_GERANT');
 session_start();
 require '../config/db.php';
 
