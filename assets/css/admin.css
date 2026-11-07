@@ -179,11 +179,12 @@ body {
     border-radius: 0.5rem; 
     overflow: hidden; 
     height: 44px;
-    width: 100%; /* 100% de la largeur */
+    width: 100%; 
 }
 
 .price-input-group input { 
-    flex: 1; /* Prend tout l'espace */
+    flex: 1; 
+    min-width: 0; /* CRUCIAL : empêche le champ de pousser le bouton */
     border: none; 
     padding: 0 0.75rem; 
     font-family: inherit; 
@@ -193,22 +194,27 @@ body {
     height: 100%;
 }
 
+/* Le texte DZD */
 .price-input-group span { 
     font-size: 0.75rem; 
     color: var(--text-gray); 
-    padding-right: 0.75rem; 
+    padding-right: 0.5rem; 
     font-weight: 600; 
+    white-space: nowrap; /* Empêche DZD de passer à la ligne */
 }
 
+/* Le bouton OK noir */
 .btn-save-price { 
     background: var(--text-dark); 
     color: white; 
     border: none; 
-    padding: 0 1.5rem; 
+    padding: 0 1.25rem; 
     height: 100%;
-    font-weight: 600; 
+    font-weight: 700; 
     font-size: 0.85rem; 
     cursor: pointer; 
+    flex-shrink: 0; /* CRUCIAL : empêche le bouton de s'écraser */
+    white-space: nowrap; /* Garde le mot OK sur une ligne */
 }
 
 /* Le bouton Dispo prend toute la largeur en dessous */
