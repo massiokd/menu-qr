@@ -71,7 +71,7 @@ $categories = $stmtCat->fetchAll();
                     
                     <div class="category-actions">
                         <!-- Boutons de tri (Flèches) -->
-                        <div class="sort-buttons">
+                                              <div class="sort-buttons">
                             <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'up')" title="Monter">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
                             </button>
@@ -107,14 +107,14 @@ $categories = $stmtCat->fetchAll();
                                 
                                 <div class="item-actions">
                                     <!-- Boutons de tri du plat -->
-                                    <div class="sort-buttons">
-                                        <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'up')" title="Monter">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                                        </button>
-                                        <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'down')" title="Descendre">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                        </button>
-                                    </div>
+                                <div class="sort-buttons">
+                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'up')" title="Monter">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                    </button>
+                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'down')" title="Descendre">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                </div>
 
                                     <!-- Modifier Plat -->
                                     <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">

@@ -86,19 +86,19 @@ $pending_payment = $stmtP->fetch();
                             
                             <!-- CCP Classique -->
                             <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6;">
-                                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:0.25rem;">Compte CCP (pour virement bancaire) :</p>
-                                <div style="display:flex; align-items:center; justify-content:space-between; background:#f9fafb; padding:0.5rem; border-radius:0.3rem;">
-                                    <span id="ccp-number" style="font-size:1.1rem; font-weight:800; font-family:monospace; letter-spacing:1px;">00413557550 Clé 62</span>
-                                    <button type="button" onclick="copyText('ccp-number', this)" style="background:var(--brand-color); color:white; border:none; padding:0.4rem 0.6rem; border-radius:0.3rem; cursor:pointer; font-size:0.75rem;">Copier</button>
+                                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:0.5rem;">Compte CCP (pour virement bancaire) :</p>
+                                <div style="background:#f9fafb; padding:0.75rem; border-radius:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                                    <span style="font-size:1.1rem; font-weight:800; font-family:monospace; letter-spacing:1px; word-break: break-all;">00413557550 Clé 62</span>
+                                    <button type="button" onclick="copyText('CCP : 00413557550 Clé 62', this)" style="background:var(--brand-color); color:white; border:none; padding:0.5rem; border-radius:0.3rem; cursor:pointer; font-size:0.8rem; font-weight:bold; width:100%;">Copier le numéro CCP</button>
                                 </div>
                             </div>
 
                             <!-- RIP Baridimob -->
                             <div>
-                                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:0.25rem;">Numéro Baridimob (RIP) :</p>
-                                <div style="display:flex; align-items:center; justify-content:space-between; background:#f9fafb; padding:0.5rem; border-radius:0.3rem;">
-                                    <span id="rip-number" style="font-size:1rem; font-weight:800; font-family:monospace; letter-spacing:1px;">00799999004135755062</span>
-                                    <button type="button" onclick="copyText('rip-number', this)" style="background:var(--brand-color); color:white; border:none; padding:0.4rem 0.6rem; border-radius:0.3rem; cursor:pointer; font-size:0.75rem;">Copier</button>
+                                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:0.5rem;">Numéro Baridimob (RIP) :</p>
+                                <div style="background:#f9fafb; padding:0.75rem; border-radius:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                                    <span style="font-size:1rem; font-weight:800; font-family:monospace; letter-spacing:1px; word-break: break-all;">00799999004135755062</span>
+                                    <button type="button" onclick="copyText('00799999004135755062', this)" style="background:var(--brand-color); color:white; border:none; padding:0.5rem; border-radius:0.3rem; cursor:pointer; font-size:0.8rem; font-weight:bold; width:100%;">Copier le numéro RIP</button>
                                 </div>
                             </div>
                         </div>
@@ -107,7 +107,7 @@ $pending_payment = $stmtP->fetch();
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                             Ouvrir l'application Baridimob
                         </a>
-                        <p style="font-size:0.75rem; color:var(--text-gray);">(Le bouton ouvre l'app si elle est installée)</p>
+                        
                     </div>
 
                     <div>
@@ -123,18 +123,17 @@ $pending_payment = $stmtP->fetch();
     </main>
 
     <script>
-        function copyText(elementId, btnElement) {
-            const textToCopy = document.getElementById(elementId).innerText;
+        function copyText(textToCopy, btnElement) {
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = btnElement.innerText;
-                btnElement.innerText = "Copié !";
-                btnElement.style.background = "#10b981"; // Vert temporaire
+                btnElement.innerText = "✅ Copié !";
+                btnElement.style.background = "#10b981"; 
                 setTimeout(() => {
                     btnElement.innerText = originalText;
-                    btnElement.style.background = "var(--brand-color)"; // Retour à l'orange
+                    btnElement.style.background = "var(--brand-color)";
                 }, 2000);
             }).catch(err => {
-                alert("Erreur lors de la copie : " + err);
+                alert("Erreur lors de la copie.");
             });
         }
     </script>
