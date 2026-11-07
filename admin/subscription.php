@@ -124,7 +124,15 @@ $pending_payment = $stmtP->fetch();
                     </div>
                     <div>
                         <label style="font-weight:700; margin-bottom:0.5rem; display:block;">3. Joignez la preuve de paiement (Capture d'écran)</label>
-                        <input type="file" name="receipt" accept="image/*" class="form-control" required style="padding:0.5rem;">
+                                              <div style="background: #f9fafb; border: 2px dashed #d1d5db; border-radius: 0.75rem; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--brand-color)'" onmouseout="this.style.borderColor='#d1d5db'" onclick="document.getElementById('receipt-upload').click()">
+                            
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--brand-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 0.5rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            
+                            <p style="font-weight: 700; color: var(--text-dark); margin-bottom: 0.25rem;" id="file-name-display">Choisir une capture d'écran</p>
+                            <p style="font-size: 0.75rem; color: var(--text-gray);">Cliquez ici pour joindre la preuve de paiement</p>
+                            
+                            <input type="file" id="receipt-upload" name="receipt" accept="image/*" required style="display: none;" onchange="document.getElementById('file-name-display').innerText = this.files[0].name;">
+                        </div>
                         <p style="font-size:0.75rem; color:var(--text-gray); margin-top:0.25rem;">Uploadez une capture d'écran de la transaction Baridimob.</p>
                     </div>
 

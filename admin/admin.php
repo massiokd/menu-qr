@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Lo
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
 
-$stmtResto = $pdo->prepare("SELECT nom, slug, theme FROM restaurants WHERE id = ?");
+$stmtResto = $pdo->prepare("SELECT * FROM restaurants WHERE id = ?");
 $stmtResto->execute([$resto_id]);
 $resto = $stmtResto->fetch();
 
