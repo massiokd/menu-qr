@@ -2,7 +2,7 @@
 session_start();
 require '../config/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: login.php'); exit; }
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: ../login.php'); exit; }
 
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
@@ -61,84 +61,88 @@ $categories = $stmtCat->fetchAll();
             </div>
         </div>
 
-        <?php foreach ($categories as $cat): ?>
+                <?php foreach ($categories as $cat): ?>
             <div class="category-block">
+                
+                <!-- En-tête de la catégorie -->
                 <div class="category-header-container">
                     <h2 class="category-header"><?= htmlspecialchars($cat['nom']) ?></h2>
-                                       <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <!-- BOUTONS DE TRI CATÉGORIE -->
-                        <div style="display:flex; gap:0.25rem; background:rgba(0,0,0,0.03); padding:0.2rem; border-radius:0.5rem;">
-                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'up')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
+                    
+                    <div class="category-actions">
+                        <!-- Boutons de tri (Flèches) -->
+                        <div class="sort-buttons">
+                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'up')" title="Monter">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
                             </button>
-                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'down')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
+                            <button onclick="moveItem(<?= $cat['id'] ?>, 'category', 'down')" title="Descendre">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </button>
                         </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <!-- Bouton Modifier (On utilise des data-attributes, c'est 100% fiable) -->
-                        <a href="#" 
-                           data-id="<?= $cat['id'] ?>" 
-                           data-nom="<?= htmlspecialchars($cat['nom']) ?>"
-                           onclick="openEditCategory(this); return false;" 
-                           class="icon-btn edit" 
-                           title="Modifier la catégorie">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+
+                        <!-- Bouton Modifier -->
+                        <a href="#" data-id="<?= $cat['id'] ?>" data-nom="<?= htmlspecialchars($cat['nom']) ?>" onclick="openEditCategory(this); return false;" class="icon-btn edit" title="Modifier la catégorie">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                         </a>
 
                         <!-- Bouton Supprimer -->
                         <a href="#" onclick="openDeleteModal('../actions/delete_category.php?id=<?= $cat['id'] ?>', 'Voulez-vous vraiment supprimer la catégorie <?= htmlspecialchars(addslashes($cat['nom'])) ?> ? Tous les plats qu\'elle contient seront définitivement effacés.'); return false;" class="icon-btn delete" title="Supprimer la catégorie">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </a>
                     </div>
                 </div>
                 
-                <?php
-                $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
-                $stmtItems->execute([$cat['id']]);
-                $items = $stmtItems->fetchAll();
-                ?>
+                <!-- Liste des plats -->
+                <div class="items-list-container">
+                    <?php
+                    $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
+                    $stmtItems->execute([$cat['id']]);
+                    $items = $stmtItems->fetchAll();
+                    ?>
 
-                <?php foreach ($items as $item): ?>
-                    <div class="item-row">
-                        <div class="item-row-header">
-                            <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
-                            <div class="item-actions">
-                                <!-- BOUTONS DE TRI PLAT -->
-                                <div style="display:flex; gap:0.25rem; margin-right:0.5rem;">
-                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'up')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                                    </button>
-                                    <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'down')" style="background:none; border:none; cursor:pointer; color:var(--text-gray); display:flex;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                    </button>
+                    <?php foreach ($items as $item): ?>
+                        <div class="item-row">
+                            <div class="item-row-header">
+                                <span class="item-row-name"><?= htmlspecialchars($item['nom']) ?></span>
+                                
+                                <div class="item-actions">
+                                    <!-- Boutons de tri du plat -->
+                                    <div class="sort-buttons">
+                                        <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'up')" title="Monter">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                        </button>
+                                        <button onclick="moveItem(<?= $item['id'] ?>, 'item', 'down')" title="Descendre">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modifier Plat -->
+                                    <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </a>
+                                    <!-- Supprimer Plat -->
+                                    <a href="#" onclick="openDeleteModal('../actions/delete_item.php?id=<?= $item['id'] ?>', 'Voulez-vous vraiment supprimer le plat <?= htmlspecialchars(addslashes($item['nom'])) ?> ?'); return false;" class="icon-btn delete">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </a>
                                 </div>
-                                <a href="item_form.php?id=<?= $item['id'] ?>" class="icon-btn edit">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                                </a>
-                                <!-- Bouton Supprimer Plat -->
-                                <a href="#" onclick="openDeleteModal('../actions/delete_item.php?id=<?= $item['id'] ?>', 'Voulez-vous vraiment supprimer le plat <?= htmlspecialchars(addslashes($item['nom'])) ?> ?'); return false;" class="icon-btn delete">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                </a>
+                            </div>
+                            
+                            <div class="item-row-controls">
+                                <div class="price-input-group">
+                                    <input type="number" id="prix-<?= $item['id'] ?>" value="<?= $item['prix'] ?>" step="50">
+                                    <span>DZD</span>
+                                    <button onclick="updatePrix(<?= $item['id'] ?>)" class="btn-save-price">OK</button>
+                                </div>
+                                <button onclick="toggleDispo(<?= $item['id'] ?>, this)" class="btn-status <?= $item['disponible'] ? 'available' : 'unavailable' ?>">
+                                    <?= $item['disponible'] ? 'Disponible' : 'Épuisé' ?>
+                                </button>
                             </div>
                         </div>
-                        
-                        <div class="item-row-controls">
-                            <div class="price-input-group">
-                                <input type="number" id="prix-<?= $item['id'] ?>" value="<?= $item['prix'] ?>" step="50">
-                                <span>DZD</span>
-                                <button onclick="updatePrix(<?= $item['id'] ?>)" class="btn-save-price">OK</button>
-                            </div>
-                            <button onclick="toggleDispo(<?= $item['id'] ?>, this)" 
-                                class="btn-status <?= $item['disponible'] ? 'available' : 'unavailable' ?>">
-                                <?= $item['disponible'] ? 'Disponible' : 'Épuisé' ?>
-                            </button>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
 
+                <!-- Bouton Ajouter un plat -->
                 <a href="item_form.php?cat_id=<?= $cat['id'] ?>" class="btn-add-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Ajouter un plat
                 </a>
             </div>

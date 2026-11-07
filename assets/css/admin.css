@@ -458,3 +458,67 @@ textarea.form-control { height: 80px; resize: vertical; }
 .toggle-password:hover {
     color: var(--brand-color);
 }
+
+/* =========================================
+   CORRECTION DE LA MISE EN PAGE ADMIN
+   ========================================= */
+.category-block {
+    display: block !important; /* Force l'affichage vertical */
+    margin-bottom: 3rem;
+    background: transparent;
+}
+
+.items-list-container {
+    display: flex;
+    flex-direction: column; /* Force les plats à s'empiler */
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.category-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-left: 0.75rem;
+    border-left: 4px solid var(--brand-color);
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Style propre pour les boutons de tri */
+.sort-buttons {
+    display: flex;
+    background: rgba(0,0,0,0.05);
+    border-radius: 0.5rem;
+    padding: 0.2rem;
+}
+
+.sort-buttons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    border-radius: 0.3rem;
+    transition: all 0.2s;
+}
+
+.sort-buttons button:hover {
+    background: white;
+    color: var(--brand-color);
+}
+
+/* Assure que les cartes de plats prennent bien toute la largeur */
+.item-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
