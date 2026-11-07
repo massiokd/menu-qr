@@ -76,15 +76,38 @@ $pending_payment = $stmtP->fetch();
                         </select>
                     </div>
 
-                    <div style="background:#f3f4f6; padding:1.5rem; border-radius:0.5rem; text-align:center;">
-                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">2. Effectuez le virement</label>
-                        <p style="font-size:0.85rem; color:var(--text-gray); margin-bottom:1rem;">Scannez ce QR Code avec votre application Baridimob</p>
+                    <div style="background:#f9fafb; padding:1.5rem; border-radius:0.5rem; border:1px solid #e5e7eb; text-align:center;">
+                        <label style="font-weight:700; margin-bottom:1rem; display:block; color:var(--text-dark);">2. Effectuez le virement</label>
                         
-                        <!-- Remplace ceci par ton vrai QR code ou numéro CCP -->
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VOTRE_LIEN_CCP_OU_NUMERO" alt="QR Baridimob" style="width:150px; height:150px; border-radius:0.5rem; margin:0 auto; display:block;">
-                        
-                        <p style="font-size:0.9rem; margin-top:1rem; font-weight:bold;">Ou envoyez au CCP : 00 123 456 78</p>
-                        <p style="font-size:0.8rem; color:var(--text-gray);">(Fennec Tech)</p>
+                        <div style="background:white; padding:1rem; border-radius:0.5rem; border:1px dashed #d1d5db; margin-bottom:1rem; text-align:left;">
+                            <p style="font-size:0.9rem; color:var(--text-dark); margin-bottom:1rem; text-align:center;">
+                                Titulaire : <strong>Ouaked Massinissa</strong>
+                            </p>
+                            
+                            <!-- CCP Classique -->
+                            <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6;">
+                                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:0.25rem;">Compte CCP (pour virement bancaire) :</p>
+                                <div style="display:flex; align-items:center; justify-content:space-between; background:#f9fafb; padding:0.5rem; border-radius:0.3rem;">
+                                    <span id="ccp-number" style="font-size:1.1rem; font-weight:800; font-family:monospace; letter-spacing:1px;">00413557550 Clé 62</span>
+                                    <button type="button" onclick="copyText('ccp-number', this)" style="background:var(--brand-color); color:white; border:none; padding:0.4rem 0.6rem; border-radius:0.3rem; cursor:pointer; font-size:0.75rem;">Copier</button>
+                                </div>
+                            </div>
+
+                            <!-- RIP Baridimob -->
+                            <div>
+                                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:0.25rem;">Numéro Baridimob (RIP) :</p>
+                                <div style="display:flex; align-items:center; justify-content:space-between; background:#f9fafb; padding:0.5rem; border-radius:0.3rem;">
+                                    <span id="rip-number" style="font-size:1rem; font-weight:800; font-family:monospace; letter-spacing:1px;">00799999004135755062</span>
+                                    <button type="button" onclick="copyText('rip-number', this)" style="background:var(--brand-color); color:white; border:none; padding:0.4rem 0.6rem; border-radius:0.3rem; cursor:pointer; font-size:0.75rem;">Copier</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="baridimob://" style="display:inline-flex; align-items:center; gap:0.5rem; background:#10b981; color:white; padding:0.6rem 1rem; border-radius:0.5rem; text-decoration:none; font-weight:600; font-size:0.9rem; margin-bottom:0.5rem; width:100%; justify-content:center;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                            Ouvrir l'application Baridimob
+                        </a>
+                        <p style="font-size:0.75rem; color:var(--text-gray);">(Le bouton ouvre l'app si elle est installée)</p>
                     </div>
 
                     <div>
@@ -98,5 +121,23 @@ $pending_payment = $stmtP->fetch();
         </div>
 
     </main>
+
+    <script>
+        function copyText(elementId, btnElement) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = btnElement.innerText;
+                btnElement.innerText = "Copié !";
+                btnElement.style.background = "#10b981"; // Vert temporaire
+                setTimeout(() => {
+                    btnElement.innerText = originalText;
+                    btnElement.style.background = "var(--brand-color)"; // Retour à l'orange
+                }, 2000);
+            }).catch(err => {
+                alert("Erreur lors de la copie : " + err);
+            });
+        }
+    </script>
+
 </body>
 </html>
