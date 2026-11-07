@@ -28,7 +28,7 @@ $stmtCat = $pdo->prepare("SELECT * FROM categories WHERE restaurant_id = ? AND i
 $stmtCat->execute([$resto['id']]);
 $categories = $stmtCat->fetchAll();
 
-// 3. Récupérer TOUS les plats en UNE SEULE requête (Optimisation N+1)
+// 3. Récupérer TOUS les plats en UNE SEULE requête
 $stmtAllItems = $pdo->prepare("
     SELECT items.*, categories.id as cat_id 
     FROM items 
@@ -39,7 +39,7 @@ $stmtAllItems = $pdo->prepare("
 $stmtAllItems->execute([$resto['id']]);
 $all_items = $stmtAllItems->fetchAll();
 
-// 4. Regrouper les plats par catégorie dans un tableau PHP
+// 4. Regrouper les plats par catégorie
 $items_by_category = [];
 foreach ($all_items as $item) {
     $items_by_category[$item['cat_id']][] = $item;
@@ -52,7 +52,6 @@ foreach ($all_items as $item) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu - <?= htmlspecialchars($resto['nom']) ?></title>
     <link rel="stylesheet" href="assets/css/menu.css">
-    <!-- Icônes FontAwesome pour le téléphone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body data-theme="<?= htmlspecialchars($resto['theme'] ?? 'classique') ?>" data-font="<?= htmlspecialchars($resto['font_family'] ?? 'Plus Jakarta Sans') ?>">
@@ -62,7 +61,6 @@ foreach ($all_items as $item) {
         <div class="blob blob-2"></div>
     </div>
     <div class="noise-overlay"></div>
-    <div class="scroll-progress" id="progressBar"></div>
 
     <header class="header">
         <?php if($resto['logo_url']): ?>
@@ -72,46 +70,65 @@ foreach ($all_items as $item) {
         <p class="restaurant-subtitle"><?= htmlspecialchars($resto['slogan'] ?? 'Découvrez notre carte') ?></p>
     </header>
 
-    <nav class="category-nav">
-        <ul class="nav-list">
-            <?php foreach ($categories as $index => $cat): ?>
-                <li>
-                    <a href="#cat-<?= $cat['id'] ?>" 
-                       data-target="cat-<?= $cat['id'] ?>"
-                       class="category-link <?= $index === 0 ? 'active' : '' ?>">
-                        <?= htmlspecialchars($cat['nom']) ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
+    <!-- ZONE STICKY (Recherche + Onglets) -->
+    <div class="sticky-container">
+        
+        <!-- Barre de recherche -->
+        <div class="client-search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="clientSearch" placeholder="Rechercher un plat..." onkeyup="filterMenu()">
+            <button type="button" onclick="clearSearch()" id="clearBtn" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <!-- Onglets des catégories -->
+        <div class="category-tabs-wrapper" id="tabsWrapper">
+            <div class="category-tabs">
+                <?php foreach ($categories as $index => $cat): 
+                    $count = count($items_by_category[$cat['id']] ?? []);
+                ?>
+                    <button class="tab-btn <?= $index === 0 ? 'active' : '' ?>" 
+                            onclick="switchTab(<?= $cat['id'] ?>, this)"
+                            id="tab-<?= $cat['id'] ?>">
+                        <?= htmlspecialchars($cat['nom']) ?> 
+                        <span class="tab-count"><?= $count ?></span>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+    </div>
 
     <main class="main-content">
-        <?php foreach ($categories as $cat): 
-            // On récupère les plats déjà chargés depuis notre tableau magique (ULTRA RAPIDE)
+        <!-- Message aucun résultat -->
+        <div id="noResultMsg" style="display:none; text-align:center; padding:3rem 1rem; color:var(--gray);">
+            <p style="font-size:3rem; margin-bottom:1rem;">🦊</p>
+            <p style="font-weight:600; font-size:1.1rem;">Aucun plat ne correspond à votre recherche.</p>
+            <button onclick="clearSearch()" style="margin-top:1rem; background:var(--brand); color:white; border:none; padding:0.6rem 1.2rem; border-radius:0.5rem; font-weight:bold; cursor:pointer;">Voir tout le menu</button>
+        </div>
+
+        <?php foreach ($categories as $index => $cat): 
             $items = $items_by_category[$cat['id']] ?? [];
+            if (empty($items)) continue; // On saute les catégories vides
         ?>
-            <div id="cat-<?= $cat['id'] ?>" class="category-section">
+            <div id="cat-<?= $cat['id'] ?>" class="category-section <?= $index === 0 ? 'active-category' : '' ?>">
                 <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
 
                 <div class="items-list">
                     <?php foreach ($items as $item): ?>
-                        <!-- La classe .reveal sert pour l'animation au scroll -->
                         <div class="menu-card reveal <?= !$item['disponible'] ? 'unavailable' : '' ?>">
-                            
                             <div class="item-details">
                                 <h3 class="item-name" 
                                     data-fr="<?= htmlspecialchars($item['nom']) ?>" 
                                     data-ar="<?= htmlspecialchars($item['nom_ar'] ?: $item['nom']) ?>">
                                     <?= htmlspecialchars($item['nom']) ?>
                                 </h3>
-                                
                                 <p class="item-desc" 
                                    data-fr="<?= htmlspecialchars($item['description']) ?>" 
                                    data-ar="<?= htmlspecialchars($item['description_ar'] ?: $item['description']) ?>">
                                     <?= htmlspecialchars($item['description']) ?>
                                 </p>
-                                
                                 <div class="item-bottom">
                                     <span class="item-price">
                                         <?= number_format($item['prix'], 0, ',', ' ') ?> <span>DZD</span>
@@ -134,98 +151,134 @@ foreach ($all_items as $item) {
         <?php endforeach; ?>
     </main>
 
-    <!-- Footer Propre et Discret -->
+    <!-- Footer -->
     <footer class="footer">
-        <!-- Réseaux sociaux si remplis -->
         <?php if(!empty($resto['instagram_url']) || !empty($resto['facebook_url'])): ?>
             <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
                 <?php if(!empty($resto['instagram_url'])): ?>
-                    <a href="<?= htmlspecialchars($resto['instagram_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--gray)'">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    </a>
+                    <a href="<?= htmlspecialchars($resto['instagram_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
                 <?php endif; ?>
-                
                 <?php if(!empty($resto['facebook_url'])): ?>
-                    <a href="<?= htmlspecialchars($resto['facebook_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--gray)'">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                    </a>
+                    <a href="<?= htmlspecialchars($resto['facebook_url']) ?>" target="_blank" style="color:var(--gray); transition:color 0.2s;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <!-- Ton numéro à toi (FenneTech) -->
         <div class="footer-contact">
             <a href="https://wa.me/213559322518" target="_blank" class="contact-item">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                 Support FenneTech
             </a>
         </div>
     </footer>
 
-    <!-- BOUTON RETOUR EN HAUT -->
     <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
     </button>
 
     <script>
-        // 1. Barre de progression
-        window.addEventListener('scroll', () => {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (winScroll / height) * 100;
-            document.getElementById("progressBar").style.width = scrolled + "%";
-        });
-
-        // 2. Menu Actif au scroll (Scrollspy)
-        const links = document.querySelectorAll('.category-link');
-        const sections = document.querySelectorAll('.category-section');
-
-        const observerNav = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const id = entry.target.getAttribute('id');
-                    links.forEach(link => {
-                        link.classList.remove('active');
-                        if (link.dataset.target === id) {
-                            link.classList.add('active');
-                            link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                        }
-                    });
-                }
+        // --- GESTION DES ONGLETS ---
+        function switchTab(catId, btn) {
+            // 1. Cacher toutes les sections
+            document.querySelectorAll('.category-section').forEach(sec => {
+                sec.classList.remove('active-category');
             });
-        }, { rootMargin: "-150px 0px -50% 0px" });
-        sections.forEach(section => observerNav.observe(section));
+            
+            // 2. Afficher la section demandée
+            const activeSection = document.getElementById('cat-' + catId);
+            if(activeSection) {
+                activeSection.classList.add('active-category');
+                
+                // Remettre les animations pour les éléments nouvellement affichés
+                activeSection.querySelectorAll('.reveal').forEach(el => {
+                    el.classList.add('active');
+                });
+            }
 
-        // 3. ANIMATION MAGIQUE AU SCROLL
-        const revealElements = document.querySelectorAll('.reveal');
-        
-        const observerReveal = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observerReveal.unobserve(entry.target);
+            // 3. Changer l'onglet actif
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // 4. Scroll l'onglet actif pour qu'il soit bien centré
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            // 5. Remonter en haut du contenu
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- BARRE DE RECHERCHE ---
+        function filterMenu() {
+            const query = document.getElementById('clientSearch').value.toLowerCase().trim();
+            const clearBtn = document.getElementById('clearBtn');
+            const tabsWrapper = document.getElementById('tabsWrapper');
+            const sections = document.querySelectorAll('.category-section');
+            const noResultMsg = document.getElementById('noResultMsg');
+            let hasResults = false;
+
+            clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+            if (query === '') {
+                // Mode normal : on affiche l'onglet actif
+                tabsWrapper.style.display = 'block';
+                noResultMsg.style.display = 'none';
+                sections.forEach(sec => sec.classList.remove('active-category'));
+                
+                const activeTab = document.querySelector('.tab-btn.active');
+                if(activeTab) {
+                    const catId = activeTab.id.replace('tab-', '');
+                    const activeSection = document.getElementById('cat-' + catId);
+                    if(activeSection) activeSection.classList.add('active-category');
+                } else if (sections.length > 0) {
+                    sections[0].classList.add('active-category');
                 }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: "0px 0px -50px 0px"
-        });
+                
+                document.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
+                return;
+            }
 
-        revealElements.forEach(el => observerReveal.observe(el));
+            // Mode recherche : on cherche partout
+            tabsWrapper.style.display = 'none'; // On cache les onglets pendant la recherche
+            sections.forEach(sec => sec.classList.add('active-category')); // On affiche tout pour chercher
+
+            sections.forEach(sec => {
+                const items = sec.querySelectorAll('.menu-card');
+                let hasCatResult = false;
+
+                items.forEach(item => {
+                    const name = item.querySelector('.item-name').textContent.toLowerCase();
+                    const desc = item.querySelector('.item-desc').textContent.toLowerCase();
+                    if (name.includes(query) || desc.includes(query)) {
+                        item.style.display = 'flex';
+                        hasCatResult = true;
+                        hasResults = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Cacher le titre de la catégorie si aucun résultat dedans
+                sec.style.display = hasCatResult ? 'block' : 'none';
+            });
+
+            noResultMsg.style.display = hasResults ? 'none' : 'block';
+        }
+
+        function clearSearch() {
+            document.getElementById('clientSearch').value = '';
+            filterMenu();
+        }
+
+        // --- ANIMATIONS ---
+        const revealElements = document.querySelectorAll('.category-section.active-category .reveal');
+        revealElements.forEach(el => el.classList.add('active'));
 
         // --- BOUTON RETOUR EN HAUT ---
         const backToTopBtn = document.getElementById("backToTop");
         window.addEventListener("scroll", () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add("show");
-            } else {
-                backToTopBtn.classList.remove("show");
-            }
+            if (window.scrollY > 300) { backToTopBtn.classList.add("show"); } 
+            else { backToTopBtn.classList.remove("show"); }
         });
-        backToTopBtn.addEventListener("click", () => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        });
+        backToTopBtn.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); });
     </script>
-
 </body>
 </html>
