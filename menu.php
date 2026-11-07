@@ -14,20 +14,21 @@ if (!$resto) {
     echo '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Menu indisponible</title><script src="https://cdn.tailwindcss.com"></script><style>body{background:#fdfbf7;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;}.error-box{background:white;padding:2.5rem;border-radius:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;max-width:350px;width:90%;}</style></head><body><div class="error-box"><div class="text-5xl mb-4">🦊</div><h1 class="text-xl font-bold text-gray-800 mb-2">Menu indisponible</h1><p class="text-sm text-gray-500">Ce menu est temporairement suspendu ou n\'existe pas.</p></div></body></html>';
     exit;
 }
-// On incrémente le compteur de scans
-// On enregistre le scan dans l'historique
+
+// 1. Enregistrer le scan
 $stmtScan = $pdo->prepare("INSERT INTO menu_scans (restaurant_id) VALUES (?)");
 $stmtScan->execute([$resto['id']]);
 
-// On met à jour le compteur global sur la table restaurants (pour aller plus vite)
 $stmtCount = $pdo->prepare("UPDATE restaurants SET scan_count = scan_count + 1 WHERE id = ?");
 $stmtCount->execute([$resto['id']]);
-$resto['scan_count']++; // On met à jour la variable locale
+$resto['scan_count']++; 
 
+// 2. Récupérer les catégories
 $stmtCat = $pdo->prepare("SELECT * FROM categories WHERE restaurant_id = ? AND is_active = true ORDER BY ordre ASC");
 $stmtCat->execute([$resto['id']]);
 $categories = $stmtCat->fetchAll();
-// On récupère TOUS les plats du restaurant en UNE SEULE requête
+
+// 3. Récupérer TOUS les plats en UNE SEULE requête (Optimisation N+1)
 $stmtAllItems = $pdo->prepare("
     SELECT items.*, categories.id as cat_id 
     FROM items 
@@ -38,7 +39,7 @@ $stmtAllItems = $pdo->prepare("
 $stmtAllItems->execute([$resto['id']]);
 $all_items = $stmtAllItems->fetchAll();
 
-// On regroupe les plats par catégorie dans un tableau PHP
+// 4. Regrouper les plats par catégorie dans un tableau PHP
 $items_by_category = [];
 foreach ($all_items as $item) {
     $items_by_category[$item['cat_id']][] = $item;
@@ -86,29 +87,12 @@ foreach ($all_items as $item) {
     </nav>
 
     <main class="main-content">
-                        <?php
-                // On récupère les plats déjà chargés depuis notre tableau magique
-                $items = $items_by_category[$cat['id']] ?? [];
-                ?>
+        <?php foreach ($categories as $cat): 
+            // On récupère les plats déjà chargés depuis notre tableau magique (ULTRA RAPIDE)
+            $items = $items_by_category[$cat['id']] ?? [];
+        ?>
             <div id="cat-<?= $cat['id'] ?>" class="category-section">
                 <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
-
-                <?php
-                $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
-                $stmtItems->execute([$cat['id']]);
-                $items = $stmtItems->fetchAll();
-                ?>
-
-    <main class="main-content">
-        <?php foreach ($categories as $cat): ?>
-            <div id="cat-<?= $cat['id'] ?>" class="category-section">
-                <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
-
-                <?php
-                $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
-                $stmtItems->execute([$cat['id']]);
-                $items = $stmtItems->fetchAll();
-                ?>
 
                 <div class="items-list">
                     <?php foreach ($items as $item): ?>
@@ -151,7 +135,7 @@ foreach ($all_items as $item) {
     </main>
 
     <!-- Footer Propre et Discret -->
-       <footer class="footer">
+    <footer class="footer">
         <!-- Réseaux sociaux si remplis -->
         <?php if(!empty($resto['instagram_url']) || !empty($resto['facebook_url'])): ?>
             <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
@@ -172,7 +156,6 @@ foreach ($all_items as $item) {
         <!-- Ton numéro à toi (FenneTech) -->
         <div class="footer-contact">
             <a href="https://wa.me/213559322518" target="_blank" class="contact-item">
-                <!-- L'icône SVG de WhatsApp -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                 Support FenneTech
             </a>
@@ -213,15 +196,13 @@ foreach ($all_items as $item) {
         }, { rootMargin: "-150px 0px -50% 0px" });
         sections.forEach(section => observerNav.observe(section));
 
-        // 3. ANIMATION MAGIQUE AU SCROLL (IntersectionObserver = ultra fluide sur mobile)
+        // 3. ANIMATION MAGIQUE AU SCROLL
         const revealElements = document.querySelectorAll('.reveal');
         
         const observerReveal = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    // On ajoute la classe 'active' pour déclencher l'animation CSS
                     entry.target.classList.add('active');
-                    // On arrête d'observer une fois que l'élément est apparu
                     observerReveal.unobserve(entry.target);
                 }
             });
@@ -244,10 +225,7 @@ foreach ($all_items as $item) {
         backToTopBtn.addEventListener("click", () => {
             window.scrollTo({ top: 0, behavior: "smooth" });
         });
-
     </script>
-
-
 
 </body>
 </html>
