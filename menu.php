@@ -15,8 +15,13 @@ if (!$resto) {
     exit;
 }
 // On incrémente le compteur de scans
-$stmtScan = $pdo->prepare("UPDATE restaurants SET scan_count = scan_count + 1 WHERE id = ?");
+// On enregistre le scan dans l'historique
+$stmtScan = $pdo->prepare("INSERT INTO menu_scans (restaurant_id) VALUES (?)");
 $stmtScan->execute([$resto['id']]);
+
+// On met à jour le compteur global sur la table restaurants (pour aller plus vite)
+$stmtCount = $pdo->prepare("UPDATE restaurants SET scan_count = scan_count + 1 WHERE id = ?");
+$stmtCount->execute([$resto['id']]);
 $resto['scan_count']++; // On met à jour la variable locale
 
 $stmtCat = $pdo->prepare("SELECT * FROM categories WHERE restaurant_id = ? AND is_active = true ORDER BY ordre ASC");

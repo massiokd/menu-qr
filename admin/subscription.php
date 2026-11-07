@@ -32,9 +32,10 @@ $dernier_paiement = $stmtP->fetch();
     </header>
 
     <div class="admin-tabs">
-        <a href="admin.php">Gérer le Menu</a>
-        <a href="settings.php">Paramètres</a>
-        <a href="subscription.php" class="active">Abonnement</a>
+        <a href="admin.php" class="<?= basename($_SERVER['PHP_SELF']) == 'admin.php' ? 'active' : '' ?>">Gérer le Menu</a>
+        <a href="stats.php" class="<?= basename($_SERVER['PHP_SELF']) == 'stats.php' ? 'active' : '' ?>">Statistiques</a>
+        <a href="settings.php" class="<?= basename($_SERVER['PHP_SELF']) == 'settings.php' ? 'active' : '' ?>">Paramètres</a>
+        <a href="subscription.php" class="<?= basename($_SERVER['PHP_SELF']) == 'subscription.php' ? 'active' : '' ?>">Abonnement</a>
     </div>
 
     <main class="container">
