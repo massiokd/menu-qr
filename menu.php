@@ -191,30 +191,37 @@ foreach ($categories as $cat) {
         let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
 
         // --- GESTION DES ONGLETS ---
-  
         function switchTab(catId) {
             currentCategoryId = catId;
             
+            // 1. On réinitialise la recherche si on était en train de chercher
             const searchInput = document.getElementById('clientSearch');
             if (searchInput.value.trim() !== '') {
                 searchInput.value = '';
                 document.getElementById('clearBtn').style.display = 'none';
-                document.getElementById('tabsWrapper').style.display = 'block';
-                document.getElementById('noResultMsg').style.display = 'none';
             }
+            document.getElementById('tabsWrapper').style.display = 'block';
+            document.getElementById('noResultMsg').style.display = 'none';
 
+            // 2. On cache TOUTES les sections et on nettoie les styles inline
             document.querySelectorAll('.category-section').forEach(sec => {
                 sec.classList.remove('active');
-                sec.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
+                sec.style.display = ''; // On efface le style inline pour laisser le CSS faire son travail
+                
+                // On réaffiche tous les plats et on force l'animation
+                sec.querySelectorAll('.menu-card').forEach(item => {
+                    item.style.display = 'flex';
+                    item.classList.add('active');
+                });
             });
 
+            // 3. On affiche la section demandée
             const target = document.getElementById('cat-' + catId);
             if(target) {
                 target.classList.add('active');
-                // 👇 LA CORRECTION EST ICI : On force l'apparition des plats de cet onglet
-                target.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
             }
 
+            // 4. On met à jour l'onglet actif
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active');
                 if (b.getAttribute('data-id') == catId) {
@@ -236,13 +243,13 @@ foreach ($categories as $cat) {
             
             clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
 
+            // SI LA RECHERCHE EST VIDE : On retourne au fonctionnement normal (onglets)
             if (query === '') {
-                tabsWrapper.style.display = 'block';
-                noResultMsg.style.display = 'none';
                 switchTab(currentCategoryId);
                 return;
             }
 
+            // SI ON CHERCHE : On cache les onglets et on cherche partout
             tabsWrapper.style.display = 'none';
             let hasResults = false;
 
@@ -256,8 +263,7 @@ foreach ($categories as $cat) {
                     
                     if (name.includes(query) || desc.includes(query)) {
                         item.style.display = 'flex';
-                        // 👇 LA CORRECTION EST ICI AUSSI : On force l'apparition des résultats trouvés
-                        item.classList.add('active');
+                        item.classList.add('active'); // On force l'affichage
                         sectionHasVisibleItem = true;
                         hasResults = true;
                     } else {
@@ -265,8 +271,14 @@ foreach ($categories as $cat) {
                     }
                 });
 
-                sec.style.display = sectionHasVisibleItem ? 'block' : 'none';
-                if (sectionHasVisibleItem) sec.classList.add('active');
+                // On gère l'affichage de la section
+                if (sectionHasVisibleItem) {
+                    sec.style.display = 'block'; // Style inline pour forcer l'affichage pendant la recherche
+                    sec.classList.remove('active'); // On retire .active pour éviter les conflits
+                } else {
+                    sec.style.display = 'none';
+                    sec.classList.remove('active');
+                }
             });
 
             noResultMsg.style.display = hasResults ? 'none' : 'block';
