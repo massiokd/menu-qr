@@ -117,14 +117,13 @@ $active_clients = $stmtCount->fetch()['total'] ?? 0;
                         <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= htmlspecialchars($pending['plan']) ?></strong> (<?= $pending['montant'] ?> DZD)</p>
                         <p style="font-size: 0.85rem; color: #78350f;">Réf : <strong><?= htmlspecialchars($pending['reference']) ?></strong></p>
                         
-                        <!-- Lien vers le reçu -->
                         <?php if(!empty($pending['receipt_url'])): ?>
                             <a href="<?= htmlspecialchars($pending['receipt_url']) ?>" target="_blank" style="display:inline-block; margin-bottom:0.5rem; color:#3b82f6; font-weight:bold; font-size:0.85rem;">📄 Voir le reçu</a>
                         <?php endif; ?>
 
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
                             <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement ?')">✅ Valider</a>
-                          <button type="button" onclick="openRejectModal(<?= $pending['id'] ?>)" style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; text-decoration: none; font-weight: bold; font-size: 0.85rem; cursor: pointer;">❌ Refuser</button>
+                            <button type="button" onclick="openRejectModal(<?= $pending['id'] ?>)" style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; text-decoration: none; font-weight: bold; font-size: 0.85rem; cursor: pointer;">❌ Refuser</button>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -150,37 +149,53 @@ $active_clients = $stmtCount->fetch()['total'] ?? 0;
                     <strong>Expire le :</strong> <?= $r['plan'] === 'lifetime' ? 'À vie' : ($r['expires_at'] ? date('d/m/Y', strtotime($r['expires_at'])) : 'Non défini') ?>
                 </div>
 
-                <!-- ACTIONS EXISTANTES (Changer de plan / Suspendre) -->
-                <form action="actions/super_admin_actions.php" method="POST" class="form-row" style="margin-bottom: 1rem;">
-                    <input type="hidden" name="action" value="update_resto">
-                    <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
+                <!-- LOGIQUE : SI À VIE, ON AFFICHE LE BADGE VIP. SINON, LES FORMULAIRES. -->
+                <?php if($r['plan'] === 'lifetime'): ?>
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 0.5rem; display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                        <p style="font-weight:bold; color:#166534; margin:0;">💎 Client Premium à vie (Aucun renouvellement requis)</p>
+                        <form action="actions/super_admin_actions.php" method="POST" style="margin:0;">
+                            <input type="hidden" name="action" value="update_resto">
+                            <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
+                            <button type="submit" name="toggle_active" value="1" class="btn-outline" style="color: <?= $r['is_active'] ? 'var(--danger)' : 'var(--success)' ?>; border: 1px solid currentColor; padding: 0.4rem 0.8rem; border-radius: 0.3rem; background: transparent; cursor: pointer; font-weight:bold;">
+                                <?= $r['is_active'] ? 'Suspendre' : 'Réactiver' ?>
+                            </button>
+                        </form>
+                    </div>
+                <?php else: ?>
                     
-                    <select name="plan">
-                        <option value="trial" <?= $r['plan']=='trial'?'selected':'' ?>>Essai (14j)</option>
-                        <option value="monthly" <?= $r['plan']=='monthly'?'selected':'' ?>>Mensuel (800 DZD)</option>
-                        <option value="yearly" <?= $r['plan']=='yearly'?'selected':'' ?>>Annuel (6900 DZD)</option>
-                        <option value="lifetime" <?= $r['plan']=='lifetime'?'selected':'' ?>>À vie (14900 DZD)</option>
-                    </select>
-                    
-                    <button type="submit" class="btn-primary">Mettre à jour</button>
-                    
-                    <button type="submit" name="toggle_active" value="1" class="btn-outline" style="color: <?= $r['is_active'] ? 'var(--danger)' : 'var(--success)' ?>;">
-                        <?= $r['is_active'] ? 'Suspendre' : 'Réactiver' ?>
-                    </button>
-                </form>
-
-                <!-- PROLONGATION MANUELLE -->
-                <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; border: 1px dashed #d1d5db; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                    <p style="font-size: 0.85rem; font-weight: 700; margin: 0; color: var(--text-dark);">Ajouter du temps (Manuel) :</p>
-                    <form action="actions/manual_extend.php" method="POST" style="display:flex; gap:0.5rem; align-items:center;">
+                    <!-- ACTIONS STANDARD (Changer de plan / Suspendre) -->
+                    <form action="actions/super_admin_actions.php" method="POST" class="form-row" style="margin-bottom: 1rem;">
+                        <input type="hidden" name="action" value="update_resto">
                         <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
-                        <select name="duration" style="padding: 0.4rem; border-radius: 0.3rem; border: 1px solid #ccc; font-size: 0.85rem;">
-                            <option value="1_month">+1 Mois</option>
-                            <option value="1_year">+1 An</option>
+                        
+                        <select name="plan">
+                            <option value="trial" <?= $r['plan']=='trial'?'selected':'' ?>>Essai (14j)</option>
+                            <option value="monthly" <?= $r['plan']=='monthly'?'selected':'' ?>>Mensuel (800 DZD)</option>
+                            <option value="yearly" <?= $r['plan']=='yearly'?'selected':'' ?>>Annuel (6900 DZD)</option>
+                            <option value="lifetime" <?= $r['plan']=='lifetime'?'selected':'' ?>>À vie (14900 DZD)</option>
                         </select>
-                        <button type="submit" style="background: var(--success); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 0.3rem; font-size: 0.85rem; font-weight: bold; cursor: pointer;">Ajouter</button>
+                        
+                        <button type="submit" class="btn-primary">Mettre à jour</button>
+                        
+                        <button type="submit" name="toggle_active" value="1" class="btn-outline" style="color: <?= $r['is_active'] ? 'var(--danger)' : 'var(--success)' ?>;">
+                            <?= $r['is_active'] ? 'Suspendre' : 'Réactiver' ?>
+                        </button>
                     </form>
-                </div>
+
+                    <!-- PROLONGATION MANUELLE -->
+                    <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; border: 1px dashed #d1d5db; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <p style="font-size: 0.85rem; font-weight: 700; margin: 0; color: var(--text-dark);">Ajouter du temps (Manuel) :</p>
+                        <form action="actions/manual_extend.php" method="POST" style="display:flex; gap:0.5rem; align-items:center;">
+                            <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
+                            <select name="duration" style="padding: 0.4rem; border-radius: 0.3rem; border: 1px solid #ccc; font-size: 0.85rem;">
+                                <option value="1_month">+1 Mois</option>
+                                <option value="1_year">+1 An</option>
+                            </select>
+                            <button type="submit" style="background: var(--success); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 0.3rem; font-size: 0.85rem; font-weight: bold; cursor: pointer;">Ajouter</button>
+                        </form>
+                    </div>
+                    
+                <?php endif; ?>
 
             </div>
         <?php endforeach; ?>
