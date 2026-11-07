@@ -14,6 +14,10 @@ if (!$resto) {
     echo '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Menu indisponible</title><script src="https://cdn.tailwindcss.com"></script><style>body{background:#fdfbf7;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;}.error-box{background:white;padding:2.5rem;border-radius:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;max-width:350px;width:90%;}</style></head><body><div class="error-box"><div class="text-5xl mb-4">🦊</div><h1 class="text-xl font-bold text-gray-800 mb-2">Menu indisponible</h1><p class="text-sm text-gray-500">Ce menu est temporairement suspendu ou n\'existe pas.</p></div></body></html>';
     exit;
 }
+// On incrémente le compteur de scans
+$stmtScan = $pdo->prepare("UPDATE restaurants SET scan_count = scan_count + 1 WHERE id = ?");
+$stmtScan->execute([$resto['id']]);
+$resto['scan_count']++; // On met à jour la variable locale
 
 $stmtCat = $pdo->prepare("SELECT * FROM categories WHERE restaurant_id = ? AND is_active = true ORDER BY ordre ASC");
 $stmtCat->execute([$resto['id']]);
@@ -183,6 +187,26 @@ $categories = $stmtCat->fetchAll();
         });
 
         revealElements.forEach(el => observerReveal.observe(el));
+
+        // --- BOUTON RETOUR EN HAUT ---
+        const backToTopBtn = document.getElementById("backToTop");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add("show");
+            } else {
+                backToTopBtn.classList.remove("show");
+            }
+        });
+        backToTopBtn.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
     </script>
+
+    <!-- BOUTON RETOUR EN HAUT -->
+    <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+    </button>
+
 </body>
 </html>

@@ -215,3 +215,44 @@ body[data-theme="hiver"] { --brand: #3b82f6; --brand-light: #dbeafe; --bg: #eff6
     transition: color 0.3s;
 }
 .brand-link:hover { color: var(--brand); }
+
+/* =========================================
+   BOUTON RETOUR EN HAUT
+   ========================================= */
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--brand);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:active {
+    transform: scale(0.9);
+}
+
+/* En arabe, le bouton passe à gauche */
+body[dir="rtl"] .back-to-top {
+    right: auto;
+    left: 2rem;
+}

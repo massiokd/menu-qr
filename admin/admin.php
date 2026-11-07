@@ -39,6 +39,20 @@ $categories = $stmtCat->fetchAll();
         <a href="subscription.php" class="<?= basename($_SERVER['PHP_SELF']) == 'subscription.php' ? 'active' : '' ?>">Abonnement</a>
     </div>
 
+            <!-- Statistiques -->
+        <div class="admin-card" style="background: linear-gradient(135deg, var(--brand-color) 0%, #9a3412 100%); color: white; border: none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:0.25rem; opacity:0.9;">Vues de votre menu</h2>
+                    <p style="font-size:2.5rem; font-weight:800; line-height:1;"><?= number_format($resto['scan_count'] ?? 0, 0, ',', ' ') ?></p>
+                </div>
+                <div style="background:rgba(255,255,255,0.2); padding:1rem; border-radius:50%;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+            </div>
+            <p style="font-size:0.8rem; margin-top:0.5rem; opacity:0.8;">Chaque fois qu'un client scanne le QR code, ce compteur augmente.</p>
+        </div>
+
     <main class="container">
                 <!-- Barre de recherche -->
         <div class="search-bar-container">
