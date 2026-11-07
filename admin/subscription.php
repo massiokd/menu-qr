@@ -64,7 +64,7 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
                 <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
                 <h2 style="font-size: 1.5rem; color: var(--brand-color); margin-bottom: 0.5rem;">Vous êtes un membre à vie !</h2>
                 <p style="color: var(--text-dark); max-width: 400px; margin: 0 auto; font-size: 0.95rem; line-height: 1.5;">
-                    Votre compte bénéficie d'un accès à vie à toutes les fonctionnalités de Fennec Tech. <br>
+                    Votre compte bénéficie d'un accès à vie à toutes les fonctionnalités de FenneTech.<br>
                     Vous n'avez plus besoin de renouveler votre abonnement ni d'effectuer de paiement.
                 </p>
             </div>
