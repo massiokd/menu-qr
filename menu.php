@@ -99,14 +99,35 @@ foreach ($all_items as $item) {
                 $items = $stmtItems->fetchAll();
                 ?>
 
+    <main class="main-content">
+        <?php foreach ($categories as $cat): ?>
+            <div id="cat-<?= $cat['id'] ?>" class="category-section">
+                <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
+
+                <?php
+                $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
+                $stmtItems->execute([$cat['id']]);
+                $items = $stmtItems->fetchAll();
+                ?>
+
                 <div class="items-list">
                     <?php foreach ($items as $item): ?>
                         <!-- La classe .reveal sert pour l'animation au scroll -->
                         <div class="menu-card reveal <?= !$item['disponible'] ? 'unavailable' : '' ?>">
                             
                             <div class="item-details">
-                                <h3 class="item-name"><?= htmlspecialchars($item['nom']) ?></h3>
-                                <p class="item-desc"><?= htmlspecialchars($item['description']) ?></p>
+                                <h3 class="item-name" 
+                                    data-fr="<?= htmlspecialchars($item['nom']) ?>" 
+                                    data-ar="<?= htmlspecialchars($item['nom_ar'] ?: $item['nom']) ?>">
+                                    <?= htmlspecialchars($item['nom']) ?>
+                                </h3>
+                                
+                                <p class="item-desc" 
+                                   data-fr="<?= htmlspecialchars($item['description']) ?>" 
+                                   data-ar="<?= htmlspecialchars($item['description_ar'] ?: $item['description']) ?>">
+                                    <?= htmlspecialchars($item['description']) ?>
+                                </p>
+                                
                                 <div class="item-bottom">
                                     <span class="item-price">
                                         <?= number_format($item['prix'], 0, ',', ' ') ?> <span>DZD</span>
