@@ -62,14 +62,8 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
             <h2>Renouveler ou Changer de formule</h2>
             <p>Choisissez la formule qui vous convient. Le paiement se fait par virement <strong>Baridimob</strong> ou <strong>CCP</strong>.</p>
 
-            <!-- AFFICHAGE DU DERNIER PAIEMENT (VALIDÉ OU REFUSÉ) -->
-            <?php if($last_payment && $last_payment['statut'] === 'valide' && !$pending_payment): ?>
-                <div style="background:#dcfce7; color:#166534; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #bbf7d0;">
-                    <strong>✅ Paiement validé</strong><br>
-                    <p style="font-size:0.85rem; margin-top:0.25rem;"><?= htmlspecialchars($last_payment['admin_note'] ?? 'Votre abonnement est actif.') ?></p>
-                    <p style="font-size:0.75rem; margin-top:0.5rem; opacity:0.8;">Effectué le <?= date('d/m/Y', strtotime($last_payment['created_at'])) ?></p>
-                </div>
-            <?php elseif($last_payment && $last_payment['statut'] === 'refuse' && !$pending_payment): ?>
+            <!-- AFFICHAGE DU REFUS UNIQUEMENT -->
+            <?php if($last_payment && $last_payment['statut'] === 'refuse' && !$pending_payment): ?>
                 <div style="background:#fee2e2; color:#991b1b; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fecaca;">
                     <strong>❌ Paiement refusé</strong><br>
                     <p style="font-size:0.85rem; margin-top:0.25rem;"><strong>Raison :</strong> <?= htmlspecialchars($last_payment['admin_note'] ?? 'Aucune raison fournie.') ?></p>

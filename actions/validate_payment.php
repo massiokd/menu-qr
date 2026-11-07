@@ -23,7 +23,7 @@ if ($payment) {
     // 'lifetime' reste NULL
 
     // Mise à jour du restaurant
-    $stmtUpdate = $pdo->prepare("UPDATE restaurants SET plan = ?, expires_at = ?, is_active = true WHERE id = ?");
+   $stmtUpdate = $pdo->prepare("UPDATE restaurants SET plan = ?, expires_at = ?, is_active = true, subscription_status = 'active' WHERE id = ?");
     $stmtUpdate->execute([$plan, $expires_at, $resto_id]);
 
     // Mise à jour du paiement (avec le commentaire de succès)
