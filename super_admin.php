@@ -40,6 +40,32 @@ foreach ($restos as $r) {
     </header>
 
     <main class="container">
+
+    <?php
+// Calculs des revenus
+$stmtRev = $pdo->query("SELECT SUM(montant) as total FROM payments WHERE statut = 'valide'");
+$total_rev = $stmtRev->fetch()['total'] ?? 0;
+
+$stmtRevMonth = $pdo->query("SELECT SUM(montant) as total FROM payments WHERE statut = 'valide' AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)");
+$rev_month = $stmtRevMonth->fetch()['total'] ?? 0;
+
+$stmtCount = $pdo->query("SELECT COUNT(*) as total FROM restaurants WHERE is_active = true");
+$active_clients = $stmtCount->fetch()['total'] ?? 0;
+?>
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:1rem; margin-bottom:2rem;">
+    <div class="card" style="text-align:center; padding:1.5rem;">
+        <h3 style="font-size:0.85rem; color:var(--gray);">Revenu Total</h3>
+        <p style="font-size:2rem; font-weight:800; color:var(--success);"><?= number_format($total_rev, 0, ',', ' ') ?> DZD</p>
+    </div>
+    <div class="card" style="text-align:center; padding:1.5rem;">
+        <h3 style="font-size:0.85rem; color:var(--gray);">Revenu (Ce mois)</h3>
+        <p style="font-size:2rem; font-weight:800; color:var(--brand-color);"><?= number_format($rev_month, 0, ',', ' ') ?> DZD</p>
+    </div>
+    <div class="card" style="text-align:center; padding:1.5rem;">
+        <h3 style="font-size:0.85rem; color:var(--gray);">Clients Actifs</h3>
+        <p style="font-size:2rem; font-weight:800; color:#3b82f6;"><?= $active_clients ?></p>
+    </div>
+</div>
         
         <!-- Statistiques -->
         <div class="stats-grid">
@@ -86,13 +112,99 @@ foreach ($restos as $r) {
         ?>
             <div class="card">
                 
-                <!-- ALERTE DE PAIEMENT -->
+                <!-- ALERTE DE PAIEMENT EN ATTENTE -->
                 <?php if($pending): ?>
                     <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
                         <p style="font-weight: bold; color: #92400e; margin-bottom: 0.5rem;">⚠️ Demande de paiement en attente</p>
                         <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= htmlspecialchars($pending['plan']) ?></strong> (<?= $pending['montant'] ?> DZD)</p>
                         <p style="font-size: 0.85rem; color: #78350f;">Réf : <strong><?= htmlspecialchars($pending['reference']) ?></strong></p>
-                        <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="display: inline-block; margin-top: 0.5rem; background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement et activer l\'abonnement ?')">✅ Valider le paiement</a>
+                        
+                        <!-- Lien vers le reçu -->
+                        <?php if($pending['receipt_url']): ?>
+                            <a href="<?= htmlspecialchars($pending['receipt_url']) ?>" target="_blank" style="display:inline-block; margin-bottom:0.5rem; color:#3b82f6; font-weight:bold; font-size:0.85rem;">📄 Voir le reçu</a>
+                        <?php endif; ?>
+
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement ?')">✅ Valider</a>
+                            <a href="actions/reject_payment.php?id=<?= $pending['id'] ?>" style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Refuser ce paiement ?')">❌ Refuser</a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- EN-TÊTE DU RESTAURANT -->
+                <div class="card-header">
+                    <div>
+                        <div class="card-title"><?= htmlspecialchars($r['nom']) ?></div>
+                        <div class="card-subtitle">Lien: /menu.php?slug=<?= htmlspecialchars($r['slug']) ?></div>
+                    </div>
+                    <div>
+                        <?php if($is_online): ?>
+                            <span class="badge badge-active">En ligne</span>
+                        <?php else: ?>
+                            <span class="badge badge-inactive">Hors ligne / Expiré</span>
+                        <?php endif; ?>
+                        <span class="badge badge-plan"><?= htmlspecialchars($r['plan']) ?></span>
+                    </div>
+                </div>
+
+                <!-- DATE D'EXPIRATION -->
+                <div style="font-size: 0.875rem; margin-bottom: 1rem;">
+                    <strong>Expire le :</strong> <?= $r['plan'] === 'lifetime' ? 'À vie' : ($r['expires_at'] ? date('d/m/Y', strtotime($r['expires_at'])) : 'Non défini') ?>
+                </div>
+
+                <!-- ACTIONS EXISTANTES (Changer de plan / Suspendre) -->
+                <form action="actions/super_admin_actions.php" method="POST" class="form-row" style="margin-bottom: 1rem;">
+                    <input type="hidden" name="action" value="update_resto">
+                    <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
+                    
+                    <select name="plan">
+                        <option value="trial" <?= $r['plan']=='trial'?'selected':'' ?>>Essai (14j)</option>
+                        <option value="monthly" <?= $r['plan']=='monthly'?'selected':'' ?>>Mensuel (800 DZD)</option>
+                        <option value="yearly" <?= $r['plan']=='yearly'?'selected':'' ?>>Annuel (6900 DZD)</option>
+                        <option value="lifetime" <?= $r['plan']=='lifetime'?'selected':'' ?>>À vie (14900 DZD)</option>
+                    </select>
+                    
+                    <button type="submit" class="btn-primary">Mettre à jour</button>
+                    
+                    <button type="submit" name="toggle_active" value="1" class="btn-outline" style="color: <?= $r['is_active'] ? 'var(--danger)' : 'var(--success)' ?>;">
+                        <?= $r['is_active'] ? 'Suspendre' : 'Réactiver' ?>
+                    </button>
+                </form>
+
+                <!-- 👇 NOUVEAU BLOC : PROLONGATION MANUELLE 👇 -->
+                <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; border: 1px dashed #d1d5db; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <p style="font-size: 0.85rem; font-weight: 700; margin: 0; color: var(--text-dark);">Ajouter du temps (Manuel) :</p>
+                    <form action="actions/manual_extend.php" method="POST" style="display:flex; gap:0.5rem; align-items:center;">
+                        <input type="hidden" name="resto_id" value="<?= $r['id'] ?>">
+                        <select name="duration" style="padding: 0.4rem; border-radius: 0.3rem; border: 1px solid #ccc; font-size: 0.85rem;">
+                            <option value="1_month">+1 Mois</option>
+                            <option value="1_year">+1 An</option>
+                        </select>
+                        <button type="submit" style="background: var(--success); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 0.3rem; font-size: 0.85rem; font-weight: bold; cursor: pointer;">Ajouter</button>
+                    </form>
+                </div>
+                <!-- 👆 FIN DU NOUVEAU BLOC 👆 -->
+
+            </div>
+        <?php endforeach; ?>
+            <div class="card">
+                
+                <!-- ALERTE DE PAIEMENT -->
+                <?php if($pending): ?>
+                    <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                        <p style="font-weight: bold; color: #92400e; margin-bottom: 0.5rem;">⚠️ Demande de paiement en attente</p>
+                        <p style="font-size: 0.85rem; color: #78350f;">Plan : <strong><?= $pending['plan'] ?></strong> (<?= $pending['montant'] ?> DZD)</p>
+                        <p style="font-size: 0.85rem; color: #78350f;">Réf : <strong><?= htmlspecialchars($pending['reference']) ?></strong></p>
+                        
+                        <!-- Lien vers le reçu -->
+                        <?php if($pending['receipt_url']): ?>
+                            <a href="<?= htmlspecialchars($pending['receipt_url']) ?>" target="_blank" style="display:inline-block; margin-bottom:0.5rem; color:#3b82f6; font-weight:bold; font-size:0.85rem;">📄 Voir le reçu</a>
+                        <?php endif; ?>
+
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <a href="actions/validate_payment.php?id=<?= $pending['id'] ?>" style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Valider ce paiement ?')">✅ Valider</a>
+                            <a href="actions/reject_payment.php?id=<?= $pending['id'] ?>" style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem;" onclick="return confirm('Refuser ce paiement ?')">❌ Refuser</a>
+                        </div>
                     </div>
                 <?php endif; ?>
 

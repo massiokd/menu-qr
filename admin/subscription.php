@@ -65,7 +65,7 @@ $pending_payment = $stmtP->fetch();
                     Votre paiement pour la formule <strong><?= htmlspecialchars($pending_payment['plan']) ?></strong> (Réf: <?= htmlspecialchars($pending_payment['reference']) ?>) est en cours de vérification. Votre compte sera activé dès réception.
                 </div>
             <?php else: ?>
-                <form action="../actions/request_payment.php" method="POST" style="display:flex; flex-direction:column; gap:1.5rem; margin-top:1rem;">
+                <form action="../actions/request_payment.php" method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:1.5rem; margin-top:1rem;">
                     
                     <div>
                         <label style="font-weight:700; margin-bottom:0.5rem; display:block;">1. Choisissez votre formule</label>
@@ -122,13 +122,18 @@ $pending_payment = $stmtP->fetch();
                             Si l'application n'est pas installée, vous serez redirigé vers le Play Store.
                         </p>
                     </div>
-
                     <div>
-                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">3. Saisissez la référence du reçu</label>
-                        <input type="text" name="reference" class="form-control" placeholder="Ex: Numéro de transaction Baridimob" required>
+                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">3. Joignez la preuve de paiement (Capture d'écran)</label>
+                        <input type="file" name="receipt" accept="image/*" class="form-control" required style="padding:0.5rem;">
+                        <p style="font-size:0.75rem; color:var(--text-gray); margin-top:0.25rem;">Uploadez une capture d'écran de la transaction Baridimob.</p>
                     </div>
 
-                    <button type="submit" class="btn-primary" style="padding:1rem; font-size:1rem;">J'ai payé, envoyer pour validation</button>
+                    <div>
+                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">4. Référence du reçu (Optionnel)</label>
+                        <input type="text" name="reference" class="form-control" placeholder="Ex: Numéro de transaction">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="padding:1rem; font-size:1rem;">J'ai payé, envoyer pour vérification</button>
                 </form>
             <?php endif; ?>
         </div>

@@ -5,12 +5,20 @@ require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: ../login.php'); exit; }
 
+
+
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
 
 $stmtResto = $pdo->prepare("SELECT nom, slug, theme FROM restaurants WHERE id = ?");
 $stmtResto->execute([$resto_id]);
 $resto = $stmtResto->fetch();
+
+// Calcul des jours restants d'abonnement
+$days_left = null;
+if ($resto['plan'] !== 'lifetime' && !empty($resto['expires_at'])) {
+    $days_left = ceil((strtotime($resto['expires_at']) - time()) / 86400);
+}
 
 $base_url = "https://menu-qr-ebke.onrender.com"; 
 $menu_url = $base_url . "/menu.php?slug=" . $resto['slug'];
@@ -43,6 +51,35 @@ $categories = $stmtCat->fetchAll();
 
 
     <main class="container">
+        <?php if($resto['subscription_status'] === 'pending_verification'): ?>
+    <div style="background:#fef3c7; color:#92400e; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fcd34d;">
+        <strong>⏳ Votre paiement est en cours de vérification.</strong><br>
+        Votre menu est actif pour vous permettre de continuer à travailler. Nous validons votre abonnement sous 24h.
+    </div>
+<?php endif; ?>
+
+        <!-- ALERTE D'EXPIRATION D'ABONNEMENT -->
+        <?php if ($days_left !== null && $days_left > 0 && $days_left <= 7): ?>
+            <!-- Alerte Jaune : Expire bientôt -->
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <p style="font-weight: 700; color: #92400e; margin-bottom: 0.25rem; margin-top:0;">⚠️ Votre abonnement expire bientôt !</p>
+                    <p style="font-size: 0.85rem; color: #78350f; margin:0;">Il vous reste <strong><?= $days_left ?> jour(s)</strong> avant l'expiration (le <?= date('d/m/Y', strtotime($resto['expires_at'])) ?>).</p>
+                </div>
+                <a href="subscription.php" style="background: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem; white-space: nowrap;">Renouveler</a>
+            </div>
+            
+        <?php elseif ($days_left !== null && $days_left <= 0): ?>
+            <!-- Alerte Rouge : Déjà expiré -->
+            <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <p style="font-weight: 700; color: #991b1b; margin-bottom: 0.25rem; margin-top:0;">🚨 Votre abonnement a expiré !</p>
+                    <p style="font-size: 0.85rem; color: #7f1d1d; margin:0;">Votre menu n'est plus accessible par vos clients.</p>
+                </div>
+                <a href="subscription.php" style="background: #ef4444; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; font-size: 0.85rem; white-space: nowrap;">Réactiver</a>
+            </div>
+        <?php endif; ?>
+        
                 <!-- Barre de recherche -->
         <div class="search-bar-container">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
