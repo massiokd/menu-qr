@@ -181,8 +181,9 @@ body[data-theme="hiver"] { --brand: #3b82f6; --brand-light: #dbeafe; --bg: #eff6
    ========================================= */
 .main-content { max-width: 32rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-.category-section { display: none; } /* Caché par défaut */
-.category-section.active-category { display: block; } /* Affiché si actif */
+/* Sections (affichage conditionnel) */
+.category-section { display: none; }
+.category-section.active { display: block; }
 
 .category-title { 
     font-family: var(--font-title) !important;

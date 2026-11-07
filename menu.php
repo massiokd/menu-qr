@@ -89,8 +89,8 @@ foreach ($all_items as $item) {
                     $count = count($items_by_category[$cat['id']] ?? []);
                 ?>
                     <button class="tab-btn <?= $index === 0 ? 'active' : '' ?>" 
-                            onclick="switchTab(<?= $cat['id'] ?>, this)"
-                            id="tab-<?= $cat['id'] ?>">
+                            data-id="<?= $cat['id'] ?>"
+                            onclick="switchTab(<?= $cat['id'] ?>, this)">
                         <?= htmlspecialchars($cat['nom']) ?> 
                         <span class="tab-count"><?= $count ?></span>
                     </button>
@@ -112,7 +112,7 @@ foreach ($all_items as $item) {
             $items = $items_by_category[$cat['id']] ?? [];
             if (empty($items)) continue; // On saute les catégories vides
         ?>
-            <div id="cat-<?= $cat['id'] ?>" class="category-section <?= $index === 0 ? 'active-category' : '' ?>">
+                        <div id="cat-<?= $cat['id'] ?>" class="category-section <?= $index === 0 ? 'active' : '' ?>" style="<?= $index === 0 ? 'display: block;' : 'display: none;' ?>">
                 <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
 
                 <div class="items-list">
@@ -177,32 +177,44 @@ foreach ($all_items as $item) {
     </button>
 
     <script>
+        // --- VARIABLE GLOBALE POUR SE SOUVENIR DE L'ONGLET ACTIF ---
+        let currentCategoryId = <?= $categories[0]['id'] ?? 'null' ?>;
+
         // --- GESTION DES ONGLETS ---
         function switchTab(catId, btn) {
-            // 1. Cacher toutes les sections
-            document.querySelectorAll('.category-section').forEach(sec => {
-                sec.classList.remove('active-category');
-            });
+            currentCategoryId = catId;
             
-            // 2. Afficher la section demandée
-            const activeSection = document.getElementById('cat-' + catId);
-            if(activeSection) {
-                activeSection.classList.add('active-category');
-                
-                // Remettre les animations pour les éléments nouvellement affichés
-                activeSection.querySelectorAll('.reveal').forEach(el => {
-                    el.classList.add('active');
-                });
+            // Si une recherche était en cours, on la vide
+            const searchInput = document.getElementById('clientSearch');
+            if (searchInput.value.trim() !== '') {
+                searchInput.value = '';
+                document.getElementById('clearBtn').style.display = 'none';
+                document.getElementById('tabsWrapper').style.display = 'block';
+                document.getElementById('noResultMsg').style.display = 'none';
             }
 
-            // 3. Changer l'onglet actif
+            // On cache toutes les sections et on réinitialise les plats
+            document.querySelectorAll('.category-section').forEach(sec => {
+                sec.classList.remove('active');
+                sec.style.display = 'none';
+                sec.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
+            });
+
+            // On affiche la section demandée
+            const target = document.getElementById('cat-' + catId);
+            if(target) {
+                target.classList.add('active');
+                target.style.display = 'block';
+            }
+
+            // On met à jour le bouton actif
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
-            // 4. Scroll l'onglet actif pour qu'il soit bien centré
+            
+            // On centre le bouton actif dans la barre
             btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-
-            // 5. Remonter en haut du contenu
+            
+            // On remonte en haut de page
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -213,53 +225,68 @@ foreach ($all_items as $item) {
             const tabsWrapper = document.getElementById('tabsWrapper');
             const sections = document.querySelectorAll('.category-section');
             const noResultMsg = document.getElementById('noResultMsg');
-            let hasResults = false;
-
+            
             clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
 
+            // 1. SI LA RECHERCHE EST VIDE, ON REVIENT AUX ONGLETS
             if (query === '') {
-                // Mode normal : on affiche l'onglet actif
                 tabsWrapper.style.display = 'block';
                 noResultMsg.style.display = 'none';
-                sections.forEach(sec => sec.classList.remove('active-category'));
                 
-                const activeTab = document.querySelector('.tab-btn.active');
-                if(activeTab) {
-                    const catId = activeTab.id.replace('tab-', '');
-                    const activeSection = document.getElementById('cat-' + catId);
-                    if(activeSection) activeSection.classList.add('active-category');
-                } else if (sections.length > 0) {
-                    sections[0].classList.add('active-category');
+                sections.forEach(sec => {
+                    sec.classList.remove('active');
+                    sec.style.display = 'none';
+                    sec.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
+                });
+
+                // On réaffiche l'onglet qui était actif avant la recherche
+                const target = document.getElementById('cat-' + currentCategoryId);
+                if(target) {
+                    target.classList.add('active');
+                    target.style.display = 'block';
                 }
-                
-                document.querySelectorAll('.menu-card').forEach(item => item.style.display = 'flex');
+
+                // On remet la couleur sur le bon bouton d'onglet
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                    if(b.getAttribute('data-id') == currentCategoryId) {
+                        b.classList.add('active');
+                        b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                });
                 return;
             }
 
-            // Mode recherche : on cherche partout
-            tabsWrapper.style.display = 'none'; // On cache les onglets pendant la recherche
-            sections.forEach(sec => sec.classList.add('active-category')); // On affiche tout pour chercher
+            // 2. SI ON TAPE QUELQUE CHOSE, ON CACHE LES ONGLETS ET ON CHERCHE PARTOUT
+            tabsWrapper.style.display = 'none';
+            let hasResults = false;
 
             sections.forEach(sec => {
+                let sectionHasVisibleItem = false;
                 const items = sec.querySelectorAll('.menu-card');
-                let hasCatResult = false;
-
+                
                 items.forEach(item => {
                     const name = item.querySelector('.item-name').textContent.toLowerCase();
                     const desc = item.querySelector('.item-desc').textContent.toLowerCase();
+                    
                     if (name.includes(query) || desc.includes(query)) {
                         item.style.display = 'flex';
-                        hasCatResult = true;
+                        sectionHasVisibleItem = true;
                         hasResults = true;
                     } else {
                         item.style.display = 'none';
                     }
                 });
 
-                // Cacher le titre de la catégorie si aucun résultat dedans
-                sec.style.display = hasCatResult ? 'block' : 'none';
+                // On affiche la section uniquement si elle contient des résultats
+                if (sectionHasVisibleItem) {
+                    sec.style.display = 'block'; 
+                } else {
+                    sec.style.display = 'none';
+                }
             });
 
+            // Message si aucun résultat
             noResultMsg.style.display = hasResults ? 'none' : 'block';
         }
 
@@ -268,11 +295,10 @@ foreach ($all_items as $item) {
             filterMenu();
         }
 
-        // --- ANIMATIONS ---
-        const revealElements = document.querySelectorAll('.category-section.active-category .reveal');
+        // --- ANIMATIONS ET BOUTON RETOUR EN HAUT ---
+        const revealElements = document.querySelectorAll('.category-section.active .reveal');
         revealElements.forEach(el => el.classList.add('active'));
 
-        // --- BOUTON RETOUR EN HAUT ---
         const backToTopBtn = document.getElementById("backToTop");
         window.addEventListener("scroll", () => {
             if (window.scrollY > 300) { backToTopBtn.classList.add("show"); } 
