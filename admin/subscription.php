@@ -174,6 +174,17 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
                 alert("Erreur lors de la copie.");
             });
         }
+
+        document.querySelector('form[action="../actions/request_payment.php"]').addEventListener('submit', function(e) {
+            const btn = this.querySelector('button[type="submit"]');
+            if(btn) {
+                btn.classList.add('btn-loading');
+                btn.innerHTML = '<span class="spinner"></span> Envoi du reçu en cours...';
+                // Optionnel : désactiver les champs pour éviter les doubles clics
+                this.querySelectorAll('input, select').forEach(el => el.setAttribute('readonly', 'readonly'));
+            }
+        });
+
     </script>
 
 </body>

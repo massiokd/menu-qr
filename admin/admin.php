@@ -168,7 +168,7 @@ $categories = $stmtCat->fetchAll();
                                 <div class="price-input-group">
                                     <input type="number" id="prix-<?= $item['id'] ?>" value="<?= $item['prix'] ?>" step="50">
                                     <span>DZD</span>
-                                    <button onclick="updatePrix(<?= $item['id'] ?>)" class="btn-save-price">OK</button>
+                                    <button onclick="updatePrix(<?= $item['id'] ?>, this)" class="btn-save-price">OK</button>
                                 </div>
                                 <button onclick="toggleDispo(<?= $item['id'] ?>, this)" class="btn-status <?= $item['disponible'] ? 'available' : 'unavailable' ?>">
                                     <?= $item['disponible'] ? 'Disponible' : 'Épuisé' ?>
@@ -205,6 +205,23 @@ $categories = $stmtCat->fetchAll();
     <div id="toast" class="toast">Prix mis à jour !</div>
 
     <script>
+
+        // Fonction pour ajouter un spinner dans un bouton
+        function setLoading(element, isLoading, originalText = '') {
+            if (isLoading) {
+                element.classList.add('btn-loading');
+                if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+                    element.dataset.originalHtml = element.innerHTML;
+                    element.innerHTML = '<span class="spinner"></span>'; // Pour les boutons noirs/verts
+                }
+            } else {
+                element.classList.remove('btn-loading');
+                if (element.dataset.originalHtml) {
+                    element.innerHTML = element.dataset.originalHtml;
+                }
+            }
+        }
+
         // --- GESTION DE LA MODALE ---
         function openDeleteModal(url, message) {
             document.getElementById('modal-message').innerText = message;
@@ -223,16 +240,44 @@ $categories = $stmtCat->fetchAll();
 
         // --- AJAX PRIX & DISPO ---
         function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
-        async function updatePrix(itemId) {
+                async function updatePrix(itemId, btnElement) {
             const newPrix = document.getElementById('prix-' + itemId).value;
             const formData = new FormData(); formData.append('action', 'update_prix'); formData.append('item_id', itemId); formData.append('prix', newPrix);
-            try { const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); const result = await response.json(); if(result.success) showToast('Prix mis à jour !'); } catch (error) { showToast('Erreur.'); }
+            
+            setLoading(btnElement, true); // Active le spinner
+            try { 
+                const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); 
+                const result = await response.json(); 
+                if(result.success) showToast('Prix mis à jour !'); 
+            } catch (error) { 
+                showToast('Erreur.'); 
+            } finally {
+                setLoading(btnElement, false); // Retire le spinner
+            }
         }
-        async function toggleDispo(itemId, btn) {
+        async function toggleDispo(itemId, btnElement) {
             const formData = new FormData(); formData.append('action', 'toggle_dispo'); formData.append('item_id', itemId);
-            try { const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); const result = await response.json();
-                if(result.success) { if(result.new_status) { btn.textContent = 'Disponible'; btn.classList.replace('unavailable', 'available'); showToast('Plat disponible.'); } else { btn.textContent = 'Épuisé'; btn.classList.replace('available', 'unavailable'); showToast('Plat épuisé.'); } }
-            } catch (error) { showToast('Erreur.'); }
+            
+            setLoading(btnElement, true);
+            try { 
+                const response = await fetch('../actions/update_item.php', { method: 'POST', body: formData }); 
+                const result = await response.json();
+                if(result.success) { 
+                    if(result.new_status) { 
+                        btnElement.textContent = 'Disponible'; 
+                        btnElement.classList.replace('unavailable', 'available'); 
+                        showToast('Plat disponible.'); 
+                    } else { 
+                        btnElement.textContent = 'Épuisé'; 
+                        btnElement.classList.replace('available', 'unavailable'); 
+                        showToast('Plat épuisé.'); 
+                    } 
+                }
+            } catch (error) { 
+                showToast('Erreur.'); 
+            } finally {
+                setLoading(btnElement, false);
+            }
         }
 
         // --- FILTRE DE RECHERCHE ---

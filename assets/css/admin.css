@@ -568,3 +568,32 @@ textarea.form-control { height: 80px; resize: vertical; }
     display: flex;
     flex-direction: column;
 }
+
+/* =========================================
+   SPINNER DE CHARGEMENT
+   ========================================= */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+.spinner-dark {
+    border-color: rgba(0, 0, 0, 0.1);
+    border-top-color: var(--text-dark);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Classe pour désactiver un bouton pendant le chargement */
+.btn-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    cursor: not-allowed;
+}

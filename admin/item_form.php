@@ -158,6 +158,19 @@ $categories = $stmtCat->fetchAll();
             };
             reader.readAsDataURL(file);
         }
+
+        // Optionnel : le script de previewImage existant
+        function previewImage(event) { ... }
+
+        // Nouveau script pour le bouton de soumission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = this.querySelector('button[type="submit"]');
+            if(btn) {
+                btn.classList.add('btn-loading');
+                btn.innerHTML = '<span class="spinner"></span> Enregistrement...';
+            }
+        });
+    
     </script>
 </body>
 </html>
