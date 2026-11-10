@@ -2,52 +2,42 @@
 session_name('FENNEC_GERANT');
 session_start();
 require '../config/db.php';
+require 'upload_helper.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') {
-    header('Location: login.php'); exit;
-}
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { die("Non autorisé"); }
 
-$pdo = getDB();
-$item_id = $_POST['item_id'] ?? null;
-$category_id = $_POST['category_id'];
-$nom = $_POST['nom'];
-$description = $_POST['description'];
-$prix = $_POST['prix'];
-$existing_image = $_POST['existing_image'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $pdo = getDB();
+    $item_id = $_POST['item_id'] ?? null;
+    $category_id = $_POST['category_id'];
+    $nom = $_POST['nom'];
+    $description = $_POST['description'];
+    $prix = $_POST['prix'];
+    $existing_image = $_POST['existing_image'] ?? '';
+    
+    $nom_ar = $_POST['nom_ar'] ?? '';
+    $description_ar = $_POST['description_ar'] ?? '';
 
-$image_url = $existing_image; // On garde l'ancienne par défaut
+    $image_url = $existing_image; // On garde l'ancienne par défaut
 
-// Gestion de l'upload d'image vers ImgBB (si un fichier est envoyé)
-$file = $_FILES['image_camera']['size'] > 0 ? $_FILES['image_camera'] : ($_FILES['image_gallery']['size'] > 0 ? $_FILES['image_gallery'] : null);
-
-if ($file) {
-    $imageData = base64_encode(file_get_contents($file['tmp_name']));
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=' . IMGBB_API_KEY);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, [
-        'image' => $imageData,
-    ]);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout de 10 secondes max
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Timeout de connexion
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    $result = json_decode($response, true);
-    if (isset($result['data']['url'])) {
-        $image_url = $result['data']['url'];
+    // Gestion de l'upload de la nouvelle image (compressée)
+    if (isset($_FILES['image_camera']) && $_FILES['image_camera']['size'] > 0) {
+        $new_url = uploadToSupabase($_FILES['image_camera'], 'plat');
+        if ($new_url) $image_url = $new_url;
+    } 
+    elseif (isset($_FILES['image_gallery']) && $_FILES['image_gallery']['size'] > 0) {
+        $new_url = uploadToSupabase($_FILES['image_gallery'], 'plat');
+        if ($new_url) $image_url = $new_url;
     }
-}
 
-if ($item_id) {
-    // UPDATE
-    $stmt = $pdo->prepare("UPDATE items SET category_id=?, nom=?, description=?, prix=?, image_url=? WHERE id=?");
-    $stmt->execute([$category_id, $nom, $description, $prix, $image_url, $item_id]);
-} else {
-    // INSERT
-    $stmt = $pdo->prepare("INSERT INTO items (category_id, nom, description, prix, image_url) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$category_id, $nom, $description, $prix, $image_url]);
+    // Mise à jour ou Insertion
+    if ($item_id) {
+        $stmt = $pdo->prepare("UPDATE items SET category_id=?, nom=?, description=?, prix=?, image_url=?, nom_ar=?, description_ar=? WHERE id=?");
+        $stmt->execute([$category_id, $nom, $description, $prix, $image_url, $nom_ar, $description_ar, $item_id]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO items (category_id, nom, description, prix, image_url, nom_ar, description_ar) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$category_id, $nom, $description, $prix, $image_url, $nom_ar, $description_ar]);
+    }
 }
 
 header('Location: ../admin/admin.php');
