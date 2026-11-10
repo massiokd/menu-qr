@@ -1,9 +1,10 @@
 FROM php:8.2-apache
 
-# 1. Installer les extensions PostgreSQL ET cURL
+# 1. Installer les extensions PostgreSQL, cURL ET GD (pour les images)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libpq-dev libcurl4-openssl-dev \
-    && docker-php-ext-install pdo_pgsql curl \
+    && apt-get install -y --no-install-recommends libpq-dev libcurl4-openssl-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_pgsql curl gd \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Augmenter les limites d'upload PHP (20 Mo)
@@ -17,8 +18,6 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
-
-# 5. Copier TOUS les dossiers (admin, actions, assets, config...) dans le serveur
 COPY . /var/www/html/
 
 EXPOSE 10000
