@@ -219,9 +219,9 @@ $fonts = [
                         errorCorrectionLevel: "H" // Niveau élevé pour cacher le logo
                     },
                     imageOptions: {
-                        hideBackgroundDots: true, // Crée un cercle propre autour du logo
-                        imageSize: 0.35, // Taille du logo (35% du QR)
-                        margin: 10, // Marge autour du logo
+                        hideBackgroundDots: true,
+                        imageSize: 0.45, 
+                        margin: 2, 
                         crossOrigin: "anonymous"
                     },
                     dotsOptions: {

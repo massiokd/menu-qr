@@ -65,15 +65,17 @@ body[data-theme="hiver"] { --brand: #3b82f6; --brand-light: #dbeafe; --bg: #eff6
    ========================================= */
 .header { padding: 4rem 1.5rem 2rem; text-align: center; position: relative; }
 .restaurant-logo { 
-    width: 6.5rem; 
-    height: 6.5rem; 
+    width: 8rem; /* On agrandit le cercle */
+    height: 8rem; 
     border-radius: 50%; 
-    object-fit: contain; /* ⬅️ Affiche le logo EN ENTIER, sans le couper */
+    object-fit: contain; 
     border: 4px solid var(--card); 
     box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); 
     margin-bottom: 1.5rem; 
-    background: white; /* ⬅️ Fond blanc propre */
-    padding: 0.5rem; /* ⬅️ Un peu d'espace autour du logo */
+    background: white; 
+    padding: 0; /* On enlève le padding pour que le logo prenne tout l'espace */
+    transform: scale(1.1); /* Effet de zoom pour compenser l'espace vide de l'image */
+    transition: transform 0.3s ease;
 }
 .restaurant-name { font-family: var(--font-title) !important; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1.1; color: var(--text); }
 .restaurant-subtitle { font-size: 0.85rem; color: var(--gray); font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
