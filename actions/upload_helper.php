@@ -43,6 +43,7 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $compressedData);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $supabaseKey,              
         'Authorization: Bearer ' . $supabaseKey,
         'Content-Type: image/jpeg',
         'x-upsert: true'
