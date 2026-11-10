@@ -1,6 +1,46 @@
 <?php
+// actions/email_helper.php
+
+function sendEmailBrevo($apiKey, $to, $subject, $html) {
+    $senderEmail = "massiokd@gmail.com"; // L'adresse que tu as vérifiée sur Brevo
+    $senderName = "FenneTech";
+
+    $data = [
+        "sender" => [
+            "name" => $senderName,
+            "email" => $senderEmail
+        ],
+        "to" => [
+            ["email" => $to]
+        ],
+        "subject" => $subject,
+        "htmlContent" => $html
+    ];
+
+    $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'api-key: ' . $apiKey,
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode != 201 && $httpCode != 200) {
+        error_log("BREVO_ERROR ($httpCode): " . $response);
+    }
+
+    return $httpCode == 201 || $httpCode == 200;
+}
+
+// Fonction pour envoyer le lien de réinitialisation
 function sendResetEmail($toEmail, $restoName, $resetLink) {
-    $apiKey = getenv('RESEND_API_KEY');
+    $apiKey = getenv('BREVO_API_KEY');
     if (!$apiKey) return false;
 
     $htmlContent = "
@@ -17,26 +57,25 @@ function sendResetEmail($toEmail, $restoName, $resetLink) {
     </div>
     ";
 
-    $data = [
-        "from" => "FenneTech <onboarding@resend.dev>",
-        "to" => [$toEmail],
-        "subject" => "Réinitialisation de votre mot de passe",
-        "html" => $htmlContent
-    ];
+    return sendEmailBrevo($apiKey, $toEmail, "Réinitialisation de votre mot de passe", $htmlContent);
+}
 
-    $ch = curl_init('https://api.resend.com/emails');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $apiKey,
-        'Content-Type: application/json'
-    ]);
+// Fonction pour envoyer l'alerte de sécurité (anti-phishing)
+function sendSecurityAlert($toEmail, $restoName) {
+    $apiKey = getenv('BREVO_API_KEY');
+    if (!$apiKey) return false;
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    $html = "
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px;'>
+        <h2 style='color: #dc2626;'>⚠️ Alerte de sécurité</h2>
+        <p>Bonjour,</p>
+        <p>Une demande de réinitialisation de mot de passe a été faite pour le compte <strong>{$restoName}</strong>.</p>
+        <p>Si vous êtes à l'origine de cette demande, vous pouvez ignorer cet email et utiliser le lien reçu séparément.</p>
+        <p>Si vous n'avez rien demandé, quelqu'un essaie peut-être d'accéder à votre compte. Dans ce cas, <strong>ne cliquez pas</strong> sur le lien de réinitialisation et contactez-nous immédiatement.</p>
+        <p style='font-size: 12px; color: #6b7280;'>L'équipe FenneTech 🦊</p>
+    </div>
+    ";
 
-    return $httpCode == 200 || $httpCode == 201;
+    return sendEmailBrevo($apiKey, $toEmail, "⚠️ Alerte de sécurité - Demande de réinitialisation", $html);
 }
 ?>
