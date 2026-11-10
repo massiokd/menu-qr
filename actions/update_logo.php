@@ -14,6 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['logo'])) {
             $pdo = getDB();
             $stmt = $pdo->prepare("UPDATE restaurants SET logo_url = ? WHERE id = ?");
             $stmt->execute([$new_url, $_SESSION['restaurant_id']]);
+        } else {
+            // Échec de l'upload du logo
+            header('Location: ../admin/settings.php?tab=branding&error=logo_failed');
+            exit;
         }
     }
 }

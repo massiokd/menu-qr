@@ -4,14 +4,21 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     $supabaseKey = getenv('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!$supabaseUrl || !$supabaseKey) {
-        die("Erreur : Les variables SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY sont manquantes sur Render.");
+        error_log("Supabase: URL ou KEY manquante.");
+        return null;
     }
 
     $tmpName = $fileArray['tmp_name'];
     
     // --- COMPRESSION ---
-    $image = imagecreatefromstring(file_get_contents($tmpName));
-    if (!$image) { die("Erreur : Impossible de lire l'image. Format non supporté."); }
+$imageData = file_get_contents($tmpName);
+$image = @imagecreatefromstring($imageData);
+
+if (!$image) { 
+    // Si on ne peut pas lire l'image, on renvoie une erreur propre
+    error_log("Compression: Impossible de lire l'image (format non supporté).");
+    return null; 
+}
 
     // Redimensionnement Max 1000px
     $width = imagesx($image);
@@ -34,8 +41,9 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     imagedestroy($image);
 
     // --- UPLOAD ---
+    $cleanUrl = rtrim($supabaseUrl, '/'); // Sécurité anti-slash
     $fileName = $fileNamePrefix . '_' . time() . '_' . uniqid() . '.jpg';
-    $url = $supabaseUrl . '/storage/v1/object/menu-images/' . $fileName;
+    $url = $cleanUrl . '/storage/v1/object/menu-images/' . $fileName;
     
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -43,7 +51,7 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $compressedData);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'apikey: ' . $supabaseKey,              
+        'apikey: ' . $supabaseKey,
         'Authorization: Bearer ' . $supabaseKey,
         'Content-Type: image/jpeg',
         'x-upsert: true'
@@ -53,15 +61,12 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // SI L'UPLOAD ÉCHOUE, ON AFFICHE L'ERREUR EXACTE
-    if ($httpCode != 200 && $httpCode != 201) {
-        echo "<h1>Erreur d'upload Supabase (Code $httpCode)</h1>";
-        echo "<p>Réponse de Supabase : </p>";
-        echo "<pre>" . htmlspecialchars($response) . "</pre>";
-        echo "<p>Vérifie que ton bucket s'appelle bien <strong>menu-images</strong> et qu'il est public.</p>";
-        die();
+    if ($httpCode == 200 || $httpCode == 201) {
+        return $cleanUrl . '/storage/v1/object/public/menu-images/' . $fileName;
     }
-
-    return $supabaseUrl . '/storage/v1/object/public/menu-images/' . $fileName;
+    
+    // Si erreur, on l'écrit dans les logs de Render pour toi (invisible pour le gérant)
+    error_log("Supabase Upload Error ($httpCode): " . $response);
+    return null;
 }
 ?>

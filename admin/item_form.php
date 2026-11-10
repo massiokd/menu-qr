@@ -38,6 +38,13 @@ $categories = $stmtCat->fetchAll();
     </header>
 
     <main class="container">
+                <!-- Affichage de l'erreur d'upload -->
+        <?php if(isset($_GET['error']) && $_GET['error'] == 'upload_failed'): ?>
+            <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #fecaca; text-align: center; font-weight: bold;">
+                ❌ L'image n'a pas pu être envoyée. <br>
+                <span style="font-size: 0.85rem; font-weight: normal;">Vérifiez votre connexion internet et réessayez.</span>
+            </div>
+        <?php endif; ?>
         <form action="../actions/save_item.php" method="POST" enctype="multipart/form-data" class="admin-card">
             
             <?php if($item_id): ?>

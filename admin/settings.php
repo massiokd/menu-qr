@@ -51,10 +51,12 @@ $fonts = [
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paramètres - <?= htmlspecialchars($resto['nom']) ?></title>
     <link rel="stylesheet" href="../assets/css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -170,8 +172,9 @@ $fonts = [
                 <h2>Votre QR Code</h2>
                 <p>Imprimez ce code et collez-le sur vos tables. Vos clients le scanneront pour voir votre menu.</p>
                 
-                <div style="margin: 2rem 0;">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=<?= urlencode($menu_url) ?>" alt="QR Code" style="border-radius:1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin:0 auto;">
+                <!-- Le Canvas qui va générer le QR Code -->
+                <div style="margin: 2rem 0; display: flex; justify-content: center;">
+                    <canvas id="qr-canvas" style="border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 100%; height: auto; width: 300px;"></canvas>
                 </div>
 
                 <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
@@ -179,13 +182,89 @@ $fonts = [
                         Voir le menu
                     </a>
                     
-                    <!-- Bouton de téléchargement HD -->
-                    <a href="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&download=1&data=<?= urlencode($menu_url) ?>" target="_blank" class="btn-primary" style="text-decoration:none; display:flex; align-items:center; gap:0.5rem;">
+                    <!-- Bouton de téléchargement -->
+                    <button onclick="downloadQR()" class="btn-primary" style="display:flex; align-items:center; gap:0.5rem; border:none; cursor:pointer;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         Télécharger en HD
-                    </a>
+                    </button>
                 </div>
             </div>
+
+            <!-- SCRIPT POUR GÉNÉRER LE QR CODE ET LE LOGO -->
+            <script>
+                const menuUrl = "<?= htmlspecialchars($menu_url) ?>";
+                const logoUrl = "<?= !empty($resto['logo_url']) ? htmlspecialchars($resto['logo_url']) : '' ?>";
+                
+                const canvas = document.getElementById('qr-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Taille de haute qualité pour l'impression
+                const size = 1000; 
+                canvas.width = size;
+                canvas.height = size;
+                
+                // 1. Générer la matrice du QR Code
+                // 'H' = High error correction (indispensable pour mettre un logo au milieu)
+                const qr = qrcode(0, 'H'); 
+                qr.addData(menuUrl);
+                qr.make();
+                
+                const moduleCount = qr.getModuleCount();
+                const margin = 80; // Marge blanche autour du QR
+                const tileSize = (size - margin * 2) / moduleCount;
+                
+                // Fond blanc
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                
+                // Dessin des modules noirs
+                ctx.fillStyle = '#000000';
+                for (let row = 0; row < moduleCount; row++) {
+                    for (let col = 0; col < moduleCount; col++) {
+                        if (qr.isDark(row, col)) {
+                            ctx.fillRect(margin + col * tileSize, margin + row * tileSize, tileSize, tileSize);
+                        }
+                    }
+                }
+                
+                // 2. Ajouter le logo au milieu (si le resto en a un)
+                if (logoUrl) {
+                    const img = new Image();
+                    img.crossOrigin = 'Anonymous'; // Indispensable pour télécharger l'image après
+                    img.onload = function() {
+                        const logoSize = size * 0.25; // Le logo prend 25% du QR code
+                        const x = (size - logoSize) / 2;
+                        const y = (size - logoSize) / 2;
+                        
+                        // Dessiner un carré blanc arrondi derrière le logo pour qu'il ressorte bien
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        const r = 30; // Rayon des coins arrondis
+                        ctx.moveTo(x + r, y);
+                        ctx.lineTo(x + logoSize - r, y);
+                        ctx.quadraticCurveTo(x + logoSize, y, x + logoSize, y + r);
+                        ctx.lineTo(x + logoSize, y + logoSize - r);
+                        ctx.quadraticCurveTo(x + logoSize, y + logoSize, x + logoSize - r, y + logoSize);
+                        ctx.lineTo(x + r, y + logoSize);
+                        ctx.quadraticCurveTo(x, y + logoSize, x, y + logoSize - r);
+                        ctx.lineTo(x, y + r);
+                        ctx.quadraticCurveTo(x, y, x + r, y);
+                        ctx.fill();
+                        
+                        // Dessiner le logo
+                        ctx.drawImage(img, x, y, logoSize, logoSize);
+                    };
+                    img.src = logoUrl;
+                }
+
+                // 3. Fonction pour télécharger l'image
+                function downloadQR() {
+                    const link = document.createElement('a');
+                    link.download = 'QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }
+            </script>
         <?php endif; ?>
 
         <!-- ONGLET SÉCURITÉ -->
