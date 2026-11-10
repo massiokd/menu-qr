@@ -71,4 +71,36 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     error_log("Supabase Upload Error ($httpCode): " . $response);
     return null;
 }
+
+function deleteFromSupabase($fileUrl) {
+    $supabaseUrl = getenv('SUPABASE_URL');
+    $supabaseKey = getenv('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!$supabaseUrl || !$supabaseKey || empty($fileUrl)) return false;
+
+    // On extrait juste le nom du fichier depuis l'URL complète
+    $filename = basename(parse_url($fileUrl, PHP_URL_PATH));
+    if (!$filename) return false;
+
+    $cleanUrl = rtrim($supabaseUrl, '/');
+    $url = $cleanUrl . '/storage/v1/object/menu-images/' . $filename;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // On utilise la méthode DELETE
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $supabaseKey,
+        'Authorization: Bearer ' . $supabaseKey
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // 200 ou 204 = succès de la suppression
+    return $httpCode == 200 || $httpCode == 204;
+}
+
 ?>

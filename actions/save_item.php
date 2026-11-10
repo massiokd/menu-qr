@@ -31,6 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($fileToUpload) {
         $new_url = uploadToSupabase($fileToUpload, 'plat');
         if ($new_url) {
+            
+            if (!empty($existing_image)) {
+                deleteFromSupabase($existing_image);
+            }
             $image_url = $new_url;
         } else {
             // L'UPLOAD A ÉCHOUÉ : On redirige avec une erreur
