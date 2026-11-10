@@ -11,38 +11,40 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     $tmpName = $fileArray['tmp_name'];
     
     // --- COMPRESSION ---
-$imageData = file_get_contents($tmpName);
-$image = @imagecreatefromstring($imageData);
+    $image = @imagecreatefromstring(file_get_contents($tmpName));
+    if (!$image) { 
+        error_log("Compression: Impossible de lire l'image.");
+        return null; 
+    }
 
-if (!$image) { 
-    // Si on ne peut pas lire l'image, on renvoie une erreur propre
-    error_log("Compression: Impossible de lire l'image (format non supporté).");
-    return null; 
-}
-
-    // Redimensionnement Max 1000px
+    // Redimensionnement Max 800px (idéal pour un logo)
     $width = imagesx($image);
     $height = imagesy($image);
-    $maxWidth = 1000;
+    $maxWidth = 800;
 
     if ($width > $maxWidth) {
         $newWidth = $maxWidth;
         $newHeight = floor($height * ($maxWidth / $width));
         $newImage = imagecreatetruecolor($newWidth, $newHeight);
-        imagefill($newImage, 0, 0, imagecolorallocate($newImage, 255, 255, 255));
+        
+        // On garde la transparence
+        imagealphablending($newImage, false);
+        imagesavealpha($newImage, true);
+        
         imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
         imagedestroy($image);
         $image = $newImage;
     }
 
+    // On sauvegarde TOUJOURS en PNG pour garder la transparence
     ob_start();
-    imagejpeg($image, null, 75); // 75% de qualité
+    imagepng($image);
     $compressedData = ob_get_clean();
     imagedestroy($image);
 
     // --- UPLOAD ---
     $cleanUrl = rtrim($supabaseUrl, '/'); // Sécurité anti-slash
-    $fileName = $fileNamePrefix . '_' . time() . '_' . uniqid() . '.jpg';
+    $fileName = $fileNamePrefix . '_' . time() . '_' . uniqid() . '.png';
     $url = $cleanUrl . '/storage/v1/object/menu-images/' . $fileName;
     
     $ch = curl_init();
@@ -53,7 +55,7 @@ if (!$image) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'apikey: ' . $supabaseKey,
         'Authorization: Bearer ' . $supabaseKey,
-        'Content-Type: image/jpeg',
+                'Content-Type: image/png',
         'x-upsert: true'
     ]);
     
