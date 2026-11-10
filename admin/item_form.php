@@ -111,8 +111,8 @@ $categories = $stmtCat->fetchAll();
                 img.onload = function() {
                     // 1. Création d'un canvas pour redimensionner
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1000; // Largeur max
-                    const MAX_HEIGHT = 1000; // Hauteur max
+                    const MAX_WIDTH = 1000;
+                    const MAX_HEIGHT = 1000;
                     let width = img.width;
                     let height = img.height;
 
@@ -159,10 +159,7 @@ $categories = $stmtCat->fetchAll();
             reader.readAsDataURL(file);
         }
 
-        // Optionnel : le script de previewImage existant
-        function previewImage(event) { ... }
-
-        // Nouveau script pour le bouton de soumission
+        // Script pour le bouton de soumission (Spinner)
         document.querySelector('form').addEventListener('submit', function(e) {
             const btn = this.querySelector('button[type="submit"]');
             if(btn) {
@@ -170,7 +167,6 @@ $categories = $stmtCat->fetchAll();
                 btn.innerHTML = '<span class="spinner"></span> Enregistrement...';
             }
         });
-    
     </script>
 </body>
 </html>

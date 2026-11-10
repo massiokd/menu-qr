@@ -3,28 +3,17 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     $supabaseUrl = getenv('SUPABASE_URL');
     $supabaseKey = getenv('SUPABASE_SERVICE_ROLE_KEY');
     
-    if (!$supabaseUrl || !$supabaseKey || $fileArray['error'] !== UPLOAD_ERR_OK) {
-        return null;
+    if (!$supabaseUrl || !$supabaseKey) {
+        die("Erreur : Les variables SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY sont manquantes sur Render.");
     }
 
     $tmpName = $fileArray['tmp_name'];
-    $mime = mime_content_type($tmpName);
     
-    // --- 1. COMPRESSION DE L'IMAGE (GD) ---
-    // On crée l'image en mémoire selon son format
-    if ($mime == 'image/jpeg' || $mime == 'image/jpg') {
-        $image = imagecreatefromjpeg($tmpName);
-    } elseif ($mime == 'image/png') {
-        $image = imagecreatefrompng($tmpName);
-    } elseif ($mime == 'image/webp') {
-        $image = imagecreatefromwebp($tmpName);
-    } else {
-        return null; // Format non supporté
-    }
+    // --- COMPRESSION ---
+    $image = imagecreatefromstring(file_get_contents($tmpName));
+    if (!$image) { die("Erreur : Impossible de lire l'image. Format non supporté."); }
 
-    if (!$image) return null;
-
-    // Redimensionnement (Max 1000px de large pour garder une bonne qualité)
+    // Redimensionnement Max 1000px
     $width = imagesx($image);
     $height = imagesy($image);
     $maxWidth = 1000;
@@ -33,28 +22,18 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
         $newWidth = $maxWidth;
         $newHeight = floor($height * ($maxWidth / $width));
         $newImage = imagecreatetruecolor($newWidth, $newHeight);
-        
-        // Garder la transparence pour les PNG
-        imagealphablending($newImage, false);
-        imagesavealpha($newImage, true);
-        
+        imagefill($newImage, 0, 0, imagecolorallocate($newImage, 255, 255, 255));
         imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
         imagedestroy($image);
         $image = $newImage;
     }
 
-    // Capture de l'image compressée en JPEG (qualité 75%)
     ob_start();
-    // On met un fond blanc pour les PNG transparents qui deviennent des JPEG
-    $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
-    imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
-    imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
-    imagejpeg($bg, null, 75);
+    imagejpeg($image, null, 75); // 75% de qualité
     $compressedData = ob_get_clean();
     imagedestroy($image);
-    imagedestroy($bg);
 
-    // --- 2. UPLOAD VERS SUPABASE STORAGE ---
+    // --- UPLOAD ---
     $fileName = $fileNamePrefix . '_' . time() . '_' . uniqid() . '.jpg';
     $url = $supabaseUrl . '/storage/v1/object/menu-images/' . $fileName;
     
@@ -73,10 +52,15 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($httpCode == 200 || $httpCode == 201) {
-        return $supabaseUrl . '/storage/v1/object/public/menu-images/' . $fileName;
+    // SI L'UPLOAD ÉCHOUE, ON AFFICHE L'ERREUR EXACTE
+    if ($httpCode != 200 && $httpCode != 201) {
+        echo "<h1>Erreur d'upload Supabase (Code $httpCode)</h1>";
+        echo "<p>Réponse de Supabase : </p>";
+        echo "<pre>" . htmlspecialchars($response) . "</pre>";
+        echo "<p>Vérifie que ton bucket s'appelle bien <strong>menu-images</strong> et qu'il est public.</p>";
+        die();
     }
-    
-    return null;
+
+    return $supabaseUrl . '/storage/v1/object/public/menu-images/' . $fileName;
 }
 ?>
