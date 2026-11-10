@@ -174,7 +174,17 @@ $fonts = [
                 <p>Imprimez ce code et placez-le sur vos tables.</p>
                 
                 <!-- Le conteneur du QR Code -->
-                <div id="qr-container" style="margin: 2rem auto; display: flex; justify-content: center;"></div>
+                <div id="qr-container" style="margin: 2rem auto; display: flex; justify-content: center; max-width: 250px; width: 100%;"></div>
+
+<style>
+    /* Force le QR Code à ne pas dépasser son conteneur */
+    #qr-container canvas, #qr-container svg {
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>
 
                 <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top: 1rem;">
                     <a href="<?= htmlspecialchars($menu_url) ?>" target="_blank" class="btn-primary" style="text-decoration:none; background:#f3f4f6; color:var(--text-dark);">
@@ -234,9 +244,18 @@ $fonts = [
                 // On l'affiche dans le conteneur
                 qrCode.append(document.getElementById("qr-container"));
 
-                // Fonction pour télécharger
+                // Fonction pour télécharger en haute définition
                 document.getElementById("download-btn").addEventListener("click", () => {
-                    qrCode.download({ name: "QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>", extension: "png" });
+                    // 1. On change la taille pour la version HD (1000x1000)
+                    qrCode.update({ width: 1000, height: 1000 });
+                    
+                    // 2. On lance le téléchargement
+                    setTimeout(() => {
+                        qrCode.download({ name: "QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>", extension: "png" });
+                        
+                        // 3. On remet à la taille normale pour l'affichage sur le site
+                        setTimeout(() => qrCode.update({ width: 250, height: 250 }), 500);
+                    }, 100);
                 });
             </script>
         <?php endif; ?>
