@@ -7,108 +7,37 @@ function showError($message) {
     <!DOCTYPE html>
     <html lang="fr">
     <head>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><path d='M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01'></path></svg>">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Menu introuvable - FenneTech</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><path d='M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01'></path></svg>">
         <link rel="stylesheet" href="assets/css/menu.css">
         <style>
-            .error-page {
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 1.5rem;
-                position: relative;
-                z-index: 10;
-            }
-            .error-card {
-                background: var(--card);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid var(--border);
-                border-radius: 1.5rem;
-                padding: 3rem 2rem;
-                text-align: center;
-                max-width: 400px;
-                width: 100%;
-                box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
-                animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            }
-            .error-icon {
-                width: 80px;
-                height: 80px;
-                background: #fee2e2;
-                color: #dc2626;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 1.5rem;
-            }
-            .error-title {
-                font-family: var(--font-title);
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: var(--text);
-                margin-bottom: 0.75rem;
-            }
-            .error-message {
-                color: var(--gray);
-                font-size: 0.95rem;
-                line-height: 1.5;
-                margin-bottom: 2rem;
-            }
-            .error-btn {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-                background: var(--brand);
-                color: white;
-                text-decoration: none;
-                padding: 1rem 1.5rem;
-                border-radius: 0.75rem;
-                font-weight: 700;
-                font-size: 0.95rem;
-                transition: all 0.2s;
-                width: 100%;
-            }
-            .error-btn:hover {
-                opacity: 0.9;
-                transform: translateY(-2px);
-            }
-            @keyframes slideUpFade {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
+            .error-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; position: relative; z-index: 10; }
+            .error-card { background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 1.5rem; padding: 3rem 2rem; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+            .error-icon { width: 80px; height: 80px; background: #fee2e2; color: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+            .error-title { font-family: var(--font-title); font-size: 1.8rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
+            .error-message { color: var(--gray); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem; }
+            .error-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--brand); color: white; text-decoration: none; padding: 1rem 1.5rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; width: 100%; }
+            .error-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+            @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         </style>
     </head>
     <body data-theme="classique" data-font="Plus Jakarta Sans">
-        
-        <div class="bg-aurora">
-            <div class="blob blob-1"></div>
-            <div class="blob blob-2"></div>
-        </div>
+        <div class="bg-aurora"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
         <div class="noise-overlay"></div>
-
         <div class="error-page">
             <div class="error-card">
                 <div class="error-icon">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                 </div>
-                
                 <h1 class="error-title">Oups, menu introuvable</h1>
                 <p class="error-message"><?= htmlspecialchars($message) ?></p>
-                
                 <a href="https://wa.me/213559322518" target="_blank" class="error-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                     Contacter le support
                 </a>
-                
-                <p style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--gray);">
-                    Propulsé par <a href="https://fennec.tech" style="color: var(--brand); text-decoration: none; font-weight: bold;">FenneTech</a>
-                </p>
+                <p style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--gray);">Propulsé par <a href="https://fennec.tech" style="color: var(--brand); text-decoration: none; font-weight: bold;">FenneTech</a></p>
             </div>
         </div>
     </body>
@@ -117,22 +46,16 @@ function showError($message) {
     exit;
 }
 
-// 1. Vérification du slug
 $slug = $_GET['slug'] ?? '';
-if (empty($slug)) { 
-    showError("Aucun identifiant de restaurant n'a été fourni dans le lien."); 
-}
+if (empty($slug)) { showError("Aucun identifiant de restaurant n'a été fourni dans le lien."); }
 
 $pdo = getDB();
 
-// 2. Vérification du restaurant
 $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE slug = ? AND is_active = true AND (plan = 'lifetime' OR expires_at > NOW() OR subscription_status = 'pending_verification')");
 $stmt->execute([$slug]);
 $resto = $stmt->fetch();
 
-if (!$resto) { 
-    showError("Ce menu n'existe pas, a été déplacé, ou l'abonnement du restaurant a expiré."); 
-}
+if (!$resto) { showError("Ce menu n'existe pas, a été déplacé, ou l'abonnement du restaurant a expiré."); }
 
 // 1. Enregistrer le scan
 $stmtScan = $pdo->prepare("INSERT INTO menu_scans (restaurant_id) VALUES (?)");
@@ -164,7 +87,7 @@ foreach ($all_items as $item) {
     $items_by_category[$item['cat_id']][] = $item;
 }
 
-// 5. Préparer la première catégorie active (celle qui a des plats)
+// 5. Préparer la première catégorie active
 $first_category_id = null;
 foreach ($categories as $cat) {
     if (!empty($items_by_category[$cat['id']])) {
@@ -176,10 +99,10 @@ foreach ($categories as $cat) {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><path d='M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01'></path></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu - <?= htmlspecialchars($resto['nom']) ?></title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><path d='M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01'></path></svg>">
     <link rel="stylesheet" href="assets/css/menu.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -192,11 +115,6 @@ foreach ($categories as $cat) {
     <div class="noise-overlay"></div>
 
     <header class="header">
-        <!-- Bouton de changement de langue -->
-        <button id="langToggleBtn" class="lang-btn" onclick="toggleLanguage()">
-            🌍 العربية
-        </button>
-        
         <?php if($resto['logo_url']): ?>
             <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo">
         <?php endif; ?>
@@ -204,10 +122,7 @@ foreach ($categories as $cat) {
         <p class="restaurant-subtitle"><?= htmlspecialchars($resto['slogan'] ?? 'Découvrez notre carte') ?></p>
     </header>
 
-    <!-- ZONE STICKY (Recherche + Onglets) -->
     <div class="sticky-container">
-        
-        <!-- Barre de recherche -->
         <div class="client-search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="clientSearch" placeholder="Rechercher un plat..." onkeyup="filterMenu()">
@@ -216,7 +131,6 @@ foreach ($categories as $cat) {
             </button>
         </div>
 
-        <!-- Onglets des catégories -->
         <div class="category-tabs-wrapper" id="tabsWrapper">
             <div class="category-tabs">
                 <?php foreach ($categories as $cat): 
@@ -232,11 +146,9 @@ foreach ($categories as $cat) {
                 <?php endforeach; ?>
             </div>
         </div>
-
     </div>
 
     <main class="main-content">
-        <!-- Message aucun résultat -->
         <div id="noResultMsg" style="display:none; text-align:center; padding:3rem 1rem; color:var(--gray);">
             <p style="font-size:3rem; margin-bottom:1rem;">🦊</p>
             <p style="font-weight:600; font-size:1.1rem;">Aucun plat ne correspond à votre recherche.</p>
@@ -257,8 +169,7 @@ foreach ($categories as $cat) {
                                 <h3 class="item-name"><?= htmlspecialchars($item['nom']) ?></h3>
                                 <p class="item-desc"><?= htmlspecialchars($item['description']) ?></p>
                                 <div class="item-bottom">
-                                    <!-- dir="ltr" force l'affichage de gauche à droite pour les chiffres -->
-                                    <span class="item-price notranslate" dir="ltr">
+                                    <span class="item-price">
                                         <?= number_format($item['prix'], 0, ',', ' ') ?> <span>DZD</span>
                                     </span>
                                     <?php if(!$item['disponible']): ?>
@@ -279,7 +190,6 @@ foreach ($categories as $cat) {
         <?php endforeach; ?>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <?php if(!empty($resto['instagram_url']) || !empty($resto['facebook_url'])): ?>
             <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
@@ -304,39 +214,11 @@ foreach ($categories as $cat) {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
     </button>
 
-    <!-- INITIALISATION DE LA TRADUCTION (translate.js) -->
-    <script src="https://res.zvo.cn/translate/translate.js"></script>
-    
     <script>
-        // --- LANGUE ---
-        translate.language.setLocal('french');
-        translate.service.use('client.edge');
-        translate.execute();
-
-        let currentLang = 'french';
-
-        function toggleLanguage() {
-            const btn = document.getElementById('langToggleBtn');
-            
-            if (currentLang === 'french') {
-                currentLang = 'arabic';
-                translate.changeLanguage('arabic');
-                btn.innerHTML = "🌍 Français";
-                document.body.setAttribute('dir', 'rtl');
-            } else {
-                currentLang = 'french';
-                translate.changeLanguage('french');
-                btn.innerHTML = "🌍 العربية";
-                document.body.setAttribute('dir', 'ltr');
-            }
-        }
-
-        // --- GESTION DES ONGLETS ---
         let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
 
         function switchTab(catId) {
             currentCategoryId = catId;
-            
             const searchInput = document.getElementById('clientSearch');
             if (searchInput.value.trim() !== '') {
                 searchInput.value = '';
@@ -348,7 +230,6 @@ foreach ($categories as $cat) {
             document.querySelectorAll('.category-section').forEach(sec => {
                 sec.classList.remove('active');
                 sec.style.display = ''; 
-                
                 sec.querySelectorAll('.menu-card').forEach(item => {
                     item.style.display = 'flex';
                     item.classList.add('active');
@@ -356,9 +237,7 @@ foreach ($categories as $cat) {
             });
 
             const target = document.getElementById('cat-' + catId);
-            if(target) {
-                target.classList.add('active');
-            }
+            if(target) target.classList.add('active');
 
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active');
@@ -367,11 +246,9 @@ foreach ($categories as $cat) {
                     b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 }
             });
-            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- BARRE DE RECHERCHE ---
         function filterMenu() {
             const query = document.getElementById('clientSearch').value.toLowerCase().trim();
             const clearBtn = document.getElementById('clearBtn');
@@ -424,7 +301,6 @@ foreach ($categories as $cat) {
             filterMenu();
         }
 
-        // --- ANIMATIONS ET BOUTON RETOUR EN HAUT ---
         document.querySelectorAll('.category-section.active .reveal').forEach(el => el.classList.add('active'));
 
         const backToTopBtn = document.getElementById("backToTop");
