@@ -32,5 +32,17 @@ if ($payment) {
     $stmtPay->execute([$note_admin, $payment_id]);
 }
 
+ require 'email_helper.php';
+    
+    // On récupère les infos pour l'email
+    $stmtInfo = $pdo->prepare("SELECT u.email, r.nom as resto_nom, r.expires_at, r.plan FROM users u JOIN restaurants r ON u.restaurant_id = r.id WHERE u.restaurant_id = ? AND u.role = 'gerant'");
+    $stmtInfo->execute([$resto_id]);
+    $info = $stmtInfo->fetch();
+
+    if ($info) {
+        $expiry_date_fr = $info['plan'] === 'lifetime' ? 'À vie' : date('d/m/Y', strtotime($info['expires_at']));
+        sendPaymentConfirmedEmail($info['email'], $info['resto_nom'], $info['plan'], $expiry_date_fr);
+    }
+
 header('Location: ../super_admin.php');
 exit;

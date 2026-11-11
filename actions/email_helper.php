@@ -78,4 +78,65 @@ function sendSecurityAlert($toEmail, $restoName) {
 
     return sendEmailBrevo($apiKey, $toEmail, "⚠️ Alerte de sécurité - Demande de réinitialisation", $html);
 }
+
+// Fonction : Abonnement expire bientôt
+function sendExpiringSoonEmail($toEmail, $restoName, $daysLeft, $expiryDate) {
+    $apiKey = getenv('BREVO_API_KEY');
+    if (!$apiKey) return false;
+
+    $html = "
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px;'>
+        <h2 style='color: #f59e0b;'>⚠️ Votre abonnement expire bientôt</h2>
+        <p>Bonjour,</p>
+        <p>L'abonnement de votre restaurant <strong>{$restoName}</strong> expire dans <strong>{$daysLeft} jours</strong> (le {$expiryDate}).</p>
+        <p>Pour éviter que votre menu ne soit coupé pour vos clients, pensez à renouveler votre abonnement dès maintenant.</p>
+        <div style='text-align: center; margin: 30px 0;'>
+            <a href='https://menu-qr-ebke.onrender.com/login.php' style='background-color: #c2410c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Se connecter pour renouveler</a>
+        </div>
+        <p style='font-size: 12px; color: #6b7280;'>L'équipe FenneTech 🦊</p>
+    </div>
+    ";
+    return sendEmailBrevo($apiKey, $toEmail, "⚠️ Votre abonnement expire bientôt", $html);
+}
+
+// Fonction : Abonnement expiré
+function sendExpiredEmail($toEmail, $restoName) {
+    $apiKey = getenv('BREVO_API_KEY');
+    if (!$apiKey) return false;
+
+    $html = "
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px;'>
+        <h2 style='color: #dc2626;'>🚨 Votre abonnement a expiré</h2>
+        <p>Bonjour,</p>
+        <p>L'abonnement de votre restaurant <strong>{$restoName}</strong> a expiré.</p>
+        <p>Votre menu n'est plus accessible par vos clients. Pour le réactiver, veuillez régulariser votre situation.</p>
+        <div style='text-align: center; margin: 30px 0;'>
+            <a href='https://menu-qr-ebke.onrender.com/login.php' style='background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Réactiver mon compte</a>
+        </div>
+        <p style='font-size: 12px; color: #6b7280;'>L'équipe FenneTech 🦊</p>
+    </div>
+    ";
+    return sendEmailBrevo($apiKey, $toEmail, "🚨 Votre abonnement a expiré", $html);
+}
+
+// Fonction : Paiement validé
+function sendPaymentConfirmedEmail($toEmail, $restoName, $plan, $expiryDate) {
+    $apiKey = getenv('BREVO_API_KEY');
+    if (!$apiKey) return false;
+
+    $html = "
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px;'>
+        <h2 style='color: #10b981;'>✅ Paiement validé</h2>
+        <p>Bonjour,</p>
+        <p>Nous avons le plaisir de vous informer que le paiement pour votre restaurant <strong>{$restoName}</strong> a bien été validé.</p>
+        <p>Votre abonnement <strong>{$plan}</strong> est maintenant actif jusqu'au <strong>{$expiryDate}</strong>.</p>
+        <p>Merci pour votre confiance !</p>
+        <div style='text-align: center; margin: 30px 0;'>
+            <a href='https://menu-qr-ebke.onrender.com/login.php' style='background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Accéder à mon menu</a>
+        </div>
+        <p style='font-size: 12px; color: #6b7280;'>L'équipe FenneTech 🦊</p>
+    </div>
+    ";
+    return sendEmailBrevo($apiKey, $toEmail, "✅ Votre paiement a été validé !", $html);
+}
 ?>
