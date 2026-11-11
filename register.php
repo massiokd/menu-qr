@@ -80,6 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="login-card" style="max-width: 450px; padding: 2rem;">
+        <!-- Logo FenneTech -->
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 40px; width: auto; margin: 0 auto;">
+        </div>
+
         <h1 style="font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem;">Créer un compte</h1>
         <p style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-bottom: 1.5rem;">14 jours d'essai gratuit. Sans engagement.</p>
         
