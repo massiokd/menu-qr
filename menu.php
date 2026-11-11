@@ -435,33 +435,28 @@ foreach ($categories as $cat) {
         });
         backToTopBtn.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); });
 
-               // --- GESTION DE LA LANGUE ---
+        // --- GESTION DE LA LANGUE (Méthode par Cookie) ---
         function toggleLanguage() {
             const btn = document.getElementById('langToggleBtn');
-            const select = document.querySelector('.goog-te-combo');
-
-            // Si Google Translate n'est pas encore chargé, on attend 500ms et on réessaie
-            if (!select) {
-                btn.innerHTML = "⏳ Chargement...";
-                setTimeout(toggleLanguage, 500);
-                return;
-            }
-
-            // On vérifie la langue actuelle
-            if (select.value === 'ar') {
+            // On regarde la langue actuelle (si le cookie existe)
+            const currentLang = document.cookie.includes('googtrans=/fr/ar') ? 'ar' : 'fr';
+            
+            if (currentLang === 'ar') {
                 // Retour au français
-                select.value = 'fr';
-                btn.innerHTML = "🌍 العربية";
+                document.cookie = "googtrans=/fr/fr;path=/";
+                document.cookie = "googtrans=/fr/fr;path=/;domain=" + window.location.hostname;
                 document.body.setAttribute('dir', 'ltr');
+                btn.innerHTML = "🌍 العربية";
             } else {
                 // Passage en arabe
-                select.value = 'ar';
-                btn.innerHTML = "🌍 Français";
+                document.cookie = "googtrans=/fr/ar;path=/";
+                document.cookie = "googtrans=/fr/ar;path=/;domain=" + window.location.hostname;
                 document.body.setAttribute('dir', 'rtl');
+                btn.innerHTML = "🌍 Français";
             }
             
-            // On déclenche la traduction
-            select.dispatchEvent(new Event('change'));
+            // On recharge la page pour appliquer la traduction
+            window.location.reload();
         }
 
     </script>
