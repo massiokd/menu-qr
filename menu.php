@@ -6,6 +6,18 @@ function showError($message) {
     ?>
     <!DOCTYPE html>
     <html lang="fr">
+            <!-- Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'fr', 
+                includedLanguages: 'ar', 
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -190,6 +202,8 @@ foreach ($categories as $cat) {
     <div class="noise-overlay"></div>
 
     <header class="header">
+                <!-- Bouton de changement de langue -->
+        <button id="langToggleBtn" class="lang-btn" onclick="toggleLanguage()">AR</button>
         <?php if($resto['logo_url']): ?>
             <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo">
         <?php endif; ?>
@@ -418,6 +432,28 @@ foreach ($categories as $cat) {
             else { backToTopBtn.classList.remove("show"); }
         });
         backToTopBtn.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); });
+
+        // --- GESTION DE LA LANGUE ---
+        function toggleLanguage() {
+            const btn = document.getElementById('langToggleBtn');
+            const select = document.querySelector('.goog-te-combo');
+            const isArabic = btn.textContent.trim() === 'FR'; // Si le bouton dit 'FR', c'est qu'on est en AR
+
+            if (select) {
+                if (isArabic) {
+                    select.value = 'fr'; // Retour au français
+                    btn.textContent = 'AR';
+                    document.body.setAttribute('dir', 'ltr');
+                } else {
+                    select.value = 'ar'; // Traduire en arabe
+                    btn.textContent = 'FR';
+                    document.body.setAttribute('dir', 'rtl');
+                }
+                // Déclenche la traduction
+                select.dispatchEvent(new Event('change'));
+            }
+        }
+
     </script>
 </body>
 </html>
