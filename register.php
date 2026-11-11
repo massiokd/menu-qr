@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-card" style="max-width: 450px; padding: 2rem;">
         <!-- Logo FenneTech -->
         <div style="text-align: center; margin-bottom: 1rem;">
-            <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 60px; width: auto; margin: 0 auto;">
+            <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 90px; width: auto; margin: 0 auto;">
         </div>
 
         <h1 style="font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem;">Créer un compte</h1>

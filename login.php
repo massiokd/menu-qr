@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-card">
         <!-- Logo FenneTech -->
         <div style="text-align: center; margin-bottom: 1.5rem;">
-            <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 65px; width: auto; margin: 0 auto;">
+            <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 100px; width: auto; margin: 0 auto;">
         </div>
         
         <h1>Espace Gérant</h1>
