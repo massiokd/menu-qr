@@ -125,7 +125,7 @@ if (empty($slug)) {
 $pdo = getDB();
 
 // 2. Vérification du restaurant
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE slug = ? AND is_active = true AND (plan = 'lifetime' OR expires_at > NOW())");
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE slug = ? AND is_active = true AND (plan = 'lifetime' OR expires_at > NOW() OR subscription_status = 'pending_verification')");
 $stmt->execute([$slug]);
 $resto = $stmt->fetch();
 

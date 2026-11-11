@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Africa/Algiers');
 // config/db.php
 function getDB() {
     $host = getenv('DB_HOST');

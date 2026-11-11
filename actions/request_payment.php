@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("INSERT INTO payments (restaurant_id, plan, montant, reference, receipt_url, statut) VALUES (?, ?, ?, ?, ?, 'en_attente')");
     $stmt->execute([$resto_id, $plan, $montant, $reference, $receipt_url]);
 
-    // Activer le menu temporairement (en attente de vérification)
-    $new_expires_at = date('Y-m-d H:i:s', strtotime('+1 month'));
-    $stmtUpdate = $pdo->prepare("UPDATE restaurants SET subscription_status = 'pending_verification', is_active = true, expires_at = ? WHERE id = ?");
-    $stmtUpdate->execute([$new_expires_at, $resto_id]);
+    // On active le menu temporairement, mais on NE TOUCHE PAS à la date d'expiration.
+    // C'est la validation de l'admin qui calculera la vraie date.
+    $stmtUpdate = $pdo->prepare("UPDATE restaurants SET subscription_status = 'pending_verification', is_active = true WHERE id = ?");
+    $stmtUpdate->execute([$resto_id]);
 }
 
 header('Location: ../admin/subscription.php?success=1');
