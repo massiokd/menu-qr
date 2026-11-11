@@ -10,17 +10,21 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom_resto = trim($_POST['nom_resto'] ?? '');
+    $telephone = trim($_POST['telephone'] ?? '');
     $email = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
     
     // On génère le slug à partir du nom (ex: "Le Comptoir" -> "le-comptoir")
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom_resto)));
     $slug = trim($slug, '-');
 
-    if (empty($nom_resto) || empty($email) || empty($password)) {
+    if (empty($nom_resto) || empty($telephone) || empty($email) || empty($password)) {
         $error = "Tous les champs sont obligatoires.";
     } elseif (strlen($password) < 6) {
         $error = "Le mot de passe doit contenir au moins 6 caractères.";
+    } elseif ($password !== $confirm_password) {
+        $error = "Les deux mots de passe ne correspondent pas.";
     } else {
         $pdo = getDB();
         
@@ -35,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // 1. Créer le restaurant (Essai 14 jours)
                 $expires_at = date('Y-m-d H:i:s', strtotime('+14 days'));
-                $stmtResto = $pdo->prepare("INSERT INTO restaurants (nom, slug, email, plan, expires_at, is_active, subscription_status) VALUES (?, ?, ?, 'trial', ?, true, 'active')");
-                $stmtResto->execute([$nom_resto, $slug, $email, $expires_at]);
+                $stmtResto = $pdo->prepare("INSERT INTO restaurants (nom, slug, email, telephone, plan, expires_at, is_active, subscription_status) VALUES (?, ?, ?, ?, 'trial', ?, true, 'active')");
+                $stmtResto->execute([$nom_resto, $slug, $email, $telephone, $expires_at]);
                 $resto_id = $pdo->lastInsertId();
 
                 // 2. Créer l'utilisateur (inactif jusqu'à la vérification)
@@ -75,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
 <body>
-    <div class="login-card" style="max-width: 450px;">
+    <div class="login-card" style="max-width: 450px; padding: 2rem;">
         <h1 style="font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem;">Créer un compte</h1>
         <p style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-bottom: 1.5rem;">14 jours d'essai gratuit. Sans engagement.</p>
         
@@ -94,14 +98,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" name="nom_resto" placeholder="Ex: Pizzeria Chez Paul" required>
                 </div>
                 <div class="form-group">
+                    <label>Numéro de téléphone</label>
+                    <input type="tel" name="telephone" placeholder="Ex: 0550 12 34 56" required>
+                </div>
+                <div class="form-group">
                     <label>Email</label>
                     <input type="email" name="email" placeholder="votre@email.com" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Mot de passe</label>
-                    <input type="password" name="password" placeholder="Min. 6 caractères" required>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="reg-pass" placeholder="Min. 6 caractères" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('reg-pass', this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="btn-submit">Démarrer mon essai gratuit</button>
+
+                <div class="form-group">
+                    <label>Confirmer le mot de passe</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="confirm_password" id="reg-conf" placeholder="Répétez le mot de passe" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('reg-conf', this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" style="margin-top: 1rem;">Démarrer mon essai gratuit</button>
             </form>
         <?php endif; ?>
         
@@ -109,5 +134,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="login.php" style="color: var(--text-gray); font-size: 0.85rem; text-decoration: none;">Déjà un compte ? Se connecter</a>
         </div>
     </div>
+
+    <script>
+        function togglePassword(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            } else {
+                input.type = "password";
+                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -99,6 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
             <button type="submit" class="btn-submit">Se connecter</button>
         </form>
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem;">
+            <span style="color: var(--text-gray);">Nouveau sur FenneTech ?</span> 
+            <a href="register.php" style="color: var(--brand); font-weight: bold; text-decoration: none;">Créer un compte</a>
+        </div>
     </div>
 
     <script>
