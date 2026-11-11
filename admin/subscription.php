@@ -44,6 +44,16 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
 
     <main class="container">
         
+        <?php if(isset($_GET['error'])): ?>
+            <div style="background:#fee2e2; color:#991b1b; padding:1rem; border-radius:0.5rem; margin-bottom:1.5rem; border:1px solid #fecaca; text-align:center; font-weight:bold; font-size:0.9rem;">
+                <?php 
+                    if($_GET['error'] == 'already_pending') echo "⏳ Vous avez déjà une demande de paiement en cours de vérification.";
+                    if($_GET['error'] == 'upload_failed') echo "❌ L'image du reçu n'a pas pu être envoyée. Vérifiez votre connexion et réessayez.";
+                    if($_GET['error'] == 'no_receipt') echo "📄 Vous devez joindre une preuve de paiement (capture d'écran/photo) pour continuer.";
+                ?>
+            </div>
+        <?php endif; ?>
+        
         <!-- Statut Actuel -->
         <div class="theme-selector-card" style="background: linear-gradient(135deg, var(--text-dark) 0%, #000 100%); color: white; border: none;">
             <h2 style="color:white; margin-bottom:1rem;">Statut de votre compte</h2>

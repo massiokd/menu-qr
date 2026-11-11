@@ -16,13 +16,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment = $stmt->fetch();
 
     if ($payment) {
-        // 1. Mettre à jour le paiement avec la raison
+        $resto_id = $payment['restaurant_id'];
+
+        // 1. Mettre à jour le paiement
         $stmtPay = $pdo->prepare("UPDATE payments SET statut = 'refuse', admin_note = ? WHERE id = ?");
         $stmtPay->execute([$reason, $payment_id]);
 
-        // 2. Suspendre le restaurant (car le paiement est faux)
-        $stmtResto = $pdo->prepare("UPDATE restaurants SET subscription_status = 'suspended', is_active = false WHERE id = ?");
-        $stmtResto->execute([$payment['restaurant_id']]);
+        // 2. Vérifier si le restaurant est encore valide
+        $stmtCurrent = $pdo->prepare("SELECT expires_at FROM restaurants WHERE id = ?");
+        $stmtCurrent->execute([$resto_id]);
+        $current_expiry = $stmtCurrent->fetchColumn();
+        
+        $is_still_valid = ($current_expiry && strtotime($current_expiry) > time());
+
+        // 3. Si le restaurant est encore valide, on le laisse tranquille. Sinon, on le suspend.
+        if ($is_still_valid) {
+            // Il lui reste du temps, on annule juste le statut "en attente"
+            $stmtResto = $pdo->prepare("UPDATE restaurants SET subscription_status = 'active' WHERE id = ?");
+        } else {
+            // Il était déjà expiré, on le suspend
+            $stmtResto = $pdo->prepare("UPDATE restaurants SET subscription_status = 'suspended', is_active = false WHERE id = ?");
+        }
+        $stmtResto->execute([$resto_id]);
     }
 }
 

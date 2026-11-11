@@ -15,6 +15,16 @@ $stmt->execute([$payment_id]);
 $payment = $stmt->fetch();
 
 if ($payment) {
+    
+    // 🛡️ SÉCURITÉ : On vérifie que le plan existe et que le montant correspond exactement
+    $prix = ['monthly' => 800, 'yearly' => 6900, 'lifetime' => 14900];
+    $plan_verifie = $payment['plan'];
+    
+    if (!isset($prix[$plan_verifie]) || $payment['montant'] != $prix[$plan_verifie]) {
+        // Si le montant est faux, on arrête tout et on affiche une erreur
+        die("Erreur critique : Le montant du paiement ne correspond pas au plan sélectionné. Paiement bloqué.");
+    }
+
     $resto_id = $payment['restaurant_id'];
     $plan = $payment['plan'];
 
