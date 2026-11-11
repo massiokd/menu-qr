@@ -211,7 +211,7 @@ foreach ($categories as $cat) {
         <div class="footer-brand">
             <p style="margin-bottom: 0.75rem;">Propulsé par</p>
             <a href="https://massiokd.github.io/fennetech-site/" target="_blank" style="display: inline-block; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
-                <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 90px; width: auto; display: block;">
+                                <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 50px; width: auto; display: block;">
             </a>
         </div>
     </footer>
