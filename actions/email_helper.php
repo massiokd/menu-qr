@@ -139,4 +139,26 @@ function sendPaymentConfirmedEmail($toEmail, $restoName, $plan, $expiryDate) {
     ";
     return sendEmailBrevo($apiKey, $toEmail, "✅ Votre paiement a été validé !", $html);
 }
+
+// Fonction : Confirmation de création de compte
+function sendVerificationEmail($toEmail, $restoName, $verifyLink) {
+    $apiKey = getenv('BREVO_API_KEY');
+    if (!$apiKey) return false;
+
+    $html = "
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px;'>
+        <h2 style='color: #c2410c;'>Bienvenue sur FenneTech ! 🦊</h2>
+        <p>Bonjour,</p>
+        <p>Votre compte pour le restaurant <strong>{$restoName}</strong> a bien été créé.</p>
+        <p>Pour activer votre compte et commencer à configurer votre menu, veuillez cliquer sur le bouton ci-dessous :</p>
+        <div style='text-align: center; margin: 30px 0;'>
+            <a href='{$verifyLink}' style='background-color: #c2410c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Activer mon compte</a>
+        </div>
+        <p style='font-size: 12px; color: #6b7280;'>Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement cet email.</p>
+        <p style='font-size: 12px; color: #6b7280;'>L'équipe FenneTech 🦊</p>
+    </div>
+    ";
+    return sendEmailBrevo($apiKey, $toEmail, "Activez votre compte FenneTech", $html);
+}
+
 ?>
