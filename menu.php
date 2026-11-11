@@ -6,18 +6,6 @@ function showError($message) {
     ?>
     <!DOCTYPE html>
     <html lang="fr">
-            <!-- Google Translate -->
-    <div id="google_translate_element" style="display:none;"></div>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'fr', 
-                includedLanguages: 'ar', 
-                autoDisplay: false
-            }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -202,10 +190,11 @@ foreach ($categories as $cat) {
     <div class="noise-overlay"></div>
 
     <header class="header">
-                        <!-- Bouton de changement de langue -->
+        <!-- Bouton de changement de langue -->
         <button id="langToggleBtn" class="lang-btn" onclick="toggleLanguage()">
             🌍 العربية
         </button>
+        
         <?php if($resto['logo_url']): ?>
             <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo">
         <?php endif; ?>
@@ -225,12 +214,12 @@ foreach ($categories as $cat) {
             </button>
         </div>
 
-        <!-- Onglets des catégories (On saute les vides) -->
+        <!-- Onglets des catégories -->
         <div class="category-tabs-wrapper" id="tabsWrapper">
             <div class="category-tabs">
                 <?php foreach ($categories as $cat): 
                     $count = count($items_by_category[$cat['id']] ?? []);
-                    if ($count === 0) continue; // On ne crée pas d'onglet si c'est vide
+                    if ($count === 0) continue;
                 ?>
                     <button class="tab-btn <?= $first_category_id == $cat['id'] ? 'active' : '' ?>" 
                             data-id="<?= $cat['id'] ?>"
@@ -254,7 +243,7 @@ foreach ($categories as $cat) {
 
         <?php foreach ($categories as $cat): 
             $items = $items_by_category[$cat['id']] ?? [];
-            if (empty($items)) continue; // On saute les sections vides
+            if (empty($items)) continue;
         ?>
             <div id="cat-<?= $cat['id'] ?>" class="category-section <?= $first_category_id == $cat['id'] ? 'active' : '' ?>">
                 <h2 class="category-title"><?= htmlspecialchars($cat['nom']) ?></h2>
@@ -263,16 +252,8 @@ foreach ($categories as $cat) {
                     <?php foreach ($items as $item): ?>
                         <div class="menu-card reveal <?= !$item['disponible'] ? 'unavailable' : '' ?>">
                             <div class="item-details">
-                                <h3 class="item-name" 
-                                    data-fr="<?= htmlspecialchars($item['nom']) ?>" 
-                                    data-ar="<?= htmlspecialchars($item['nom_ar'] ?: $item['nom']) ?>">
-                                    <?= htmlspecialchars($item['nom']) ?>
-                                </h3>
-                                <p class="item-desc" 
-                                   data-fr="<?= htmlspecialchars($item['description']) ?>" 
-                                   data-ar="<?= htmlspecialchars($item['description_ar'] ?: $item['description']) ?>">
-                                    <?= htmlspecialchars($item['description']) ?>
-                                </p>
+                                <h3 class="item-name"><?= htmlspecialchars($item['nom']) ?></h3>
+                                <p class="item-desc"><?= htmlspecialchars($item['description']) ?></p>
                                 <div class="item-bottom">
                                     <span class="item-price">
                                         <?= number_format($item['prix'], 0, ',', ' ') ?> <span>DZD</span>
@@ -320,15 +301,39 @@ foreach ($categories as $cat) {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
     </button>
 
+    <!-- INITIALISATION DE LA TRADUCTION (translate.js) -->
+    <script src="https://res.zvo.cn/translate/translate.js"></script>
+    
     <script>
-        // ID de la catégorie active au départ
-        let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
+        // --- LANGUE ---
+        translate.language.setLocal('french');
+        translate.service.use('client.edge');
+        translate.execute();
+
+        let currentLang = 'french';
+
+        function toggleLanguage() {
+            const btn = document.getElementById('langToggleBtn');
+            
+            if (currentLang === 'french') {
+                currentLang = 'arabic';
+                translate.changeLanguage('arabic');
+                btn.innerHTML = "🌍 Français";
+                document.body.setAttribute('dir', 'rtl');
+            } else {
+                currentLang = 'french';
+                translate.changeLanguage('french');
+                btn.innerHTML = "🌍 العربية";
+                document.body.setAttribute('dir', 'ltr');
+            }
+        }
 
         // --- GESTION DES ONGLETS ---
+        let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
+
         function switchTab(catId) {
             currentCategoryId = catId;
             
-            // 1. On réinitialise la recherche si on était en train de chercher
             const searchInput = document.getElementById('clientSearch');
             if (searchInput.value.trim() !== '') {
                 searchInput.value = '';
@@ -337,25 +342,21 @@ foreach ($categories as $cat) {
             document.getElementById('tabsWrapper').style.display = 'block';
             document.getElementById('noResultMsg').style.display = 'none';
 
-            // 2. On cache TOUTES les sections et on nettoie les styles inline
             document.querySelectorAll('.category-section').forEach(sec => {
                 sec.classList.remove('active');
-                sec.style.display = ''; // On efface le style inline pour laisser le CSS faire son travail
+                sec.style.display = ''; 
                 
-                // On réaffiche tous les plats et on force l'animation
                 sec.querySelectorAll('.menu-card').forEach(item => {
                     item.style.display = 'flex';
                     item.classList.add('active');
                 });
             });
 
-            // 3. On affiche la section demandée
             const target = document.getElementById('cat-' + catId);
             if(target) {
                 target.classList.add('active');
             }
 
-            // 4. On met à jour l'onglet actif
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active');
                 if (b.getAttribute('data-id') == catId) {
@@ -377,13 +378,11 @@ foreach ($categories as $cat) {
             
             clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
 
-            // SI LA RECHERCHE EST VIDE : On retourne au fonctionnement normal (onglets)
             if (query === '') {
                 switchTab(currentCategoryId);
                 return;
             }
 
-            // SI ON CHERCHE : On cache les onglets et on cherche partout
             tabsWrapper.style.display = 'none';
             let hasResults = false;
 
@@ -397,7 +396,7 @@ foreach ($categories as $cat) {
                     
                     if (name.includes(query) || desc.includes(query)) {
                         item.style.display = 'flex';
-                        item.classList.add('active'); // On force l'affichage
+                        item.classList.add('active'); 
                         sectionHasVisibleItem = true;
                         hasResults = true;
                     } else {
@@ -405,10 +404,9 @@ foreach ($categories as $cat) {
                     }
                 });
 
-                // On gère l'affichage de la section
                 if (sectionHasVisibleItem) {
-                    sec.style.display = 'block'; // Style inline pour forcer l'affichage pendant la recherche
-                    sec.classList.remove('active'); // On retire .active pour éviter les conflits
+                    sec.style.display = 'block'; 
+                    sec.classList.remove('active'); 
                 } else {
                     sec.style.display = 'none';
                     sec.classList.remove('active');
@@ -423,42 +421,15 @@ foreach ($categories as $cat) {
             filterMenu();
         }
 
-        // --- ANIMATIONS ---
-        // On active les animations des éléments visibles au chargement
+        // --- ANIMATIONS ET BOUTON RETOUR EN HAUT ---
         document.querySelectorAll('.category-section.active .reveal').forEach(el => el.classList.add('active'));
 
-        // --- BOUTON RETOUR EN HAUT ---
         const backToTopBtn = document.getElementById("backToTop");
         window.addEventListener("scroll", () => {
             if (window.scrollY > 300) { backToTopBtn.classList.add("show"); } 
             else { backToTopBtn.classList.remove("show"); }
         });
         backToTopBtn.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); });
-
-        // --- GESTION DE LA LANGUE (Méthode par Cookie) ---
-        function toggleLanguage() {
-            const btn = document.getElementById('langToggleBtn');
-            // On regarde la langue actuelle (si le cookie existe)
-            const currentLang = document.cookie.includes('googtrans=/fr/ar') ? 'ar' : 'fr';
-            
-            if (currentLang === 'ar') {
-                // Retour au français
-                document.cookie = "googtrans=/fr/fr;path=/";
-                document.cookie = "googtrans=/fr/fr;path=/;domain=" + window.location.hostname;
-                document.body.setAttribute('dir', 'ltr');
-                btn.innerHTML = "🌍 العربية";
-            } else {
-                // Passage en arabe
-                document.cookie = "googtrans=/fr/ar;path=/";
-                document.cookie = "googtrans=/fr/ar;path=/;domain=" + window.location.hostname;
-                document.body.setAttribute('dir', 'rtl');
-                btn.innerHTML = "🌍 Français";
-            }
-            
-            // On recharge la page pour appliquer la traduction
-            window.location.reload();
-        }
-
     </script>
 </body>
 </html>
