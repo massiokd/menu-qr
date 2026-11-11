@@ -202,8 +202,10 @@ foreach ($categories as $cat) {
     <div class="noise-overlay"></div>
 
     <header class="header">
-                <!-- Bouton de changement de langue -->
-        <button id="langToggleBtn" class="lang-btn" onclick="toggleLanguage()">AR</button>
+                        <!-- Bouton de changement de langue -->
+        <button id="langToggleBtn" class="lang-btn" onclick="toggleLanguage()">
+            🌍 العربية
+        </button>
         <?php if($resto['logo_url']): ?>
             <img src="<?= htmlspecialchars($resto['logo_url']) ?>" alt="Logo" class="restaurant-logo">
         <?php endif; ?>
@@ -433,25 +435,33 @@ foreach ($categories as $cat) {
         });
         backToTopBtn.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); });
 
-        // --- GESTION DE LA LANGUE ---
+               // --- GESTION DE LA LANGUE ---
         function toggleLanguage() {
             const btn = document.getElementById('langToggleBtn');
             const select = document.querySelector('.goog-te-combo');
-            const isArabic = btn.textContent.trim() === 'FR'; // Si le bouton dit 'FR', c'est qu'on est en AR
 
-            if (select) {
-                if (isArabic) {
-                    select.value = 'fr'; // Retour au français
-                    btn.textContent = 'AR';
-                    document.body.setAttribute('dir', 'ltr');
-                } else {
-                    select.value = 'ar'; // Traduire en arabe
-                    btn.textContent = 'FR';
-                    document.body.setAttribute('dir', 'rtl');
-                }
-                // Déclenche la traduction
-                select.dispatchEvent(new Event('change'));
+            // Si Google Translate n'est pas encore chargé, on attend 500ms et on réessaie
+            if (!select) {
+                btn.innerHTML = "⏳ Chargement...";
+                setTimeout(toggleLanguage, 500);
+                return;
             }
+
+            // On vérifie la langue actuelle
+            if (select.value === 'ar') {
+                // Retour au français
+                select.value = 'fr';
+                btn.innerHTML = "🌍 العربية";
+                document.body.setAttribute('dir', 'ltr');
+            } else {
+                // Passage en arabe
+                select.value = 'ar';
+                btn.innerHTML = "🌍 Français";
+                document.body.setAttribute('dir', 'rtl');
+            }
+            
+            // On déclenche la traduction
+            select.dispatchEvent(new Event('change'));
         }
 
     </script>
