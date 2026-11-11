@@ -208,10 +208,13 @@ foreach ($categories as $cat) {
                 Support FenneTech
             </a>
         </div>
-                <div class="footer-brand">
-            <p style="margin-bottom: 0.5rem;">Propulsé par</p>
-            <a href="https://massiokd.github.io/fennetech-site/" target="_blank">
-                <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 35px; width: auto; opacity: 0.8; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+        <div class="footer-brand">
+            <p style="margin-bottom: 0.75rem;">Propulsé par</p>
+            <a href="https://massiokd.github.io/fennetech-site/" target="_blank" 
+               style="display: inline-block; background-color: #1c1917; padding: 12px 25px; border-radius: 12px; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" 
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.2)';" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)';">
+                <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 60px; width: auto; display: block;">
             </a>
         </div>
     </footer>

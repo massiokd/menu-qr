@@ -46,7 +46,10 @@ $active_clients = $stmtCount->fetch()['total'] ?? 0;
 <body>
 
     <header class="header">
-                <h1>🦊 FenneTech Admin</h1>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 55px; width: auto;">
+            <span style="font-size: 1.5rem; font-weight: bold; border-left: 2px solid #e5e7eb; padding-left: 15px;">Admin</span>
+        </div>
         <a href="logout.php" style="color: var(--danger); font-weight: bold; text-decoration: none;">Déconnexion</a>
     </header>
 
