@@ -257,7 +257,8 @@ foreach ($categories as $cat) {
                                 <h3 class="item-name"><?= htmlspecialchars($item['nom']) ?></h3>
                                 <p class="item-desc"><?= htmlspecialchars($item['description']) ?></p>
                                 <div class="item-bottom">
-                                    <span class="item-price">
+                                    <!-- notranslate empêche Google de modifier les chiffres -->
+                                    <span class="item-price notranslate">
                                         <?= number_format($item['prix'], 0, ',', ' ') ?> <span>DZD</span>
                                     </span>
                                     <?php if(!$item['disponible']): ?>
