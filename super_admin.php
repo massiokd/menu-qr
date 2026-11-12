@@ -148,7 +148,7 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table class="w-full text-left border-collapse">
-                    <thead><tr class="bg-gray-50 text-gray-500 text-sm border-b border-gray-100"><th class="p-4 font-bold">Restaurant</th><th class="p-4 font-bold">Plan</th><th class="p-4 font-bold">Expiration</th><th class="p-4 font-bold">Statut</th><th class="p-4 font-bold text-right">Actions</th></tr></thead>
+                    <thead><tr class="bg-gray-50 text-gray-500 text-sm border-b border-gray-100"><th class="p-4 font-bold">Restaurant</th><th class="p-4 font-bold">Plan</th><th class="p-4 font-bold">Expiration</th><th class="p-4 font-bold">Statut</th> <th class="p-4 font-bold text-center">Mode Test</th><th class="p-4 font-bold text-right">Actions</th></tr></thead>
                     <tbody>
                         <?php foreach ($restos as $r): 
                             $is_expired = $r['plan'] !== 'lifetime' && strtotime($r['expires_at'] ?? 'now') < time();
@@ -166,6 +166,12 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
                             <td class="p-4"><span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-bold uppercase"><?php $plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie']; echo $plans_fr[$r['plan']] ?? $r['plan']; ?></span></td>
                             <td class="p-4 text-sm text-gray-600"><?= $r['plan'] === 'lifetime' ? '<span class="text-green-600 font-bold">À vie</span>' : ($r['expires_at'] ? date('d/m/Y', strtotime($r['expires_at'])) : 'Non défini') ?></td>
                             <td class="p-4"><?php if($is_online): ?><span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-md text-xs font-bold">En ligne</span><?php else: ?><span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-md text-xs font-bold">Hors ligne</span><?php endif; ?></td>
+                                <td class="p-4 text-center">
+                                <button onclick="toggleTestMode(<?= $r['id'] ?>, this)" 
+                                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors <?= $r['is_test'] ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300' ?>">
+                                    <?= $r['is_test'] ? 'TEST' : 'RÉEL' ?>
+                                </button>
+                            </td>
                             <td class="p-4 text-right whitespace-nowrap">
                                 <a href="actions/impersonate.php?resto_id=<?= $r['id'] ?>" class="text-gray-400 hover:text-purple-600 p-2" title="Se connecter en tant que" onclick="return confirm('Prendre le contrôle de ce compte ?')"><i class="fa-solid fa-user-secret"></i></a>
                                 <button onclick="openStatsModal(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['nom'])) ?>')" class="text-gray-400 hover:text-blue-600 p-2" title="Statistiques"><i class="fa-solid fa-eye"></i></button>
@@ -234,22 +240,55 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
     </main>
 
     <!-- MODALES -->
-    <!-- 1. Ajouter Resto -->
+    <!-- MODAL : AJOUTER UN RESTO -->
     <div id="add-resto-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Ajouter un restaurant</h2>
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Créer un compte Restaurant</h2>
             <form action="actions/super_admin_actions.php" method="POST" class="flex flex-col gap-4">
                 <input type="hidden" name="action" value="add_resto">
+                
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Nom</label><input type="text" name="nom" required class="w-full border border-gray-300 rounded-lg p-2"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Slug</label><input type="text" name="slug" required class="w-full border border-gray-300 rounded-lg p-2"></div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Nom du restaurant</label>
+                        <input type="text" name="nom" required class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-orange-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Slug (URL)</label>
+                        <input type="text" name="slug" required class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-orange-500 outline-none" placeholder="ex: chez-paul">
+                    </div>
                 </div>
-                <div><label class="block text-sm font-bold text-gray-700 mb-1">Email du gérant</label><input type="email" name="email" required class="w-full border border-gray-300 rounded-lg p-2"></div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Email du gérant</label>
+                        <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-orange-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Téléphone</label>
+                        <input type="tel" name="telephone" class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-orange-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Mot de passe initial</label>
+                    <div class="relative">
+                        <input type="password" name="password" id="admin-add-pass" required class="w-full border border-gray-300 rounded-lg p-2.5 pr-10 focus:border-orange-500 outline-none">
+                        <button type="button" onclick="togglePassword('admin-add-pass', this)" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-orange-500">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Le gérant pourra modifier ce mot de passe plus tard.</p>
+                </div>
+
                 <div class="flex items-center gap-2 mt-2">
                     <input type="checkbox" name="is_test" id="add_is_test" value="1" class="w-4 h-4 text-orange-600 rounded focus:ring-orange-500">
                     <label for="add_is_test" class="text-sm font-bold text-gray-700">C'est un restaurant de test (ne pas compter dans les stats)</label>
                 </div>
-                <div class="flex gap-2 mt-4"><button type="button" onclick="closeModal('add-resto-modal')" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-bold">Annuler</button><button type="submit" class="flex-1 bg-orange-600 text-white py-2.5 rounded-lg font-bold">Créer</button></div>
+
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="closeModal('add-resto-modal')" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-bold">Annuler</button>
+                    <button type="submit" class="flex-1 bg-orange-600 text-white py-2.5 rounded-lg font-bold">Créer le compte</button>
+                </div>
             </form>
         </div>
     </div>
@@ -387,6 +426,46 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
         <?php if(isset($_GET['search']) || isset($_GET['page'])): ?>
             showTab('restaurants');
         <?php endif; ?>
+
+        // Fonction pour basculer le mode Test en direct
+        async function toggleTestMode(restoId, btn) {
+            const isCurrentlyTest = btn.innerText.trim() === 'TEST';
+            const newIsTest = !isCurrentlyTest;
+            
+            // On change le bouton visuellement tout de suite
+            btn.innerText = newIsTest ? 'TEST' : 'RÉEL';
+            btn.className = newIsTest 
+                ? 'px-3 py-1 rounded-full text-xs font-bold transition-colors bg-gray-800 text-white' 
+                : 'px-3 py-1 rounded-full text-xs font-bold transition-colors bg-gray-200 text-gray-600 hover:bg-gray-300';
+
+            // On envoie la requête au serveur
+            const formData = new FormData();
+            formData.append('resto_id', restoId);
+            formData.append('is_test', newIsTest ? 'true' : 'false');
+
+            try {
+                await fetch('actions/toggle_test_mode.php', { method: 'POST', body: formData });
+                // On recharge la page pour appliquer le fond gris sur la ligne si besoin
+                window.location.reload();
+            } catch (e) {
+                alert('Erreur de connexion.');
+                // En cas d'erreur, on remet le bouton comme avant
+                btn.innerText = isCurrentlyTest ? 'TEST' : 'RÉEL';
+            }
+        }
+
+                // Fonction pour voir/cacher le mot de passe
+        function togglePassword(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                iconElement.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                input.type = "password";
+                iconElement.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        }
+
     </script>
 </body>
 </html>
