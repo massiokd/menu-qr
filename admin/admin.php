@@ -54,7 +54,16 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
 
     <header class="admin-header">
         <h1>Gérer le Menu</h1>
-        <a href="../logout.php" class="btn-logout">Déconnexion</a>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <?php if(isset($_SESSION['impersonated_by'])): ?>
+                <a href="../actions/stop_impersonate.php" style="background: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: bold; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(59,130,246,0.3);">
+                    <i class="fa-solid fa-arrow-left"></i> Retour Super Admin
+                </a>
+            <?php endif; ?>
+            
+            <a href="../logout.php" class="btn-logout">Déconnexion</a>
+        </div>
     </header>
 
     <div class="admin-tabs">
