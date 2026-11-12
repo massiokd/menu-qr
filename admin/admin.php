@@ -397,6 +397,83 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             });
         }
 
+                // --- LOGIQUE D'INSTALLATION PWA ---
+        let deferredPrompt;
+        const pwaBanner = document.getElementById('pwa-install-banner');
+        const pwaBtn = document.getElementById('pwa-install-btn');
+        const pwaText = document.getElementById('pwa-install-text');
+
+        // 1. Si l'app est déjà installée, on ne fait rien
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        const isDismissed = localStorage.getItem('pwa_dismissed');
+
+        // 2. Détection d'iOS (iPhone) - Apple ne permet pas le bouton auto
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        if (!isStandalone && !isDismissed) {
+            if (isIOS) {
+                // Sur iPhone, on affiche un message manuel
+                setTimeout(() => {
+                    pwaBtn.style.display = 'none';
+                    pwaText.innerHTML = "Appuyez sur <b>Partager</b> ➔ <b>Sur l'écran d'accueil</b>";
+                    pwaBanner.classList.remove('hidden');
+                }, 3000);
+            } else {
+                // Sur Android / PC, on utilise l'événement natif
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    // On affiche la bannière après 3 secondes
+                    setTimeout(() => {
+                        pwaBanner.classList.remove('hidden');
+                    }, 3000);
+                });
+            }
+        }
+
+        // 3. Fonction quand on clique sur "Installer"
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Utilisateur a accepté l\'installation');
+                    }
+                    deferredPrompt = null;
+                    pwaBanner.classList.add('hidden');
+                });
+            }
+        }
+
+        // 4. Fonction quand on clique sur "Plus tard"
+        function dismissPWA() {
+            pwaBanner.classList.add('hidden');
+            // On sauvegarde dans le navigateur pour ne plus l'afficher pendant 7 jours
+            localStorage.setItem('pwa_dismissed', Date.now());
+        }
+
+        // 5. Vérifier si la fermeture date de plus de 7 jours (pour réafficher)
+        if (isDismissed) {
+            const daysSinceDismissed = (Date.now() - parseInt(isDismissed)) / (1000 * 60 * 60 * 24);
+            if (daysSinceDismissed > 7) {
+                localStorage.removeItem('pwa_dismissed');
+            }
+        }
+
     </script>
+        <!-- BANNIÈRE D'INSTALLATION PWA -->
+    <div id="pwa-install-banner" class="hidden fixed bottom-4 left-4 right-4 md:left-auto md:w-96 bg-gray-900 text-white p-4 rounded-2xl shadow-2xl z-50 flex items-center justify-between border border-gray-700">
+        <div class="flex items-center gap-3">
+            <img src="icons/android-chrome-192x192.png" alt="Icon" class="w-10 h-10 rounded-lg">
+            <div>
+                <p class="text-sm font-bold">Installer FenneMenu</p>
+                <p class="text-xs text-gray-400" id="pwa-install-text">Accès rapide depuis votre écran d'accueil.</p>
+            </div>
+        </div>
+        <div class="flex gap-2 ml-4">
+            <button onclick="dismissPWA()" class="text-gray-400 hover:text-white text-sm font-bold px-2">Plus tard</button>
+            <button id="pwa-install-btn" onclick="installPWA()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md">Installer</button>
+        </div>
+    </div>
 </body>
 </html>
