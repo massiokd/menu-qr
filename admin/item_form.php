@@ -91,16 +91,12 @@ $categories = $stmtCat->fetchAll();
 
                 <input type="hidden" name="existing_image" value="<?= htmlspecialchars($item['image_url']) ?>">
                 
-                <div class="upload-buttons" style="display: flex; justify-content: center;">
-                    <!-- Bouton unique : Ouvre le menu natif (Caméra ou Galerie) -->
-                    <label class="btn-upload" style="flex-direction: column; padding: 2rem 1rem; width: 100%;">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--brand-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                        <span style="font-size: 1rem; font-weight: 700; color: var(--text-dark);">Ajouter une photo</span>
-                        <span style="font-size: 0.75rem; color: var(--text-gray); margin-top: 0.25rem;">Prenez une photo ou choisissez dans la galerie</span>
-                        
-                        <!-- L'input cache qui fait tout le travail -->
-                        <input type="file" name="image_camera" accept="image/*" style="display:none;" onchange="previewImage(event)">
-                    </label>
+                                <!-- Bouton d'upload compact -->
+                <label class="compact-upload">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    <span>Choisir une photo</span>
+                    <input type="file" name="image_camera" accept="image/*" style="display:none;" onchange="previewImage(event)">
+                </label>
                 </div>
             </div>
 
