@@ -3,7 +3,8 @@ session_name('FENNEC_GERANT');
 session_start();
 require '../config/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: login.php'); exit; }
+// Correction du chemin de redirection (../login.php au lieu de login.php)
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'gerant') { header('Location: ../login.php'); exit; }
 
 $pdo = getDB();
 $resto_id = $_SESSION['restaurant_id'];
@@ -30,7 +31,7 @@ $categories = $stmtCat->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $item_id ? 'Modifier' : 'Ajouter' ?> un plat</title>
-     <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#c2410c">
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
@@ -42,13 +43,14 @@ $categories = $stmtCat->fetchAll();
     </header>
 
     <main class="container">
-                <!-- Affichage de l'erreur d'upload -->
+        <!-- Affichage de l'erreur d'upload -->
         <?php if(isset($_GET['error']) && $_GET['error'] == 'upload_failed'): ?>
             <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #fecaca; text-align: center; font-weight: bold;">
                 ❌ L'image n'a pas pu être envoyée. <br>
                 <span style="font-size: 0.85rem; font-weight: normal;">Vérifiez votre connexion internet et réessayez.</span>
             </div>
         <?php endif; ?>
+
         <form action="../actions/save_item.php" method="POST" enctype="multipart/form-data" class="admin-card">
             
             <?php if($item_id): ?>
@@ -79,10 +81,11 @@ $categories = $stmtCat->fetchAll();
                 <input type="number" name="prix" class="form-control" value="<?= htmlspecialchars($item['prix']) ?>" required placeholder="Ex: 800" step="50">
             </div>
 
+            <!-- SECTION PHOTO PROPRE -->
             <div class="form-group">
                 <label>Photo</label>
                 
-                <!-- 1. L'aperçu de l'image (si elle existe) -->
+                <!-- 1. L'aperçu de l'image -->
                 <div class="image-preview-box" style="margin-bottom: 1rem;">
                     <img id="image-preview" src="<?= $item['image_url'] ?: '' ?>" style="display: <?= $item['image_url'] ? 'block' : 'none' ?>;">
                     <?php if(!$item['image_url']): ?>
@@ -90,23 +93,17 @@ $categories = $stmtCat->fetchAll();
                     <?php endif; ?>
                 </div>
 
-                <!-- 2. Le bouton simple -->
-                <label class="btn-upload" style="width: 100%;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    Choisir une photo
-                    <input type="file" name="image_camera" accept="image/*" style="display:none;" onchange="previewImage(event)">
-                </label>
-            </div>
-
-                <input type="hidden" name="existing_image" value="<?= htmlspecialchars($item['image_url']) ?>">
-                
-                                <!-- Bouton d'upload compact -->
-                <label class="compact-upload">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    <span>Choisir une photo</span>
-                    <input type="file" name="image_camera" accept="image/*" style="display:none;" onchange="previewImage(event)">
-                </label>
+                <!-- 2. Le bouton centré (un seul) -->
+                <div style="display: flex; justify-content: center;">
+                    <label class="btn-upload" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-weight: 700; cursor: pointer; transition: all 0.2s; width: auto;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        Choisir une photo
+                        <input type="file" name="image_camera" accept="image/*" style="display:none;" onchange="previewImage(event)">
+                    </label>
                 </div>
+
+                <!-- 3. L'image existante (cachée pour la sauvegarde) -->
+                <input type="hidden" name="existing_image" value="<?= htmlspecialchars($item['image_url']) ?>">
             </div>
 
             <button type="submit" class="btn-primary btn-block">Enregistrer le plat</button>
@@ -150,7 +147,6 @@ $categories = $stmtCat->fetchAll();
                     // 2. On compresse en JPEG à 80% de qualité
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
-
                     // 3. On affiche l'aperçu
                     const output = document.getElementById('image-preview');
                     const noImageText = document.getElementById('no-image-text');
@@ -183,7 +179,7 @@ $categories = $stmtCat->fetchAll();
             }
         });
 
-                // Enregistrement du Service Worker pour la PWA
+        // Enregistrement du Service Worker pour la PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
