@@ -144,7 +144,12 @@ $active_clients = $stmtCount->fetch()['total'] ?? 0;
                         <?php else: ?>
                             <span class="badge badge-inactive">Hors ligne / Expiré</span>
                         <?php endif; ?>
-                        <span class="badge badge-plan"><?= htmlspecialchars($r['plan']) ?></span>
+                        <span class="badge badge-plan">
+    <?php 
+        $plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
+        echo $plans_fr[$r['plan']] ?? $r['plan']; 
+    ?>
+</span>
                     </div>
                 </div>
 

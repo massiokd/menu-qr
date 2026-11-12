@@ -48,7 +48,13 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
         <div class="theme-selector-card" style="background: linear-gradient(135deg, var(--text-dark) 0%, #000 100%); color: white; border: none;">
             <h2 style="color:white; margin-bottom:1rem;">Statut de votre compte</h2>
             <p style="font-size:1.2rem; margin-bottom:0.5rem;">
-                Formule actuelle : <strong style="color:var(--brand-color); text-transform:uppercase;"><?= htmlspecialchars($resto['plan']) ?></strong>
+                Formule actuelle : 
+                <strong style="color:var(--brand-color); text-transform:uppercase;">
+                    <?php 
+                        $plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
+                        echo $plans_fr[$resto['plan']] ?? $resto['plan']; 
+                    ?>
+                </strong>
             </p>
             <?php if($resto['plan'] !== 'lifetime'): ?>
                 <p style="opacity:0.8;">Date d'expiration : <strong><?= date('d/m/Y', strtotime($resto['expires_at'])) ?></strong></p>
