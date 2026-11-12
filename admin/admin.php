@@ -384,7 +384,7 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             } catch (error) { showToast('Erreur.'); } finally { setLoading(btnElement, false); }
         }
 
-        // Enregistrement du Service Worker pour la PWA
+                // --- ENREGISTREMENT DU SERVICE WORKER (PWA) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
@@ -397,7 +397,6 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             });
         }
 
-                   <script>
         // --- LOGIQUE D'INSTALLATION PWA ---
         let deferredPrompt;
         const pwaBanner = document.getElementById('pwa-install-banner');
@@ -456,8 +455,7 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
         }
     </script>
 
-    </script>
-    <!-- BANNIÈRE D'INSTALLATION PWA -->
+    <!-- BANNIÈRE D'INSTALLATION PWA (On la met AVANT le script) -->
     <div id="pwa-install-banner" class="pwa-banner">
         <div class="pwa-content">
             <img src="icons/android-chrome-192x192.png" alt="Icon" class="pwa-icon">
@@ -467,9 +465,10 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             </div>
         </div>
         <div class="pwa-actions">
-            <button onclick="dismissPWA()" class="pwa-btn-later">Plus tard</button>
-            <button id="pwa-install-btn" onclick="installPWA()" class="pwa-btn-install">Installer</button>
+            <button onclick="dismissPwa()" class="pwa-btn-later">Plus tard</button>
+            <button id="pwa-install-btn" onclick="installPwa()" class="pwa-btn-install">Installer</button>
         </div>
     </div>
+
 </body>
 </html>
