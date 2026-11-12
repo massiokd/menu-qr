@@ -384,78 +384,16 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             } catch (error) { showToast('Erreur.'); } finally { setLoading(btnElement, false); }
         }
 
-                // --- ENREGISTREMENT DU SERVICE WORKER (PWA) ---
+                 // --- ENREGISTREMENT DU SERVICE WORKER (PWA) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker enregistré:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Échec PWA:', error);
-                    });
+                    .catch(error => console.log('Échec PWA:', error));
             });
-        }
-
-        // --- LOGIQUE D'INSTALLATION PWA ---
-        let deferredPrompt;
-        const pwaBanner = document.getElementById('pwa-install-banner');
-        const pwaBtn = document.getElementById('pwa-install-btn');
-        const pwaText = document.getElementById('pwa-install-text');
-
-        // 1. Vérifications initiales
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        const isDismissed = localStorage.getItem('pwa_dismissed');
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-        // 2. Affichage de la bannière
-        if (!isStandalone && !isDismissed) {
-            if (isIOS) {
-                // Sur iPhone
-                setTimeout(() => {
-                    if(pwaBtn) pwaBtn.style.display = 'none';
-                    if(pwaText) pwaText.innerHTML = "Appuyez sur <b>Partager</b> ➔ <b>Sur l'écran d'accueil</b>";
-                    if(pwaBanner) pwaBanner.classList.add('show');
-                }, 3000);
-            } else {
-                // Sur Android / PC
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                    setTimeout(() => {
-                        if(pwaBanner) pwaBanner.classList.add('show');
-                    }, 3000);
-                });
-            }
-        }
-
-        // 3. Clic sur "Installer"
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    deferredPrompt = null;
-                    if(pwaBanner) pwaBanner.classList.remove('show');
-                });
-            }
-        }
-
-        // 4. Clic sur "Plus tard"
-        function dismissPWA() {
-            if(pwaBanner) pwaBanner.classList.remove('show');
-            localStorage.setItem('pwa_dismissed', Date.now());
-        }
-
-        // 5. Réinitialisation après 7 jours
-        if (isDismissed) {
-            const daysSinceDismissed = (Date.now() - parseInt(isDismissed)) / (1000 * 60 * 60 * 24);
-            if (daysSinceDismissed > 7) {
-                localStorage.removeItem('pwa_dismissed');
-            }
         }
     </script>
 
-    <!-- BANNIÈRE D'INSTALLATION PWA (On la met AVANT le script) -->
+    <!-- 1. ON MET LA BANNIÈRE HTML ICI (AVANT LE SCRIPT) -->
     <div id="pwa-install-banner" class="pwa-banner">
         <div class="pwa-content">
             <img src="icons/android-chrome-192x192.png" alt="Icon" class="pwa-icon">
@@ -469,6 +407,72 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
             <button id="pwa-install-btn" onclick="installPwa()" class="pwa-btn-install">Installer</button>
         </div>
     </div>
+
+    <!-- 2. ON MET LE SCRIPT ICI (APRÈS LA BANNIÈRE) -->
+    <script>
+        let deferredPrompt;
+        const pwaBanner = document.getElementById('pwa-install-banner');
+        const pwaBtn = document.getElementById('pwa-install-btn');
+        const pwaText = document.getElementById('pwa-install-text');
+
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        const isDismissed = localStorage.getItem('pwa_dismissed');
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        if (!isStandalone && !isDismissed) {
+            if (isIOS) {
+                // Sur iPhone
+                setTimeout(() => {
+                    if(pwaBtn) pwaBtn.style.display = 'none';
+                    if(pwaText) pwaText.innerHTML = "Appuyez sur <b>Partager</b> ➔ <b>Sur l'écran d'accueil</b>";
+                    if(pwaBanner) pwaBanner.classList.add('show');
+                }, 3000);
+            } else {
+                // Sur Android / PC : On écoute l'événement natif
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                });
+
+                // On force l'affichage après 3 secondes, MÊME SI Chrome n'a pas encore validé l'app
+                setTimeout(() => {
+                    if(pwaBanner) {
+                        pwaBanner.classList.add('show');
+                        // Si l'événement natif n'est pas dispo, on donne les instructions manuelles
+                        if (!deferredPrompt) {
+                            if(pwaText) pwaText.innerHTML = "Menu Chrome ➔ <b>Installer l'application</b>";
+                        }
+                    }
+                }, 3000);
+            }
+        }
+
+        // Clic sur "Installer"
+        function installPwa() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                    if(pwaBanner) pwaBanner.classList.remove('show');
+                });
+            } else {
+                // Si le bouton natif n'est pas prêt, on affiche une alerte
+                alert("Pour installer l'application : Ouvrez le menu de votre navigateur (les 3 petits points en haut à droite) et cliquez sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.");
+            }
+        }
+
+        // Clic sur "Plus tard"
+        function dismissPwa() {
+            if(pwaBanner) pwaBanner.classList.remove('show');
+            localStorage.setItem('pwa_dismissed', Date.now());
+        }
+
+        // Réinitialisation après 7 jours
+        if (isDismissed) {
+            const daysSinceDismissed = (Date.now() - parseInt(isDismissed)) / (1000 * 60 * 60 * 24);
+            if (daysSinceDismissed > 7) localStorage.removeItem('pwa_dismissed');
+        }
+    </script>
 
 </body>
 </html>
