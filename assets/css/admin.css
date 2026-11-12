@@ -445,3 +445,110 @@ textarea.form-control { height: 80px; resize: vertical; }
 /* Affichage des catégories (pour les onglets) */
 .category-block { display: none; }
 .category-block.active-category { display: block; }
+
+/* =========================================
+   BANNIÈRE D'INSTALLATION PWA
+   ========================================= */
+.pwa-banner {
+    display: none; /* Caché par défaut */
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    left: 1.5rem;
+    background: #1c1917; /* Gris très foncé (ton text-dark) */
+    color: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    z-index: 1000;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #333;
+}
+
+/* Quand on l'affiche via JS */
+.pwa-banner.show {
+    display: flex;
+}
+
+.pwa-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pwa-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    object-fit: cover;
+}
+
+.pwa-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.15rem;
+}
+
+.pwa-text {
+    font-size: 0.75rem;
+    color: #a8a29e; /* Gris clair */
+}
+
+.pwa-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.pwa-btn-later {
+    background: transparent;
+    border: none;
+    color: #a8a29e;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.pwa-btn-later:hover {
+    color: white;
+}
+
+.pwa-btn-install {
+    background: var(--brand-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pwa-btn-install:hover {
+    background: #9a3412;
+}
+
+/* Sur mobile (écrans plus petits) */
+@media (max-width: 640px) {
+    .pwa-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .pwa-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+}
+
+/* Sur PC, on réduit la largeur de la bannière */
+@media (min-width: 768px) {
+    .pwa-banner {
+        left: auto;
+        width: 380px;
+    }
+}
