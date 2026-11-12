@@ -80,14 +80,23 @@ $categories = $stmtCat->fetchAll();
             </div>
 
             <div class="form-group">
-                <label>Photo du plat</label>
+                <label>Photo</label>
                 
-                <div class="image-preview-box">
+                <!-- 1. L'aperçu de l'image (si elle existe) -->
+                <div class="image-preview-box" style="margin-bottom: 1rem;">
                     <img id="image-preview" src="<?= $item['image_url'] ?: '' ?>" style="display: <?= $item['image_url'] ? 'block' : 'none' ?>;">
                     <?php if(!$item['image_url']): ?>
                         <span id="no-image-text" class="image-preview-text">Aucune image sélectionnée</span>
                     <?php endif; ?>
                 </div>
+
+                <!-- 2. Le bouton simple -->
+                <label class="btn-upload" style="width: 100%;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    Choisir une photo
+                    <input type="file" name="image_camera" accept="image/*" style="display:none;" onchange="previewImage(event)">
+                </label>
+            </div>
 
                 <input type="hidden" name="existing_image" value="<?= htmlspecialchars($item['image_url']) ?>">
                 
@@ -140,6 +149,7 @@ $categories = $stmtCat->fetchAll();
 
                     // 2. On compresse en JPEG à 80% de qualité
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
 
                     // 3. On affiche l'aperçu
                     const output = document.getElementById('image-preview');
