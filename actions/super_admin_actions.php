@@ -14,6 +14,7 @@ if ($action === 'add_resto') {
     $nom = $_POST['nom'];
     $slug = strtolower(trim($_POST['slug']));
     $email = strtolower(trim($_POST['email']));
+    $is_test = isset($_POST['is_test']) ? true : false;
     
     // Générer un mot de passe par défaut pour le gérant
     $default_password = 'resto123';
@@ -49,7 +50,7 @@ if ($action === 'add_resto') {
 if ($action === 'update_resto') {
     $resto_id = $_POST['resto_id'];
     $plan = $_POST['plan'];
-    
+    $is_test = isset($_POST['is_test']) ? true : false;
     // Calculer la nouvelle date d'expiration selon le plan
     $expires_at = null;
     if ($plan === 'trial') {
