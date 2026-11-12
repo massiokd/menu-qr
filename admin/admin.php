@@ -48,6 +48,9 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin - <?= htmlspecialchars($resto['nom']) ?></title>
+     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
@@ -380,6 +383,20 @@ $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
                 }
             } catch (error) { showToast('Erreur.'); } finally { setLoading(btnElement, false); }
         }
+
+        // Enregistrement du Service Worker pour la PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker enregistré:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Échec PWA:', error);
+                    });
+            });
+        }
+
     </script>
 </body>
 </html>

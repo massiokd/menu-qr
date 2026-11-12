@@ -70,6 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Connexion - FenneTech</title>
+            <link rel="manifest" href="admin/manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="admin/icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
 <body>
@@ -120,6 +123,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 input.type = "password";
                 iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
             }
+        }
+
+                if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('admin/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker enregistré:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Échec PWA:', error);
+                    });
+            });
         }
     </script>
 

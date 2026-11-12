@@ -1,0 +1,21 @@
+{
+  "name": "FenneMenu - Gestion",
+  "short_name": "FenneMenu",
+  "description": "Gérez votre menu digital en temps réel.",
+  "start_url": "admin.php",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#c2410c",
+  "icons": [
+    {
+      "src": "icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
