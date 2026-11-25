@@ -70,6 +70,7 @@ if ($user) {
 } else {
     $error = "Email ou mot de passe incorrect.";
 }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
