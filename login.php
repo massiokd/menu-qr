@@ -19,57 +19,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-if ($user) {
-    // 1. Vérifier d'abord si le compte est bloqué
-    if ($user['lockout_until'] && strtotime($user['lockout_until']) > time()) {
-        $error = "Compte temporairement bloqué suite à plusieurs échecs. Réessayez plus tard.";
-    } 
-    // 2. Vérifier ensuite le mot de passe
-    elseif (password_verify($password, $user['password_hash'])) {
+    if ($user) {
         
-        // 3. Vérifier l'email uniquement si le mot de passe est bon (évite de révéler si l'email existe)
-        if (!$user['email_verified']) {
-            $error = "Veuillez d'abord vérifier votre adresse email. Consultez votre boîte de réception.";
-        } else {
-            // Réinitialisation des tentatives
+        if ($user['lockout_until'] && strtotime($user['lockout_until']) > time()) {
+            $error = "Compte temporairement bloqué suite à plusieurs échecs. Réessayez plus tard.";
+        } 
+        elseif (password_verify($password, $user['password_hash'])) {
             $stmtReset = $pdo->prepare("UPDATE users SET failed_attempts = 0, lockout_until = NULL WHERE id = ?");
             $stmtReset->execute([$user['id']]);
 
             // --- SÉPARATION DES SESSIONS ---
-            if (session_status() === PHP_SESSION_ACTIVE) {
-                session_destroy();
-            }
+            session_destroy(); // On ferme la session temporaire
             
-            session_name($user['role'] === 'super_admin' ? 'FENNEC_ADMIN' : 'FENNEC_GERANT');
-            session_start();
-            session_regenerate_id(true); // Protection contre la fixation de session
+            if ($user['role'] === 'super_admin') {
+                session_name('FENNEC_ADMIN');
+            } else {
+                session_name('FENNEC_GERANT');
+            }
+            session_start(); // On ouvre la bonne session
 
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['restaurant_id'] = $user['restaurant_id'];
             $_SESSION['role'] = $user['role'];
             
-            $redirect = ($user['role'] === 'super_admin') ? 'super_admin.php' : 'admin/admin.php';
-            header("Location: $redirect");
+            if ($user['role'] === 'super_admin') { header('Location: super_admin.php'); }
+            else { header('Location: admin/admin.php'); }
             exit;
+        } 
+        else {
+            $attempts = $user['failed_attempts'] + 1;
+            if ($attempts >= 5) {
+                $lockout = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+                $stmtLock = $pdo->prepare("UPDATE users SET failed_attempts = ?, lockout_until = ? WHERE id = ?");
+                $stmtLock->execute([$attempts, $lockout, $user['id']]);
+                $error = "Trop de tentatives échouées. Compte bloqué pendant 15 minutes.";
+            } else {
+                $stmtFail = $pdo->prepare("UPDATE users SET failed_attempts = ? WHERE id = ?");
+                $stmtFail->execute([$attempts, $user['id']]);
+                $error = "Email ou mot de passe incorrect. (Tentative $attempts/5)";
+            }
         }
-    } 
-    // 4. Mot de passe incorrect
-    else {
-        $attempts = $user['failed_attempts'] + 1;
-        if ($attempts >= 5) {
-            $lockout = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-            $stmtLock = $pdo->prepare("UPDATE users SET failed_attempts = ?, lockout_until = ? WHERE id = ?");
-            $stmtLock->execute([$attempts, $lockout, $user['id']]);
-            $error = "Trop de tentatives échouées. Compte bloqué pendant 15 minutes.";
-        } else {
-            $stmtFail = $pdo->prepare("UPDATE users SET failed_attempts = ? WHERE id = ?");
-            $stmtFail->execute([$attempts, $user['id']]);
-            $error = "Email ou mot de passe incorrect. (Tentative $attempts/5)";
-        }
+    } else {
+        $error = "Email ou mot de passe incorrect.";
     }
-} else {
-    $error = "Email ou mot de passe incorrect.";
-}
 }
 ?>
 <!DOCTYPE html>
