@@ -43,10 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmtResto->execute([$nom_resto, $slug, $email, $telephone, $expires_at]);
                 $resto_id = $pdo->lastInsertId();
 
-                // 2. Créer l'utilisateur (inactif jusqu'à la vérification)
+                // 2. Créer l'utilisateur (INACTIF jusqu'à vérification)
                 $hash = password_hash($password, PASSWORD_DEFAULT);
-                $token = bin2hex(random_bytes(32));
+                $token = bin2hex(random_bytes(32)); // Token unique
                 
+                // On met is_active = false et email_verified = false
                 $stmtUser = $pdo->prepare("INSERT INTO users (restaurant_id, email, password_hash, role, is_active, email_verified, email_token) VALUES (?, ?, ?, 'gerant', false, false, ?)");
                 $stmtUser->execute([$resto_id, $email, $hash, $token]);
 
@@ -61,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } catch (Exception $e) {
                 $pdo->rollBack();
-                $error = "Une erreur est survenue lors de la création du compte.";
+                $error = "Une erreur est survenue.";
             }
         }
     }
