@@ -68,7 +68,7 @@ $categories = $stmtCat->fetchAll();
                     <!-- PLATS DE LA CATÉGORIE -->
                     <div class="items-reorder-list" data-cat-id="<?= $cat['id'] ?>">
                         <?php
-                        $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC");
+                        $stmtItems = $pdo->prepare("SELECT * FROM items WHERE category_id = ? ORDER BY ordre ASC, id ASC");
                         $stmtItems->execute([$cat['id']]);
                         $items = $stmtItems->fetchAll();
                         ?>

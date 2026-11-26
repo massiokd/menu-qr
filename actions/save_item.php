@@ -54,5 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-header('Location: ../admin/admin.php');
+// On redirige vers la catégorie où se trouve le plat (ou la nouvelle catégorie si on l'a changée)
+header('Location: ../admin/admin.php?cat_id=' . $category_id);
 exit;

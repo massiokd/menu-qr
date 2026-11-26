@@ -28,7 +28,7 @@ $stmtAllItems = $pdo->prepare("
     FROM items 
     JOIN categories ON items.category_id = categories.id 
     WHERE categories.restaurant_id = ? 
-    ORDER BY items.ordre ASC
+    ORDER BY items.ordre ASC, items.id ASC
 ");
 $stmtAllItems->execute([$resto_id]);
 $all_items = $stmtAllItems->fetchAll();
@@ -38,8 +38,12 @@ foreach ($all_items as $item) {
     $items_by_category[$item['cat_id']][] = $item;
 }
 
-// Première catégorie active
-$first_category_id = !empty($categories) ? $categories[0]['id'] : null;
+// Catégorie active : soit celle passée dans l'URL, soit la première par défaut
+if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
+    $first_category_id = (int)$_GET['cat_id'];
+} else {
+    $first_category_id = !empty($categories) ? $categories[0]['id'] : null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">

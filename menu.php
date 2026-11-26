@@ -76,7 +76,7 @@ $stmtAllItems = $pdo->prepare("
     FROM items 
     JOIN categories ON items.category_id = categories.id 
     WHERE categories.restaurant_id = ? AND categories.is_active = true
-    ORDER BY items.ordre ASC
+        ORDER BY items.ordre ASC, items.id ASC
 ");
 $stmtAllItems->execute([$resto['id']]);
 $all_items = $stmtAllItems->fetchAll();
