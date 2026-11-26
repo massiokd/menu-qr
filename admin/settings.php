@@ -201,17 +201,15 @@ $fonts = [
                 </div>
             </div>
 
-            <!-- SCRIPT POUR GÉNÉRER LE QR CODE -->
             <!-- SCRIPT POUR GÉNÉRER LE QR CODE ET LE PDF -->
             <script>
                 document.addEventListener("turbo:load", function() {
                     const qrContainer = document.getElementById("qr-container");
-                    
                     if (!qrContainer) return;
 
                     const menuUrl = "<?= htmlspecialchars($menu_url) ?>";
                     const logoUrl = "<?= !empty($resto['logo_url']) ? htmlspecialchars($resto['logo_url']) : '' ?>";
-                    const brandColor = "#c2410c"; // On force la couleur pour le PDF
+                    const brandColor = "#c2410c";
 
                     qrContainer.innerHTML = '';
 
@@ -237,24 +235,27 @@ $fonts = [
                         canvas.style.height = '250px';
                     }
 
-                    // Téléchargement en PDF (Configuration stricte)
+                    // Téléchargement en PDF (Calcul dynamique de la hauteur pour éviter les marges)
                     document.getElementById("download-pdf-btn").addEventListener("click", function() {
                         const element = document.getElementById("qr-export-zone");
                         
-                        // On attend 100ms que le canvas soit bien dessiné avant de lancer la capture
                         setTimeout(() => {
+                            // On récupère la taille exacte de la carte
+                            const width = element.offsetWidth;
+                            const height = element.offsetHeight;
+
                             const opt = {
-                                margin:       0,
+                                margin:       0, // Aucune marge
                                 filename:     'QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>.pdf',
                                 image:        { type: 'jpeg', quality: 1 },
                                 html2canvas:  { 
-                                    scale: 3, // Très haute définition
+                                    scale: 3, 
                                     useCORS: true, 
                                     letterRendering: true,
                                     scrollX: 0,
                                     scrollY: 0
                                 },
-                                jsPDF:        { unit: 'px', format: [380, 400], orientation: 'portrait' } // Taille exacte de la carte
+                                jsPDF:        { unit: 'px', format: [width, height], orientation: 'portrait' } // On utilise la taille exacte
                             };
                             
                             html2pdf().set(opt).from(element).save();

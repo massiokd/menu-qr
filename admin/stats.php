@@ -93,23 +93,36 @@ for ($i = 6; $i >= 0; $i--) {
         <!-- Graphique -->
         <div class="theme-selector-card">
             <h2>Évolution des scans (7 derniers jours)</h2>
+            <!-- Le conteneur relatif -->
             <div style="position: relative; height:300px; width:100%; margin-top:1rem;">
+                <!-- Message de chargement -->
+                <div id="chart-loader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.8); z-index: 10; border-radius: 0.5rem;">
+                    <div class="spinner spinner-dark" style="width: 30px; height: 30px; border-width: 3px; margin-bottom: 10px;"></div>
+                    <p style="color: var(--text-gray); font-weight: 600; font-size: 0.9rem;">Chargement du graphique...</p>
+                </div>
+                
                 <canvas id="scansChart"></canvas>
             </div>
         </div>
 
     </main>
-
     <script>
         document.addEventListener("turbo:load", function() {
             const chartElement = document.getElementById('scansChart');
+            const loader = document.getElementById('chart-loader');
+            
             if (chartElement) {
                 // SÉCURITÉ : On détruit l'ancien graphique s'il existe déjà
                 if (window.myScansChart) {
                     window.myScansChart.destroy();
                 }
+
+                // On affiche le loader au cas où il aurait été caché
+                if(loader) loader.style.display = 'flex';
                 
                 const ctx = chartElement.getContext('2d');
+                
+                // On crée le graphique
                 window.myScansChart = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -131,7 +144,12 @@ for ($i = 6; $i >= 0; $i--) {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: { duration: 500 }, // Animation plus rapide
+                        animation: {
+                            onComplete: function() {
+                                // Une fois l'animation terminée, on cache le loader
+                                if(loader) loader.style.display = 'none';
+                            }
+                        },
                         plugins: { legend: { display: false } },
                         scales: {
                             y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
