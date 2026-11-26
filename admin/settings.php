@@ -177,13 +177,15 @@ $fonts = [
                 <h2>Votre QR Code</h2>
                 <p>Imprimez ce code et placez-le sur vos tables.</p>
                 
-                <!-- ZONE À TÉLÉCHARGER (On l'habille pour le PDF) -->
-                <div id="qr-export-zone" style="background: white; padding: 2rem; border-radius: 1.5rem; display: inline-block; margin: 2rem auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #1c1917; margin-bottom: 0.5rem;"><?= htmlspecialchars($resto['nom']) ?></h3>
-                    <p style="font-size: 0.9rem; color: #78716c; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem;">Scannez pour voir le menu</p>
-                    
-                    <!-- Le conteneur du QR Code -->
-                    <div id="qr-container" style="width: 250px; height: 250px; margin: 0 auto;"></div>
+                <!-- ZONE À TÉLÉCHARGER (Styles forcés pour le PDF) -->
+                <div style="display: flex; justify-content: center; margin: 2rem 0;">
+                    <div id="qr-export-zone" style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-radius: 20px; width: 320px; text-align: center; font-family: Arial, sans-serif;">
+                        <h3 style="font-size: 20px; color: #1c1917; margin: 0 0 5px 0; font-weight: bold;"><?= htmlspecialchars($resto['nom']) ?></h3>
+                        <p style="font-size: 12px; color: #78716c; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px 0;">Scannez pour voir le menu</p>
+                        
+                        <!-- Le conteneur du QR Code -->
+                        <div id="qr-container" style="width: 250px; height: 250px; margin: 0 auto;"></div>
+                    </div>
                 </div>
 
                 <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top: 1rem;">
@@ -200,18 +202,17 @@ $fonts = [
             </div>
 
             <!-- SCRIPT POUR GÉNÉRER LE QR CODE -->
+            <!-- SCRIPT POUR GÉNÉRER LE QR CODE ET LE PDF -->
             <script>
                 document.addEventListener("turbo:load", function() {
                     const qrContainer = document.getElementById("qr-container");
                     
-                    // Si on n'est pas sur l'onglet QR Code, on ne fait rien
                     if (!qrContainer) return;
 
                     const menuUrl = "<?= htmlspecialchars($menu_url) ?>";
                     const logoUrl = "<?= !empty($resto['logo_url']) ? htmlspecialchars($resto['logo_url']) : '' ?>";
-                    const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--brand-color').trim() || '#c2410c';
+                    const brandColor = "#c2410c"; // On force la couleur pour le PDF
 
-                    // Vider le conteneur avant de générer (évite les doublons avec Turbo)
                     qrContainer.innerHTML = '';
 
                     const qrCode = new QRCodeStyling({
@@ -230,26 +231,34 @@ $fonts = [
 
                     qrCode.append(qrContainer);
                     
-                    // Adapter la taille à l'écran
                     const canvas = qrContainer.querySelector('canvas');
                     if(canvas) {
-                        canvas.style.width = '100%';
-                        canvas.style.height = '100%';
+                        canvas.style.width = '250px';
+                        canvas.style.height = '250px';
                     }
 
-                    // Téléchargement en PDF
+                    // Téléchargement en PDF (Configuration stricte)
                     document.getElementById("download-pdf-btn").addEventListener("click", function() {
                         const element = document.getElementById("qr-export-zone");
-                        const opt = {
-                            margin:       0.5,
-                            filename:     'QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>.pdf',
-                            image:        { type: 'jpeg', quality: 0.98 },
-                            html2canvas:  { scale: 2 }, // Scale 2 pour une meilleure qualité
-                            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-                        };
                         
-                        // Génération du PDF
-                        html2pdf().set(opt).from(element).save();
+                        // On attend 100ms que le canvas soit bien dessiné avant de lancer la capture
+                        setTimeout(() => {
+                            const opt = {
+                                margin:       0,
+                                filename:     'QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>.pdf',
+                                image:        { type: 'jpeg', quality: 1 },
+                                html2canvas:  { 
+                                    scale: 3, // Très haute définition
+                                    useCORS: true, 
+                                    letterRendering: true,
+                                    scrollX: 0,
+                                    scrollY: 0
+                                },
+                                jsPDF:        { unit: 'px', format: [380, 400], orientation: 'portrait' } // Taille exacte de la carte
+                            };
+                            
+                            html2pdf().set(opt).from(element).save();
+                        }, 100);
                     });
                 });
             </script>
