@@ -56,6 +56,17 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
     <meta name="theme-color" content="#c2410c">
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
+    <script type="speculationrules">
+    {
+      "prerender": [{
+        "source": "document",
+        "where": {
+          "selector_matches": ".admin-tabs a"
+        },
+        "eagerness": "moderate"
+      }]
+    }
+    </script>
 </head>
 <body>
 

@@ -52,6 +52,17 @@ for ($i = 6; $i >= 0; $i--) {
     <link rel="stylesheet" href="../assets/css/admin.css">
     <!-- Chart.js pour le graphique -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="speculationrules">
+    {
+      "prerender": [{
+        "source": "document",
+        "where": {
+          "selector_matches": ".admin-tabs a"
+        },
+        "eagerness": "moderate"
+      }]
+    }
+    </script>
 </head>
 <body>
 

@@ -60,6 +60,17 @@ $fonts = [
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+        <script type="speculationrules">
+    {
+      "prerender": [{
+        "source": "document",
+        "where": {
+          "selector_matches": ".admin-tabs a"
+        },
+        "eagerness": "moderate"
+      }]
+    }
+    </script>
 </head>
 <body>
 

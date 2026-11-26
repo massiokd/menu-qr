@@ -37,7 +37,7 @@ function showError($message) {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                     Contacter le support
                 </a>
-                <p style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--gray);">Propulsé par <a href="https://fennec.tech" style="color: var(--brand); text-decoration: none; font-weight: bold;">FenneTech</a></p>
+              <p style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--gray);">Propulsé par <a href="https://fennetech.pages.dev/" target="_blank" style="color: var(--brand); text-decoration: none; font-weight: bold;">FenneTech</a></p>
             </div>
         </div>
     </body>
@@ -179,9 +179,9 @@ foreach ($categories as $cat) {
                             </div>
 
                             <?php if($item['image_url']): ?>
-                                <div class="item-image-container">
-                                    <img src="<?= htmlspecialchars($item['image_url']) ?>" loading="lazy" alt="<?= htmlspecialchars($item['nom']) ?>">
-                                </div>
+<div class="item-image-container">
+    <img src="<?= htmlspecialchars($item['image_url']) ?>?width=400&quality=75" loading="lazy" decoding="async" width="112" height="112" alt="<?= htmlspecialchars($item['nom']) ?>" onload="this.style.opacity='1'">
+</div>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>

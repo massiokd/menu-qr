@@ -19,7 +19,7 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
     // Redimensionnement Max 1200px (idéal pour le web)
     $width = imagesx($image);
     $height = imagesy($image);
-    $maxWidth = 1200;
+    $maxWidth = 800;
 
     if ($width > $maxWidth) {
         $newWidth = $maxWidth;
@@ -35,9 +35,9 @@ function uploadToSupabase($fileArray, $fileNamePrefix = 'img') {
         $image = $newImage;
     }
 
-    // Conversion en WebP (Qualité 80)
+    // Conversion en WebP (Qualité 75)
     ob_start();
-    imagewebp($image, null, 80);
+    imagewebp($image, null, 75);
     $compressedData = ob_get_clean();
     imagedestroy($image);
 

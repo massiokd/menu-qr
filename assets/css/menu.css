@@ -111,3 +111,17 @@ body[data-theme="minuit"] .back-to-top{color:#0f172a}
 }
 @media(hover:hover){.menu-card:hover{transform:translateY(-3px);box-shadow:0 18px 36px -14px rgba(0,0,0,.18)}.menu-card:hover .item-image-container img{transform:scale(1.06)}.tab-btn:not(.active):hover{border-color:var(--brand);color:var(--brand)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+.item-image-container {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+.item-image-container img {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
