@@ -208,12 +208,12 @@ foreach ($categories as $cat) {
                 Support FenneTech
             </a>
         </div>
-        <div class="footer-brand">
-            <p style="margin-bottom: 0.75rem;">Propulsé par</p>
-            <a href="https://fennetech.pages.dev/" target="_blank" style="display: inline-block; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
-                                <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 50px; width: auto; display: block;">
-            </a>
-        </div>
+<div class="footer-brand">
+    <p style="margin-bottom: 0.75rem;">Propulsé par <strong>FenneTech — Menu Digital</strong></p>
+    <a href="https://fennetech.pages.dev/" target="_blank" style="display: inline-block; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+        <img src="assets/images/FenneTechLogo.png" alt="FenneTech" style="height: 40px; width: auto; display: block; margin: 0 auto;">
+    </a>
+</div>
     </footer>
 
     <button id="backToTop" class="back-to-top" aria-label="Retour en haut">

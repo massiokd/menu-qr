@@ -1,6 +1,6 @@
 {
-  "name": "FenneMenu - Gestion",
-  "short_name": "FenneMenu",
+  "name": "FenneTech — Menu Digital",
+  "short_name": "FenneTech",
   "description": "Gérez votre menu digital en temps réel.",
   "start_url": "admin.php",
   "display": "standalone",

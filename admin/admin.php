@@ -402,7 +402,7 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
         <div class="pwa-content">
             <img src="icons/android-chrome-192x192.png" alt="Icon" class="pwa-icon">
             <div>
-                <p class="pwa-title">Installer FenneMenu</p>
+                <p class="pwa-title">Installer FenneTech</p>
                 <p class="pwa-text" id="pwa-install-text">Accès rapide depuis votre écran d'accueil.</p>
             </div>
         </div>
