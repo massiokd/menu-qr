@@ -56,19 +56,9 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
     <meta name="theme-color" content="#c2410c">
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
-    <script type="speculationrules">
-    {
-      "prerender": [{
-        "source": "document",
-        "where": {
-          "selector_matches": ".admin-tabs a"
-        },
-        "eagerness": "moderate"
-      }]
-    }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js" data-turbo-track="reload"></script>
 </head>
-<body>
+<body data-turbo="true">
 
     <header class="admin-header">
         <h1>Gérer le Menu</h1>
@@ -266,32 +256,21 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
     <script>
         let currentCategoryId = <?= $first_category_id ?? 'null' ?>;
 
-        // --- GESTION DES ONGLETS ---
         function switchTab(catId) {
             currentCategoryId = catId;
-            
-            // Reset recherche
             const searchInput = document.getElementById('searchInput');
-            if (searchInput.value.trim() !== '') {
+            if (searchInput && searchInput.value.trim() !== '') {
                 searchInput.value = '';
                 document.getElementById('adminTabsWrapper').style.display = 'block';
                 document.getElementById('noResultsMsg').style.display = 'none';
             }
-
-            // Cacher toutes les catégories
             document.querySelectorAll('.category-block').forEach(sec => {
                 sec.classList.remove('active-category');
                 sec.style.display = ''; 
                 sec.querySelectorAll('.searchable-item').forEach(item => item.style.display = 'flex');
             });
-
-            // Afficher la catégorie demandée
             const target = document.getElementById('cat-' + catId);
-            if(target) {
-                target.classList.add('active-category');
-            }
-
-            // Mettre à jour l'onglet actif
+            if(target) target.classList.add('active-category');
             document.querySelectorAll('.admin-tab-btn').forEach(b => {
                 b.classList.remove('active');
                 if (b.getAttribute('data-id') == catId) {
@@ -299,11 +278,9 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
                     b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 }
             });
-            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- RECHERCHE ---
         function filterItems() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const categories = document.querySelectorAll('.category-block');
@@ -316,13 +293,11 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
                 switchTab(currentCategoryId);
                 return;
             }
-
             tabsWrapper.style.display = 'none';
 
             categories.forEach(category => {
                 const items = category.querySelectorAll('.searchable-item');
                 let hasCategoryResults = false;
-
                 items.forEach(item => {
                     const itemName = item.querySelector('.item-search-name').textContent.toLowerCase();
                     if (itemName.includes(query)) {
@@ -333,7 +308,6 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
                         item.style.display = 'none';
                     }
                 });
-
                 if (hasCategoryResults) {
                     category.style.display = 'block';
                     category.classList.add('active-category');
@@ -342,21 +316,17 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
                     category.classList.remove('active-category');
                 }
             });
-
             noResultsMsg.style.display = hasGlobalResults ? 'none' : 'block';
         }
 
-        // --- MODALES ---
         function openAddCategoryModal() { document.getElementById('add-category-modal').classList.add('active'); }
         function closeAddCategoryModal() { document.getElementById('add-category-modal').classList.remove('active'); }
-
         function openEditCategory(element) {
             document.getElementById('edit-cat-id').value = element.getAttribute('data-id');
             document.getElementById('edit-cat-name').value = element.getAttribute('data-nom');
             document.getElementById('edit-category-modal').classList.add('active');
         }
         function closeEditModal() { document.getElementById('edit-category-modal').classList.remove('active'); }
-
         function openDeleteModal(url, message) {
             document.getElementById('modal-message').innerText = message;
             document.getElementById('modal-confirm-btn').href = url;
@@ -364,11 +334,6 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
         }
         function closeModal() { document.getElementById('delete-modal').classList.remove('active'); }
 
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
-        });
-
-        // --- AJAX PRIX & DISPO ---
         function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
         function setLoading(element, isLoading) {
             if (isLoading) { element.classList.add('btn-loading'); element.dataset.originalHtml = element.innerHTML; element.innerHTML = '<span class="spinner"></span>'; } 
@@ -399,13 +364,16 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
             } catch (error) { showToast('Erreur.'); } finally { setLoading(btnElement, false); }
         }
 
-                 // --- ENREGISTREMENT DU SERVICE WORKER (PWA) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        document.addEventListener("turbo:load", function() {
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+            });
+
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js')
                     .catch(error => console.log('Échec PWA:', error));
-            });
-        }
+            }
+        });
     </script>
 
     <!-- 1. ON MET LA BANNIÈRE HTML ICI (AVANT LE SCRIPT) -->
@@ -425,68 +393,63 @@ if (isset($_GET['cat_id']) && !empty($_GET['cat_id'])) {
 
     <!-- 2. ON MET LE SCRIPT ICI (APRÈS LA BANNIÈRE) -->
     <script>
-        let deferredPrompt;
-        const pwaBanner = document.getElementById('pwa-install-banner');
-        const pwaBtn = document.getElementById('pwa-install-btn');
-        const pwaText = document.getElementById('pwa-install-text');
+        document.addEventListener("turbo:load", function() {
+            let deferredPrompt;
+            const pwaBanner = document.getElementById('pwa-install-banner');
+            const pwaBtn = document.getElementById('pwa-install-btn');
+            const pwaText = document.getElementById('pwa-install-text');
 
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        const isDismissed = localStorage.getItem('pwa_dismissed');
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (!pwaBanner) return; // Si on change de page et que la bannière n'est pas là, on s'arrête
 
-        if (!isStandalone && !isDismissed) {
-            if (isIOS) {
-                // Sur iPhone
-                setTimeout(() => {
-                    if(pwaBtn) pwaBtn.style.display = 'none';
-                    if(pwaText) pwaText.innerHTML = "Appuyez sur <b>Partager</b> ➔ <b>Sur l'écran d'accueil</b>";
-                    if(pwaBanner) pwaBanner.classList.add('show');
-                }, 3000);
-            } else {
-                // Sur Android / PC : On écoute l'événement natif
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                });
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            const isDismissed = localStorage.getItem('pwa_dismissed');
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-                // On force l'affichage après 3 secondes, MÊME SI Chrome n'a pas encore validé l'app
-                setTimeout(() => {
-                    if(pwaBanner) {
-                        pwaBanner.classList.add('show');
-                        // Si l'événement natif n'est pas dispo, on donne les instructions manuelles
-                        if (!deferredPrompt) {
-                            if(pwaText) pwaText.innerHTML = "Menu Chrome ➔ <b>Installer l'application</b>";
+            if (!isStandalone && !isDismissed) {
+                if (isIOS) {
+                    setTimeout(() => {
+                        if(pwaBtn) pwaBtn.style.display = 'none';
+                        if(pwaText) pwaText.innerHTML = "Appuyez sur <b>Partager</b> ➔ <b>Sur l'écran d'accueil</b>";
+                        if(pwaBanner) pwaBanner.classList.add('show');
+                    }, 3000);
+                } else {
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        deferredPrompt = e;
+                    });
+                    setTimeout(() => {
+                        if(pwaBanner) {
+                            pwaBanner.classList.add('show');
+                            if (!deferredPrompt) {
+                                if(pwaText) pwaText.innerHTML = "Menu Chrome ➔ <b>Installer l'application</b>";
+                            }
                         }
-                    }
-                }, 3000);
+                    }, 3000);
+                }
             }
-        }
 
-        // Clic sur "Installer"
-        function installPwa() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    deferredPrompt = null;
-                    if(pwaBanner) pwaBanner.classList.remove('show');
-                });
-            } else {
-                // Si le bouton natif n'est pas prêt, on affiche une alerte
-                alert("Pour installer l'application : Ouvrez le menu de votre navigateur (les 3 petits points en haut à droite) et cliquez sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.");
+            window.installPwa = function() {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        deferredPrompt = null;
+                        if(pwaBanner) pwaBanner.classList.remove('show');
+                    });
+                } else {
+                    alert("Pour installer l'application : Ouvrez le menu de votre navigateur (les 3 petits points en haut à droite) et cliquez sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.");
+                }
+            };
+
+            window.dismissPwa = function() {
+                if(pwaBanner) pwaBanner.classList.remove('show');
+                localStorage.setItem('pwa_dismissed', Date.now());
+            };
+
+            if (isDismissed) {
+                const daysSinceDismissed = (Date.now() - parseInt(isDismissed)) / (1000 * 60 * 60 * 24);
+                if (daysSinceDismissed > 7) localStorage.removeItem('pwa_dismissed');
             }
-        }
-
-        // Clic sur "Plus tard"
-        function dismissPwa() {
-            if(pwaBanner) pwaBanner.classList.remove('show');
-            localStorage.setItem('pwa_dismissed', Date.now());
-        }
-
-        // Réinitialisation après 7 jours
-        if (isDismissed) {
-            const daysSinceDismissed = (Date.now() - parseInt(isDismissed)) / (1000 * 60 * 60 * 24);
-            if (daysSinceDismissed > 7) localStorage.removeItem('pwa_dismissed');
-        }
+        });
     </script>
 
 </body>

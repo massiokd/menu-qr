@@ -60,19 +60,9 @@ $fonts = [
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-        <script type="speculationrules">
-    {
-      "prerender": [{
-        "source": "document",
-        "where": {
-          "selector_matches": ".admin-tabs a"
-        },
-        "eagerness": "moderate"
-      }]
-    }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js" data-turbo-track="reload"></script>
 </head>
-<body>
+<body data-turbo="true">
 
     <header class="admin-header">
         <h1>Paramètres</h1>
@@ -214,64 +204,43 @@ $fonts = [
             </div>
 
             <!-- SCRIPT POUR GÉNÉRER LE QR CODE PREMIUM -->
-            <script>
-                const menuUrl = "<?= htmlspecialchars($menu_url) ?>";
-                const logoUrl = "<?= !empty($resto['logo_url']) ? htmlspecialchars($resto['logo_url']) : '' ?>";
-                
-                // On récupère la couleur principale du thème pour l'accorder au resto
-                const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--brand-color').trim() || '#c2410c';
+               <script>
+        function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
+        
+        async function selectTheme(theme, element) {
+            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            const formData = new FormData(); formData.append('theme', theme);
+            await fetch('../actions/update_theme.php', { method: 'POST', body: formData });
+            showToast('Thème mis à jour !');
+        }
 
-                const qrCode = new QRCodeStyling({
-                    width: 600,
-                    height: 600,
-                    data: menuUrl,
-                    image: logoUrl,
-                    margin: 20,
-                    qrOptions: {
-                        typeNumber: 0,
-                        mode: "Byte",
-                        errorCorrectionLevel: "H" // Niveau élevé pour cacher le logo
-                    },
-                    imageOptions: {
-                        hideBackgroundDots: true,
-                        imageSize: 0.45, 
-                        margin: 2, 
-                        crossOrigin: "anonymous"
-                    },
-                    dotsOptions: {
-                        color: "#1c1917", // Couleur des points (Noir profond)
-                        type: "rounded" // Points arrondis, beaucoup plus moderne
-                    },
-                    backgroundOptions: {
-                        color: "#ffffff", // Fond blanc
-                    },
-                    cornersSquareOptions: {
-                        color: brandColor, // Les coins prennent la couleur du thème
-                        type: "extra-rounded"
-                    },
-                    cornersDotOptions: {
-                        color: brandColor,
-                        type: "dot"
-                    }
-                });
+        async function selectFont(font, element) {
+            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            const formData = new FormData(); formData.append('font_family', font);
+            await fetch('../actions/update_font.php', { method: 'POST', body: formData });
+            showToast('Police mise à jour !');
+        }
 
-                // On l'affiche dans le conteneur
-                qrCode.append(document.getElementById("qr-container"));
+        function togglePassword(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            } else {
+                input.type = "password";
+                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            }
+        }
 
-                // Fonction pour télécharger en haute définition
-                document.getElementById("download-btn").addEventListener("click", () => {
-                    // 1. On change la taille pour la version HD (1000x1000)
-                    qrCode.update({ width: 1000, height: 1000 });
-                    
-                    // 2. On lance le téléchargement
-                    setTimeout(() => {
-                        qrCode.download({ name: "QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>", extension: "png" });
-                        
-                        // 3. On remet à la taille normale pour l'affichage sur le site
-                        setTimeout(() => qrCode.update({ width: 250, height: 250 }), 500);
-                    }, 100);
-                });
-            </script>
+        document.addEventListener("turbo:load", function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js')
+                    .catch(error => console.log('Échec PWA:', error));
+            }
+        });
+    </script>
         <?php endif; ?>
 
         <!-- ONGLET SÉCURITÉ -->

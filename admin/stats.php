@@ -52,19 +52,9 @@ for ($i = 6; $i >= 0; $i--) {
     <link rel="stylesheet" href="../assets/css/admin.css">
     <!-- Chart.js pour le graphique -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="speculationrules">
-    {
-      "prerender": [{
-        "source": "document",
-        "where": {
-          "selector_matches": ".admin-tabs a"
-        },
-        "eagerness": "moderate"
-      }]
-    }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js" data-turbo-track="reload"></script>
 </head>
-<body>
+<body data-turbo="true">
 
     <header class="admin-header">
         <h1>Statistiques</h1>
@@ -111,53 +101,45 @@ for ($i = 6; $i >= 0; $i--) {
     </main>
 
     <script>
-        const ctx = document.getElementById('scansChart').getContext('2d');
-        const scansChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <?= json_encode($labels) ?>,
-                datasets: [{
-                    label: 'Nombre de scans',
-                    data: <?= json_encode($data) ?>,
-                    borderColor: '#c2410c', /* Couleur de ta marque */
-                    backgroundColor: 'rgba(194, 65, 12, 0.1)',
-                    borderWidth: 3,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#c2410c',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    fill: true,
-                    tension: 0.4 /* Courbe lissée */
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1, precision: 0 }
+        document.addEventListener("turbo:load", function() {
+            const chartElement = document.getElementById('scansChart');
+            if (chartElement) {
+                const ctx = chartElement.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: <?= json_encode($labels) ?>,
+                        datasets: [{
+                            label: 'Nombre de scans',
+                            data: <?= json_encode($data) ?>,
+                            borderColor: '#c2410c',
+                            backgroundColor: 'rgba(194, 65, 12, 0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#c2410c',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            fill: true,
+                            tension: 0.4
+                        }]
                     },
-                    x: { grid: { display: false } }
-                }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js')
+                    .catch(error => console.log('Échec PWA:', error));
             }
         });
-
-                // Enregistrement du Service Worker pour la PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker enregistré:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Échec PWA:', error);
-                    });
-            });
-        }
     </script>
 </body>
 </html>

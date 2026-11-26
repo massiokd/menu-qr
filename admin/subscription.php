@@ -30,19 +30,9 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><path d='M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01'></path></svg>">
     <link rel="stylesheet" href="../assets/css/admin.css">
-        <script type="speculationrules">
-    {
-      "prerender": [{
-        "source": "document",
-        "where": {
-          "selector_matches": ".admin-tabs a"
-        },
-        "eagerness": "moderate"
-      }]
-    }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js" data-turbo-track="reload"></script>
 </head>
-<body>
+<body data-turbo="true">
 
     <header class="admin-header">
         <h1>Mon Abonnement</h1>
@@ -206,18 +196,12 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
             });
         }
 
-                // Enregistrement du Service Worker pour la PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        document.addEventListener("turbo:load", function() {
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker enregistré:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Échec PWA:', error);
-                    });
-            });
-        }
+                    .catch(error => console.log('Échec PWA:', error));
+            }
+        });
     </script>
 
 </body>
