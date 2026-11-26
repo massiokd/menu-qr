@@ -106,58 +106,69 @@ for ($i = 6; $i >= 0; $i--) {
         </div>
 
     </main>
+    
     <script>
         document.addEventListener("turbo:load", function() {
             const chartElement = document.getElementById('scansChart');
             const loader = document.getElementById('chart-loader');
             
-            if (chartElement) {
-                // SÉCURITÉ : On détruit l'ancien graphique s'il existe déjà
-                if (window.myScansChart) {
-                    window.myScansChart.destroy();
-                }
+            if (!chartElement) return;
 
-                // On affiche le loader au cas où il aurait été caché
-                if(loader) loader.style.display = 'flex';
-                
-                const ctx = chartElement.getContext('2d');
-                
-                // On crée le graphique
-                window.myScansChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: <?= json_encode($labels) ?>,
-                        datasets: [{
-                            label: 'Nombre de scans',
-                            data: <?= json_encode($data) ?>,
-                            borderColor: '#c2410c',
-                            backgroundColor: 'rgba(194, 65, 12, 0.1)',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#fff',
-                            pointBorderColor: '#c2410c',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            onComplete: function() {
-                                // Une fois l'animation terminée, on cache le loader
-                                if(loader) loader.style.display = 'none';
-                            }
-                        },
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
-                            x: { grid: { display: false } }
-                        }
+            // On affiche le loader
+            if(loader) loader.style.display = 'flex';
+
+            // FONCTION DE SÉCURITÉ : On attend que Chart.js soit chargé
+            function waitForChart() {
+                if (typeof Chart === 'undefined') {
+                    // Si Chart n'est pas encore chargé, on attend 50ms et on réessaie
+                    setTimeout(waitForChart, 50);
+                } else {
+                    // Chart est prêt, on dessine !
+                    if (window.myScansChart) {
+                        window.myScansChart.destroy();
                     }
-                });
+                    
+                    const ctx = chartElement.getContext('2d');
+                    
+                    window.myScansChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: <?= json_encode($labels) ?>,
+                            datasets: [{
+                                label: 'Nombre de scans',
+                                data: <?= json_encode($data) ?>,
+                                borderColor: '#c2410c',
+                                backgroundColor: 'rgba(194, 65, 12, 0.1)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#fff',
+                                pointBorderColor: '#c2410c',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                onComplete: function() {
+                                    // L'animation est finie, on cache le loader
+                                    if(loader) loader.style.display = 'none';
+                                }
+                            },
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                }
             }
+
+            // On lance la vérification
+            waitForChart();
         });
     </script>
 </body>
