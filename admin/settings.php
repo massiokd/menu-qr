@@ -60,6 +60,7 @@ $fonts = [
     <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js" data-turbo-track="reload"></script>
 </head>
 <body data-turbo="true">
@@ -170,77 +171,88 @@ $fonts = [
             </div>
         <?php endif; ?>
 
-        <!-- ONGLET QR CODE -->
-                <!-- ONGLET QR CODE -->
+         <!-- ONGLET QR CODE -->
         <?php if($tab === 'qrcode'): ?>
             <div class="theme-selector-card" style="text-align:center; padding: 2rem 1rem;">
                 <h2>Votre QR Code</h2>
                 <p>Imprimez ce code et placez-le sur vos tables.</p>
                 
-                <!-- Le conteneur du QR Code -->
-                <div id="qr-container" style="margin: 2rem auto; display: flex; justify-content: center; max-width: 250px; width: 100%;"></div>
-
-<style>
-    /* Force le QR Code à ne pas dépasser son conteneur */
-    #qr-container canvas, #qr-container svg {
-        width: 100% !important;
-        height: auto !important;
-        border-radius: 1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-</style>
+                <!-- ZONE À TÉLÉCHARGER (On l'habille pour le PDF) -->
+                <div id="qr-export-zone" style="background: white; padding: 2rem; border-radius: 1.5rem; display: inline-block; margin: 2rem auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #1c1917; margin-bottom: 0.5rem;"><?= htmlspecialchars($resto['nom']) ?></h3>
+                    <p style="font-size: 0.9rem; color: #78716c; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem;">Scannez pour voir le menu</p>
+                    
+                    <!-- Le conteneur du QR Code -->
+                    <div id="qr-container" style="width: 250px; height: 250px; margin: 0 auto;"></div>
+                </div>
 
                 <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top: 1rem;">
                     <a href="<?= htmlspecialchars($menu_url) ?>" target="_blank" class="btn-primary" style="text-decoration:none; background:#f3f4f6; color:var(--text-dark);">
                         Voir le menu
                     </a>
                     
-                    <!-- Bouton de téléchargement -->
-                    <button id="download-btn" class="btn-primary" style="display:flex; align-items:center; gap:0.5rem; border:none; cursor:pointer;">
+                    <!-- Bouton de téléchargement PDF -->
+                    <button id="download-pdf-btn" class="btn-primary" style="display:flex; align-items:center; gap:0.5rem; border:none; cursor:pointer;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Télécharger en HD
+                        Télécharger en PDF
                     </button>
                 </div>
             </div>
 
-            <!-- SCRIPT POUR GÉNÉRER LE QR CODE PREMIUM -->
-               <script>
-        function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
-        
-        async function selectTheme(theme, element) {
-            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            const formData = new FormData(); formData.append('theme', theme);
-            await fetch('../actions/update_theme.php', { method: 'POST', body: formData });
-            showToast('Thème mis à jour !');
-        }
+            <!-- SCRIPT POUR GÉNÉRER LE QR CODE -->
+            <script>
+                document.addEventListener("turbo:load", function() {
+                    const qrContainer = document.getElementById("qr-container");
+                    
+                    // Si on n'est pas sur l'onglet QR Code, on ne fait rien
+                    if (!qrContainer) return;
 
-        async function selectFont(font, element) {
-            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            const formData = new FormData(); formData.append('font_family', font);
-            await fetch('../actions/update_font.php', { method: 'POST', body: formData });
-            showToast('Police mise à jour !');
-        }
+                    const menuUrl = "<?= htmlspecialchars($menu_url) ?>";
+                    const logoUrl = "<?= !empty($resto['logo_url']) ? htmlspecialchars($resto['logo_url']) : '' ?>";
+                    const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--brand-color').trim() || '#c2410c';
 
-        function togglePassword(inputId, iconElement) {
-            const input = document.getElementById(inputId);
-            if (input.type === "password") {
-                input.type = "text";
-                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-            } else {
-                input.type = "password";
-                iconElement.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-            }
-        }
+                    // Vider le conteneur avant de générer (évite les doublons avec Turbo)
+                    qrContainer.innerHTML = '';
 
-        document.addEventListener("turbo:load", function() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js')
-                    .catch(error => console.log('Échec PWA:', error));
-            }
-        });
-    </script>
+                    const qrCode = new QRCodeStyling({
+                        width: 600,
+                        height: 600,
+                        data: menuUrl,
+                        image: logoUrl,
+                        margin: 10,
+                        qrOptions: { typeNumber: 0, mode: "Byte", errorCorrectionLevel: "H" },
+                        imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 4, crossOrigin: "anonymous" },
+                        dotsOptions: { color: "#1c1917", type: "rounded" },
+                        backgroundOptions: { color: "#ffffff" },
+                        cornersSquareOptions: { color: brandColor, type: "extra-rounded" },
+                        cornersDotOptions: { color: brandColor, type: "dot" }
+                    });
+
+                    qrCode.append(qrContainer);
+                    
+                    // Adapter la taille à l'écran
+                    const canvas = qrContainer.querySelector('canvas');
+                    if(canvas) {
+                        canvas.style.width = '100%';
+                        canvas.style.height = '100%';
+                    }
+
+                    // Téléchargement en PDF
+                    document.getElementById("download-pdf-btn").addEventListener("click", function() {
+                        const element = document.getElementById("qr-export-zone");
+                        const opt = {
+                            margin:       0.5,
+                            filename:     'QR_Menu_<?= preg_replace('/[^a-zA-Z0-9]/', '_', $resto['nom']) ?>.pdf',
+                            image:        { type: 'jpeg', quality: 0.98 },
+                            html2canvas:  { scale: 2 }, // Scale 2 pour une meilleure qualité
+                            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                        };
+                        
+                        // Génération du PDF
+                        html2pdf().set(opt).from(element).save();
+                    });
+                });
+            </script>
         <?php endif; ?>
 
         <!-- ONGLET SÉCURITÉ -->

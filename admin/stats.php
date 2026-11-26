@@ -104,8 +104,13 @@ for ($i = 6; $i >= 0; $i--) {
         document.addEventListener("turbo:load", function() {
             const chartElement = document.getElementById('scansChart');
             if (chartElement) {
+                // SÉCURITÉ : On détruit l'ancien graphique s'il existe déjà
+                if (window.myScansChart) {
+                    window.myScansChart.destroy();
+                }
+                
                 const ctx = chartElement.getContext('2d');
-                new Chart(ctx, {
+                window.myScansChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: <?= json_encode($labels) ?>,
@@ -126,6 +131,7 @@ for ($i = 6; $i >= 0; $i--) {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: { duration: 500 }, // Animation plus rapide
                         plugins: { legend: { display: false } },
                         scales: {
                             y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
@@ -133,11 +139,6 @@ for ($i = 6; $i >= 0; $i--) {
                         }
                     }
                 });
-            }
-
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js')
-                    .catch(error => console.log('Échec PWA:', error));
             }
         });
     </script>
