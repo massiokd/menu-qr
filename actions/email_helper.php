@@ -40,7 +40,7 @@ function sendEmailBrevo($apiKey, $to, $subject, $html) {
 
 // --- FONCTION DE DESIGN COMMUNE ---
 function getEmailTemplate($title, $content, $btnText = '', $btnLink = '') {
-    $logoUrl = "https://menu-qr-ebke.onrender.com/assets/images/FenneTechLogo.png";
+    $logoUrl = "https://menu.fennetech.com/assets/images/FenneTechLogo.png";
     
     $buttonHtml = '';
     if (!empty($btnText) && !empty($btnLink)) {
@@ -140,7 +140,7 @@ function sendExpiringSoonEmail($toEmail, $restoName, $daysLeft, $expiryDate) {
         <p>Pour éviter que votre menu ne soit inaccessible à vos clients, nous vous invitons à renouveler votre abonnement dès maintenant.</p>
     ";
 
-    $html = getEmailTemplate($title, $content, "Se connecter pour renouveler", "https://menu-qr-ebke.onrender.com/admin/subscription.php");
+  $html = getEmailTemplate($title, $content, "Se connecter pour renouveler", "https://menu.fennetech.com/admin/subscription.php");
     return sendEmailBrevo($apiKey, $toEmail, $title, $html);
 }
 
@@ -156,7 +156,7 @@ function sendExpiredEmail($toEmail, $restoName) {
         <p>Votre menu n'est plus accessible par vos clients pour le moment. Pour le réactiver et retrouver vos statistiques, veuillez régulariser votre situation.</p>
     ";
 
-    $html = getEmailTemplate($title, $content, "Réactiver mon compte", "https://menu-qr-ebke.onrender.com/admin/subscription.php");
+    $html = getEmailTemplate($title, $content, "Réactiver mon compte", "https://menu.fennetech.com/admin/subscription.php");
     return sendEmailBrevo($apiKey, $toEmail, $title, $html);
 }
 
@@ -173,7 +173,7 @@ function sendPaymentConfirmedEmail($toEmail, $restoName, $plan, $expiryDate) {
         <p>Merci pour votre confiance.</p>
     ";
 
-    $html = getEmailTemplate($title, $content, "Accéder à mon menu", "https://menu-qr-ebke.onrender.com/admin/admin.php");
+  $html = getEmailTemplate($title, $content, "Accéder à mon menu", "https://menu.fennetech.com/admin/admin.php");
     return sendEmailBrevo($apiKey, $toEmail, $title, $html);
 }
 

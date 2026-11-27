@@ -20,7 +20,7 @@ $user_data = $stmtUser->fetch();
 $user_email = $user_data['email'];
 
 // URL du menu pour le QR Code
-$base_url = "https://menu-qr-ebke.onrender.com"; 
+$base_url = "https://menu.fennetech.com"; 
 $menu_url = $base_url . "/menu.php?slug=" . $resto['slug'];
 
 // Gestion des sous-onglets
