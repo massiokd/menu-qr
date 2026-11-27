@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fennetech-menu-v1';
+const CACHE_NAME = 'fennetech-menu-v3';
 const ASSETS_TO_CACHE = [
   'admin.php',
   'stats.php',

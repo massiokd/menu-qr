@@ -48,7 +48,7 @@ for ($i = 6; $i >= 0; $i--) {
     <title>Statistiques - <?= htmlspecialchars($resto['nom']) ?></title>
      <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#c2410c">
-    <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
+        <link rel="apple-touch-icon" href="icons/1apple-touch-icon.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <!-- Chart.js pour le graphique -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

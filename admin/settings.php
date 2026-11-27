@@ -57,7 +57,7 @@ $fonts = [
     <title>Paramètres - <?= htmlspecialchars($resto['nom']) ?></title>
      <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#c2410c">
-    <link rel="apple-touch-icon" href="icons/android-chrome-192x192.png">
+        <link rel="apple-touch-icon" href="icons/1apple-touch-icon.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -347,6 +347,11 @@ $fonts = [
                 <?php if(isset($_GET['success'])): ?>
                     <div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; margin-bottom:1.5rem; font-size:0.9rem; text-align:center; font-weight:bold;">
                         Merci ! Votre suggestion a bien été envoyée à l'équipe.
+                    </div>
+                <?php endif; ?>
+                                <?php if(isset($_GET['error']) && $_GET['error'] === 'limit_reached'): ?>
+                    <div style="background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; margin-bottom:1.5rem; font-size:0.9rem; text-align:center; font-weight:bold;">
+                        Vous avez atteint la limite de 3 suggestions par 24h. Merci de patienter avant d'en envoyer une nouvelle.
                     </div>
                 <?php endif; ?>
 
