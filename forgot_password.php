@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtUpdate = $pdo->prepare("UPDATE users SET reset_token = ?, reset_expires = ?, reset_last_request = ? WHERE id = ?");
             $stmtUpdate->execute([$token, $expires, $now, $user['id']]);
 
-            $resetLink = "https://menu-qr-ebke.onrender.com/reset_password.php?token=" . $token;
+            $resetLink = "https://menu.fennetech.com/reset_password.php?token=" . $token;
 
             // 📧 EMAIL 1 : Envoi du lien
             $reset_sent = sendResetEmail($user['email'], $user['resto_nom'], $resetLink);

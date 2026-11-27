@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmtUser->execute([$resto_id, $email, $hash, $token]);
 
                 // 3. Envoyer l'email de vérification
-                $verifyLink = "https://menu-qr-ebke.onrender.com/verify.php?token=" . $token;
+                $verifyLink = "https://menu.fennetech.com/verify.php?token=" . $token;
                 if (sendVerificationEmail($email, $nom_resto, $verifyLink)) {
                     $pdo->commit();
                     $success = "Votre compte a été créé ! Vérifiez votre boîte mail pour l'activer.";
