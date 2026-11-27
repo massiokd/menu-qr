@@ -351,7 +351,7 @@ $fonts = [
                 <?php endif; ?>
 
                 <form action="../actions/save_suggestion.php" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
-                    <textarea name="message" class="form-control" placeholder="Ex: J'aimerais pouvoir ajouter des options (sans oignons, épicé, etc.) sur mes plats..." required style="height:120px;"></textarea>
+                  <textarea name="message" class="form-control" placeholder="Ex: J'aimerais pouvoir ajouter des options (sans oignons, épicé, etc.) sur mes plats..." required maxlength="500" style="height:120px;"></textarea>
                     <button type="submit" class="btn-primary" style="align-self:flex-start;">Envoyer ma suggestion</button>
                 </form>
             </div>
