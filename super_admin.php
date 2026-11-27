@@ -66,6 +66,9 @@ $restos = $stmt->fetchAll();
 // --- HISTORIQUE PAIEMENTS ---
 $payments = $pdo->query("SELECT p.*, r.nom as resto_nom FROM payments p JOIN restaurants r ON p.restaurant_id = r.id ORDER BY p.created_at DESC LIMIT 50")->fetchAll();
 $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY nom ASC")->fetchAll();
+// --- SUGGESTIONS ---
+$stmtSugg = $pdo->query("SELECT s.*, r.nom as resto_nom FROM suggestions s JOIN restaurants r ON s.restaurant_id = r.id ORDER BY s.created_at DESC");
+$suggestions = $stmtSugg->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -94,6 +97,7 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
             <a href="#" onclick="showTab('dashboard')" id="nav-dashboard" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-600 text-white transition-all"><i class="fa-solid fa-chart-pie w-5"></i> Tableau de Bord</a>
             <a href="#" onclick="showTab('restaurants')" id="nav-restaurants" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all"><i class="fa-solid fa-store w-5"></i> Restaurants</a>
             <a href="#" onclick="showTab('payments')" id="nav-payments" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all"><i class="fa-solid fa-money-bill-wave w-5"></i> Paiements</a>
+            <a href="#" onclick="showTab('suggestions')" id="nav-suggestions" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all"><i class="fa-solid fa-lightbulb w-5"></i> Suggestions</a>
             <a href="#" onclick="showTab('settings')" id="nav-settings" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all"><i class="fa-solid fa-gear w-5"></i> Paramètres</a>
         </nav>
         <div class="p-4 border-t border-gray-800"><a href="logout.php" class="flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"><i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Déconnexion</a></div>
@@ -237,6 +241,29 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
 </div>
                     <button type="submit" class="bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-700 w-max mt-2">Mettre à jour</button>
                 </form>
+            </div>
+        </div>
+
+
+                <!-- TAB: SUGGESTIONS -->
+        <div id="tab-suggestions" class="p-8 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Boîte à idées des restaurateurs</h2>
+            <div class="grid gap-4">
+                <?php if(empty($suggestions)): ?>
+                    <p class="text-gray-500">Aucune suggestion pour le moment.</p>
+                <?php endif; ?>
+                <?php foreach ($suggestions as $s): ?>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="font-bold text-gray-800"><?= htmlspecialchars($s['resto_nom']) ?></span>
+                                <span class="text-xs text-gray-500 ml-2"><?= date('d/m/Y à H:i', strtotime($s['created_at'])) ?></span>
+                            </div>
+                            <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold uppercase"><?= htmlspecialchars($s['statut']) ?></span>
+                        </div>
+                        <p class="text-gray-700 whitespace-pre-line"><?= htmlspecialchars($s['message']) ?></p>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </main>
@@ -384,7 +411,7 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
 
     <script>
         function showTab(tabName) {
-            ['dashboard', 'restaurants', 'payments', 'settings'].forEach(tab => {
+            ['dashboard', 'restaurants', 'payments', 'settings', 'suggestions'].forEach(tab =>{
                 document.getElementById('tab-' + tab).classList.add('hidden');
                 document.getElementById('nav-' + tab).classList.remove('bg-orange-600', 'text-white');
                 document.getElementById('nav-' + tab).classList.add('text-gray-400');
@@ -392,7 +419,7 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
             document.getElementById('tab-' + tabName).classList.remove('hidden');
             document.getElementById('nav-' + tabName).classList.remove('text-gray-400');
             document.getElementById('nav-' + tabName).classList.add('bg-orange-600', 'text-white');
-            const titles = { 'dashboard': 'Tableau de Bord', 'restaurants': 'Gestion des Restaurants', 'payments': 'Historique des Paiements', 'settings': 'Paramètres' };
+           const titles = { 'dashboard': 'Tableau de Bord', 'restaurants': 'Gestion des Restaurants', 'payments': 'Historique des Paiements', 'settings': 'Paramètres', 'suggestions': 'Boîte à Idées' };
             document.getElementById('page-title').innerText = titles[tabName];
         }
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }

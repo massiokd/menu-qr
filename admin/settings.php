@@ -85,6 +85,7 @@ $fonts = [
             <a href="?tab=branding" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'branding' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'branding' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">Apparence</a>
             <a href="?tab=qrcode" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'qrcode' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'qrcode' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">QR Code</a>
             <a href="?tab=securite" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'securite' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'securite' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">Sécurité</a>
+            <a href="?tab=suggestions" style="text-decoration:none; font-weight:700; font-size:0.9rem; padding-bottom:0.5rem; border-bottom:3px solid <?= $tab === 'suggestions' ? 'var(--brand-color)' : 'transparent' ?>; color: <?= $tab === 'suggestions' ? 'var(--text-dark)' : 'var(--text-gray)' ?>;">Suggestions</a>
         </div>
 
         <?php if(isset($_GET['success'])): ?>
@@ -332,6 +333,26 @@ $fonts = [
                     </div>
 
                     <button type="submit" class="btn-primary" style="align-self:flex-start;">Mettre à jour le mot de passe</button>
+                </form>
+            </div>
+
+        <?php endif; ?>
+
+                <!-- ONGLET SUGGESTIONS -->
+        <?php if($tab === 'suggestions'): ?>
+            <div class="theme-selector-card">
+                <h2>Boîte à idées 💡</h2>
+                <p>Une fonctionnalité vous manque ? Une idée pour améliorer FenneTech ? Écrivez-nous, nous lisons tout !</p>
+                
+                <?php if(isset($_GET['success'])): ?>
+                    <div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; margin-bottom:1.5rem; font-size:0.9rem; text-align:center; font-weight:bold;">
+                        Merci ! Votre suggestion a bien été envoyée à l'équipe.
+                    </div>
+                <?php endif; ?>
+
+                <form action="../actions/save_suggestion.php" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
+                    <textarea name="message" class="form-control" placeholder="Ex: J'aimerais pouvoir ajouter des options (sans oignons, épicé, etc.) sur mes plats..." required style="height:120px;"></textarea>
+                    <button type="submit" class="btn-primary" style="align-self:flex-start;">Envoyer ma suggestion</button>
                 </form>
             </div>
         <?php endif; ?>
