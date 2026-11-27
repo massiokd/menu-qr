@@ -46,7 +46,7 @@ function getEmailTemplate($title, $content, $btnText = '', $btnLink = '') {
     if (!empty($btnText) && !empty($btnLink)) {
         $buttonHtml = "
         <div style='text-align: center; margin: 30px 0;'>
-            <a href='{$btnLink}' style='background-color: #c2410c; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;'>{{$btnText}}</a>
+          <a href='{$btnLink}' style='background-color: #c2410c; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;'>{$btnText}</a>
         </div>";
     }
 

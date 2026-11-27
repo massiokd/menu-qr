@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $baseDate = new DateTime();
     $expires_at = null;
     if ($plan === 'monthly') { $baseDate->modify('+1 month'); $expires_at = $baseDate->format('Y-m-d H:i:s'); }
+    elseif ($plan === '3_months') { $baseDate->modify('+3 months'); $expires_at = $baseDate->format('Y-m-d H:i:s'); }
     elseif ($plan === 'yearly') { $baseDate->modify('+1 year'); $expires_at = $baseDate->format('Y-m-d H:i:s'); }
 
     // 1. Enregistrer le paiement validé
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($user) {
         $expiry_fr = $plan === 'lifetime' ? 'À vie' : $baseDate->format('d/m/Y');
-        $plans_fr = ['monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
+        $plans_fr = ['monthly' => 'Mensuel', '3_months' => '3 Mois', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
         sendPaymentConfirmedEmail($user['email'], $user['resto_nom'], $plans_fr[$plan], $expiry_fr);
     }
 }

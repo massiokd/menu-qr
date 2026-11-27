@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("UPDATE app_settings SET value = ? WHERE key = ?");
         $stmt->execute([$_POST['price_monthly'], 'price_monthly']);
+        $stmt->execute([$_POST['price_3_months'], 'price_3_months']);
         $stmt->execute([$_POST['price_yearly'], 'price_yearly']);
         $stmt->execute([$_POST['price_lifetime'], 'price_lifetime']);
         $pdo->commit();

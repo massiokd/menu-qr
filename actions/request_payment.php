@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reference = trim($_POST['reference'] ?? '');
     
     // 🛡️ SÉCURITÉ : Vérifier que le plan demandé est valide
-    $prix = ['monthly' => 800, 'yearly' => 6900, 'lifetime' => 14900];
+        $prix = ['monthly' => 900, '3_months' => 2400, 'yearly' => 8400];
     if (!array_key_exists($plan, $prix)) {
         die("Plan invalide.");
     }

@@ -17,7 +17,7 @@ $payment = $stmt->fetch();
 if ($payment) {
     
     // 🛡️ SÉCURITÉ : On vérifie que le plan existe et que le montant correspond exactement
-    $prix = ['monthly' => 800, 'yearly' => 6900, 'lifetime' => 14900];
+        $prix = ['monthly' => 900, '3_months' => 2400, 'yearly' => 8400];
     $plan_verifie = $payment['plan'];
     
     if (!isset($prix[$plan_verifie]) || $payment['montant'] != $prix[$plan_verifie]) {
@@ -46,6 +46,9 @@ if ($payment) {
     if ($plan === 'monthly') { 
         $baseDate->modify('+1 month');
         $expires_at = $baseDate->format('Y-m-d H:i:s');
+    } elseif ($plan === '3_months') { 
+        $baseDate->modify('+3 months');
+        $expires_at = $baseDate->format('Y-m-d H:i:s');
     } elseif ($plan === 'yearly') { 
         $baseDate->modify('+1 year');
         $expires_at = $baseDate->format('Y-m-d H:i:s');
@@ -72,7 +75,7 @@ if ($payment) {
         $expiry_date_fr = ($info['plan'] === 'lifetime' || empty($info['expires_at'])) ? 'À vie' : date('d/m/Y', strtotime($info['expires_at']));
         
         // On traduit le plan pour faire joli dans l'email
-        $plan_noms = ['monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
+                $plan_noms = ['monthly' => 'Mensuel', '3_months' => '3 Mois', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
         $plan_affichage = $plan_noms[$info['plan']] ?? $info['plan'];
 
         sendPaymentConfirmedEmail($info['email'], $info['resto_nom'], $plan_affichage, $expiry_date_fr);

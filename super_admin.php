@@ -14,14 +14,15 @@ $pdo = getDB();
 $stmtSettings = $pdo->query("SELECT * FROM app_settings");
 $settings = [];
 while ($row = $stmtSettings->fetch()) { $settings[$row['key']] = $row['value']; }
-$price_monthly = $settings['price_monthly'] ?? 800;
-$price_yearly = $settings['price_yearly'] ?? 6900;
+$price_monthly = $settings['price_monthly'] ?? 900;
+$price_3_months = $settings['price_3_months'] ?? 2400;
+$price_yearly = $settings['price_yearly'] ?? 8400;
 $price_lifetime = $settings['price_lifetime'] ?? 14900;
 
 // --- STATISTIQUES (FILTRÉES POUR IGNORER LES TESTS) ---
 $total_rev = $pdo->query("SELECT SUM(p.montant) FROM payments p JOIN restaurants r ON p.restaurant_id = r.id WHERE p.statut = 'valide' AND r.is_test = false")->fetchColumn() ?? 0;
 
-$mrr = $pdo->query("SELECT SUM(CASE WHEN plan = 'monthly' THEN $price_monthly WHEN plan = 'yearly' THEN ($price_yearly / 12) ELSE 0 END) FROM restaurants WHERE is_active = true AND is_test = false AND plan != 'lifetime' AND (expires_at > NOW() OR expires_at IS NULL)")->fetchColumn() ?? 0;
+$mrr = $pdo->query("SELECT SUM(CASE WHEN plan = 'monthly' THEN $price_monthly WHEN plan = '3_months' THEN ($price_3_months / 3) WHEN plan = 'yearly' THEN ($price_yearly / 12) ELSE 0 END) FROM restaurants WHERE is_active = true AND is_test = false AND plan != 'lifetime' AND (expires_at > NOW() OR expires_at IS NULL)")->fetchColumn() ?? 0;
 
 $active_clients = $pdo->query("SELECT COUNT(*) FROM restaurants WHERE is_active = true AND is_test = false AND (plan = 'lifetime' OR expires_at > NOW())")->fetchColumn() ?? 0;
 
@@ -163,7 +164,7 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
                                 <?php if($r['is_test']): ?><span class="inline-block mt-1 bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">MODE TEST</span><?php endif; ?>
                                 <?php if($has_pending): ?><span class="inline-block mt-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">⚠️ Paiement en attente</span><?php endif; ?>
                             </td>
-                            <td class="p-4"><span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-bold uppercase"><?php $plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie']; echo $plans_fr[$r['plan']] ?? $r['plan']; ?></span></td>
+                            <td class="p-4"><span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-bold uppercase"><?php $plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', '3_months' => '3 Mois', 'yearly' => 'Annuel', 'lifetime' => 'À vie']; echo $plans_fr[$r['plan']] ?? $r['plan']; ?></span></td>
                             <td class="p-4 text-sm text-gray-600"><?= $r['plan'] === 'lifetime' ? '<span class="text-green-600 font-bold">À vie</span>' : ($r['expires_at'] ? date('d/m/Y', strtotime($r['expires_at'])) : 'Non défini') ?></td>
                             <td class="p-4"><?php if($is_online): ?><span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-md text-xs font-bold">En ligne</span><?php else: ?><span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-md text-xs font-bold">Hors ligne</span><?php endif; ?></td>
                                 <td class="p-4 text-center">
@@ -228,11 +229,12 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
             <h2 class="text-xl font-bold text-gray-800 mb-6">Paramètres des Tarifs</h2>
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-2xl">
                 <form action="actions/save_settings.php" method="POST" class="flex flex-col gap-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix Mensuel (DZD)</label><input type="number" name="price_monthly" value="<?= $price_monthly ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix Annuel (DZD)</label><input type="number" name="price_yearly" value="<?= $price_yearly ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix À Vie (DZD)</label><input type="number" name="price_lifetime" value="<?= $price_lifetime ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
-                    </div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix Mensuel (DZD)</label><input type="number" name="price_monthly" value="<?= $price_monthly ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
+    <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix 3 Mois (DZD)</label><input type="number" name="price_3_months" value="<?= $price_3_months ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
+    <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix Annuel (DZD)</label><input type="number" name="price_yearly" value="<?= $price_yearly ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
+    <div><label class="block text-sm font-bold text-gray-700 mb-1">Prix À Vie (DZD)</label><input type="number" name="price_lifetime" value="<?= $price_lifetime ?>" class="w-full border border-gray-300 rounded-lg p-2.5"></div>
+</div>
                     <button type="submit" class="bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-700 w-max mt-2">Mettre à jour</button>
                 </form>
             </div>
@@ -317,7 +319,12 @@ $all_restos_for_select = $pdo->query("SELECT id, nom FROM restaurants ORDER BY n
             <h2 class="text-xl font-bold text-gray-800 mb-4">Ajouter un paiement (Espèces)</h2>
             <form action="actions/add_manual_payment.php" method="POST" class="flex flex-col gap-4">
                 <div><label class="block text-sm font-bold text-gray-700 mb-1">Restaurant</label><select name="resto_id" required class="w-full border border-gray-300 rounded-lg p-2"><?php foreach($all_restos_for_select as $ar): ?><option value="<?= $ar['id'] ?>"><?= htmlspecialchars($ar['nom']) ?></option><?php endforeach; ?></select></div>
-                <div><label class="block text-sm font-bold text-gray-700 mb-1">Formule</label><select name="plan" id="manual-plan" onchange="updateManualAmount()" class="w-full border border-gray-300 rounded-lg p-2"><option value="monthly" data-price="<?= $price_monthly ?>">Mensuel</option><option value="yearly" data-price="<?= $price_yearly ?>">Annuel</option><option value="lifetime" data-price="<?= $price_lifetime ?>">À vie</option></select></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">Formule</label><select name="plan" id="manual-plan" onchange="updateManualAmount()" class="w-full border border-gray-300 rounded-lg p-2">
+    <option value="monthly" data-price="<?= $price_monthly ?>">Mensuel (<?= $price_monthly ?> DZD)</option>
+    <option value="3_months" data-price="<?= $price_3_months ?>">3 Mois (<?= $price_3_months ?> DZD)</option>
+    <option value="yearly" data-price="<?= $price_yearly ?>">Annuel (<?= $price_yearly ?> DZD)</option>
+    <option value="lifetime" data-price="<?= $price_lifetime ?>">À vie (<?= $price_lifetime ?> DZD)</option>
+</select></div>
                 <div><label class="block text-sm font-bold text-gray-700 mb-1">Montant (DZD)</label><input type="number" name="montant" id="manual-amount" value="<?= $price_monthly ?>" required class="w-full border border-gray-300 rounded-lg p-2"></div>
                 <div class="flex gap-2 mt-4"><button type="button" onclick="closeModal('manual-payment-modal')" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-bold">Annuler</button><button type="submit" class="flex-1 bg-green-600 text-white py-2.5 rounded-lg font-bold">Valider</button></div>
             </form>

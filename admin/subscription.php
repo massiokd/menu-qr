@@ -55,8 +55,8 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
                 Formule actuelle : 
                 <strong style="color:var(--brand-color); text-transform:uppercase;">
                     <?php 
-                        $plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
-                        echo $plans_fr[$resto['plan']] ?? $resto['plan']; 
+$plans_fr = ['trial' => 'Essai', 'monthly' => 'Mensuel', '3_months' => '3 Mois', 'yearly' => 'Annuel', 'lifetime' => 'À vie'];
+echo $plans_fr[$resto['plan']] ?? $resto['plan']; 
                     ?>
                 </strong>
             </p>
@@ -106,9 +106,9 @@ $pending_payment = ($last_payment && $last_payment['statut'] === 'en_attente') ?
                         <div>
                             <label style="font-weight:700; margin-bottom:0.5rem; display:block;">1. Choisissez votre formule</label>
                             <select name="plan" class="form-control" required>
-                                <option value="monthly">Mensuel - 800 DZD</option>
-                                <option value="yearly">Annuel - 6 900 DZD</option>
-                                <option value="lifetime">À vie - 14 900 DZD</option>
+                                <option value="monthly">Mensuel - 900 DZD</option>
+                                <option value="3_months">3 Mois - 2 400 DZD</option>
+                                <option value="yearly">Annuel - 8 400 DZD</option>
                             </select>
                         </div>
 
