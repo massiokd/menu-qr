@@ -1184,3 +1184,623 @@ button, a {
         transition: none !important;
     }
 }
+/* ===== BARRE DU BAS 100% NATIVE (AUCUNE SÉLECTION / APPUI LONG) ===== */
+@media (max-width: 767px) {
+    .admin-tabs {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        gap: 0.25rem;
+        padding: 0.35rem 0.4rem calc(0.35rem + var(--safe-b));
+    }
+
+    .admin-tabs a {
+        width: 100%;
+        height: 100%;
+        min-height: 56px;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-user-drag: none;
+        cursor: pointer;
+        transition: transform 0.12s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .admin-tabs a:active {
+        transform: scale(0.94);
+        background: rgba(194, 65, 12, 0.12);
+    }
+
+    .admin-tabs a::before,
+    .admin-tabs a::after {
+        pointer-events: none;
+    }
+}
+
+/* ===== CARTES & COMPOSANTS COMMUNS AUX AUTRES VUES ===== */
+.app-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.app-card-header {
+    margin-bottom: 1rem;
+}
+
+.app-card-header h2 {
+    font-size: 1.12rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.app-card-header p {
+    font-size: 0.86rem;
+    color: var(--text-gray);
+    line-height: 1.45;
+}
+
+.stack-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.field-label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+textarea.form-control {
+    min-height: 104px;
+    resize: vertical;
+}
+
+.feedback-banner {
+    padding: 0.85rem 1rem;
+    border-radius: 0.9rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.feedback-success {
+    background: var(--success-bg);
+    color: #065f46;
+}
+
+.feedback-danger {
+    background: var(--danger-bg);
+    color: #991b1b;
+}
+
+.feedback-warning {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.feedback-info {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+/* ===== NAVIGATION RÉGLAGES (LISTE APP MOBILE) ===== */
+.settings-nav-pills {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+    margin-bottom: 1rem;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.settings-nav-pills::-webkit-scrollbar {
+    display: none;
+}
+
+.settings-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.95rem;
+    min-height: 40px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text-gray);
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.settings-pill.active {
+    background: var(--text-dark);
+    color: #fff;
+    border-color: var(--text-dark);
+}
+
+/* ===== APPARENCE (LOGO, THÈMES, POLICES) ===== */
+.logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.logo-preview-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--surface-muted);
+    flex-shrink: 0;
+    background: var(--surface-muted);
+}
+
+.btn-upload-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1rem;
+    min-height: 42px;
+    border-radius: 0.75rem;
+    background: var(--brand-light);
+    color: var(--brand-color);
+    font-weight: 700;
+    font-size: 0.86rem;
+    cursor: pointer;
+    margin-top: 0.65rem;
+}
+
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+}
+
+@media (min-width: 480px) {
+    .theme-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.85rem 0.4rem;
+    min-height: 86px;
+    border-radius: 0.95rem;
+    background: var(--surface-muted);
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: all 0.2s;
+}
+
+.theme-option.active {
+    background: var(--surface);
+    border-color: var(--brand-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.color-circle {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.18);
+}
+
+.theme-option span {
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* ===== QR CODE ===== */
+.qr-preview-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 1.25rem 0;
+}
+
+.qr-card-export {
+    background: #ffffff;
+    padding: 26px;
+    border: 1px solid #e4e4e7;
+    border-radius: 20px;
+    width: 300px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.qr-card-export h3 {
+    font-size: 19px;
+    color: #18181b;
+    margin: 0 0 4px 0;
+    font-weight: 800;
+}
+
+.qr-card-export p {
+    font-size: 11px;
+    color: #71717a;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 18px 0;
+}
+
+.qr-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.btn-outline-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    border-radius: 0.85rem;
+    background: var(--surface-muted);
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+/* ===== SÉCURITÉ / MOT DE PASSE ===== */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input {
+    padding-right: 48px !important;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--text-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* ===== STATISTIQUES ===== */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 1.1rem;
+    padding: 1rem 0.6rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.kpi-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-gray);
+}
+
+.kpi-value {
+    font-size: 1.65rem;
+    font-weight: 800;
+    margin-top: 0.35rem;
+    line-height: 1.1;
+}
+
+.kpi-brand { color: var(--brand-color); }
+.kpi-success { color: var(--success); }
+.kpi-blue { color: #2563eb; }
+
+.chart-box {
+    position: relative;
+    height: 270px;
+    width: 100%;
+    margin-top: 0.75rem;
+}
+
+.chart-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 0.75rem;
+    z-index: 10;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-gray);
+}
+
+.spinner-dark {
+    border-color: rgba(24, 24, 27, 0.12);
+    border-top-color: var(--text-dark);
+}
+
+/* ===== ABONNEMENT ===== */
+.plan-hero-card {
+    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    color: #fff;
+    border-radius: 1.25rem;
+    padding: 1.35rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.plan-hero-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a1a1aa;
+    font-weight: 700;
+}
+
+.plan-hero-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fb923c;
+    text-transform: uppercase;
+    margin: 0.25rem 0 0.4rem;
+}
+
+.plan-hero-meta {
+    font-size: 0.88rem;
+    color: #e4e4e7;
+}
+
+.payment-box {
+    background: var(--surface-muted);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.payment-account-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 0.85rem;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.payment-account-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-gray);
+    text-transform: uppercase;
+}
+
+.payment-account-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    word-break: break-all;
+}
+
+.btn-copy-full {
+    width: 100%;
+    min-height: 40px;
+    border: none;
+    border-radius: 0.65rem;
+    background: var(--brand-color);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.84rem;
+    cursor: pointer;
+}
+
+.btn-baridimob {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 46px;
+    border-radius: 0.8rem;
+    background: var(--success);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.upload-dropzone {
+    background: var(--surface-muted);
+    border: 2px dashed #d4d4d8;
+    border-radius: 1rem;
+    padding: 1.35rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.upload-dropzone:hover {
+    border-color: var(--brand-color);
+}
+
+/* ===== RÉORGANISER & FORMULAIRE PLAT ===== */
+.reorder-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 1.15rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.reorder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.reorder-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.reorder-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.btn-move {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 0.65rem;
+    background: var(--surface-muted);
+    color: var(--text-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-move:active {
+    background: var(--brand-light);
+    color: var(--brand-color);
+}
+
+.items-reorder-list {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.reorder-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.55rem 0.55rem 0.85rem;
+    background: var(--bg-color);
+    border-radius: 0.75rem;
+}
+
+.item-name-reorder {
+    font-size: 0.92rem;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-preview-box {
+    width: 100%;
+    height: 190px;
+    background: var(--surface-muted);
+    border: 1.5px dashed #d4d4d8;
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.image-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-text {
+    font-size: 0.86rem;
+    color: var(--text-gray);
+}
+
+/* ===== COMPLÉMENT RÉORGANISER & FORMULAIRE PLAT ===== */
+.btn-back-pill {
+    color: var(--text-dark);
+    background: var(--surface-muted);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.9rem;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    transition: background 0.2s;
+}
+
+.btn-back-pill:hover {
+    background: #e4e4e7;
+}
+
+.empty-reorder-note {
+    color: var(--text-gray);
+    font-size: 0.85rem;
+    padding: 0.35rem 0.25rem;
+}
+
+.photo-action-center {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 0.95rem 1.25rem;
+    min-height: 50px;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
